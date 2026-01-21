@@ -1,5 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { redirectAfterLogin } from "./lib/auth/actions";
+import { getUserRole } from "./lib/auth/role";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -46,7 +48,63 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = path.startsWith("/admin");
   const isPetugasRoute = path.startsWith("/petugas");
   const isMasyarakatRoute = path.startsWith("/masyarakat");
+  const isLoginPage = path === "/auth/login";
+  const isRegisterPage = path === "/auth/sign-up";
 
+  console.log("pathname :", path);
+
+  // 2. Jika user sudah login tapi mencoba akses halaman login/register
+  // Redirect ke dashboard sesuai role
+  if ((isLoginPage || isRegisterPage) && user) {
+    // Ambil data user dari tabel 'users' untuk cek basic role
+    const { data: userData } = await supabase
+      .from("users")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (userData) {
+      const userRole = userData.role;
+
+      // Jika role adalah masyarakat, redirect ke /masyarakat/dashboard
+      if (userRole === "masyarakat") {
+        return NextResponse.redirect(
+          new URL("/masyarakat/dashboard", request.url),
+        );
+      }
+
+      // Jika role adalah petugas, cek level untuk tentukan admin atau petugas
+      if (userRole === "petugas") {
+        const { data: petugasData } = await supabase
+          .from("tb_petugas")
+          .select(
+            `
+            level:tb_level (
+              level
+            )
+          `,
+          )
+          .eq("user_id", user.id)
+          .single();
+
+        // @ts-ignore
+        const levelName = petugasData?.level?.level;
+
+        if (levelName === "administrator") {
+          return NextResponse.redirect(
+            new URL("/admin/dashboard", request.url),
+          );
+        } else if (levelName === "petugas") {
+          return NextResponse.redirect(
+            new URL("/petugas/dashboard", request.url),
+          );
+        }
+      }
+    }
+  }
+
+  // 3. Proteksi halaman berdasarkan role
+  // console.log("User : ", user);
   if (isAdminRoute || isPetugasRoute || isMasyarakatRoute) {
     if (!user) {
       // Jika belum login, lempar ke login
@@ -127,9 +185,11 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - auth/ (auth routes like login, callback, confirm)
+     * - auth/callback, auth/confirm (Supabase auth flows)
+     * - api/ (API routes)
+     * - Static assets (images, etc.)
      * Feel free to modify this pattern to include more paths.
      */
-    "/((?!_next/static|_next/image|favicon.ico|auth/|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|auth/callback|auth/confirm|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

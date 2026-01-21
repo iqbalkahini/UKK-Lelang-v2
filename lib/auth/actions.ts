@@ -11,7 +11,7 @@ export async function redirectAfterLogin() {
   } else if (role === "petugas") {
     redirect("/petugas/dashboard");
   } else if (role === "masyarakat") {
-    redirect("/dashboard");
+    redirect("/masyarakat/dashboard");
   } else {
     // Default fallback if role is null or unrecognized
     redirect("/dashboard");
