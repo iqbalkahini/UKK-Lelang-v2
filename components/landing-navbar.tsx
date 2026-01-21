@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { AuthButton } from "./auth-button";
 import { ThemeSwitcher } from "./theme-switcher";
 import { Suspense } from "react";
 import { Gavel } from "lucide-react";
@@ -28,9 +27,6 @@ export function LandingNavbar() {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Suspense fallback={<div className="h-9 w-20 bg-muted animate-pulse rounded" />}>
-                        <AuthButton />
-                    </Suspense>
                     <ThemeSwitcher />
                 </div>
             </div>

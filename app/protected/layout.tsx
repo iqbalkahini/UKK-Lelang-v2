@@ -1,5 +1,4 @@
 import { DeployButton } from "@/components/deploy-button";
-import { AuthButton } from "@/components/auth-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -22,7 +21,7 @@ export default function ProtectedLayout({
             </div>
             {(
               <Suspense>
-                <AuthButton />
+                {/* <AuthButton /> */}
               </Suspense>
             )}
           </div>
