@@ -41,7 +41,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "./ui/button"
-import { logout } from "@/lib/auth/logout"
+import { useLogout } from "@/lib/auth/logout"
 
 export function NavUser({
   user,
@@ -53,6 +53,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const logout = useLogout()
 
   return (
     <SidebarMenu>

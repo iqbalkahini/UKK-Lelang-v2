@@ -50,12 +50,13 @@ export async function middleware(request: NextRequest) {
   const isMasyarakatRoute = path.startsWith("/masyarakat");
   const isLoginPage = path === "/auth/login";
   const isRegisterPage = path === "/auth/sign-up";
+  const isLandingPage = path === "/";
 
   console.log("pathname :", path);
 
-  // 2. Jika user sudah login tapi mencoba akses halaman login/register
+  // 2. Jika user sudah login tapi mencoba akses halaman login/register/landing
   // Redirect ke dashboard sesuai role
-  if ((isLoginPage || isRegisterPage) && user) {
+  if ((isLoginPage || isRegisterPage || isLandingPage) && user) {
     // Ambil data user dari tabel 'users' untuk cek basic role
     const { data: userData } = await supabase
       .from("users")

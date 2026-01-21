@@ -1,8 +1,17 @@
-import { redirect } from "next/navigation";
-import { createClient } from "../supabase/server";
+"use client";
 
-export const logout = async () => {
-  const supabase = await createClient();
-  await supabase.auth.signOut();
-  redirect("/auth/login");
-};
+// useLogout.ts
+import { useRouter } from "next/navigation";
+import { createClient } from "../supabase/client";
+
+export function useLogout() {
+  const router = useRouter();
+
+  const logout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/auth/login");
+  };
+
+  return logout;
+}
