@@ -48,7 +48,7 @@ export function BarangTable() {
     const [data, setData] = useState<GetBarangResponse | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeSearch, setActiveSearch] = useState(""); // The search term being used in API
     const [deleteItemId, setDeleteItemId] = useState<number | null>(null);
