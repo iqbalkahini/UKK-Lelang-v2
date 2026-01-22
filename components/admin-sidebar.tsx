@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import {
     LayoutDashboardIcon,
     PackageIcon,
@@ -21,6 +20,7 @@ import {
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useUser } from "@/hooks/useUser"
+import { Suspense } from "react"
 
 const navMain = [
     {
@@ -93,7 +93,9 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
-                <NavMain items={navMain} />
+                <Suspense>
+                    <NavMain items={navMain} />
+                </Suspense>
                 <NavSecondary items={navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>
