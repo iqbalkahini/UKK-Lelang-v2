@@ -51,44 +51,43 @@ export function BarangTable() {
     const [isLoading, setIsLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeSearch, setActiveSearch] = useState(""); // The search term being used in API
-    const [filter, setFilter] = useState<{
-        date: string,
-    }>({
-        date: "ascending"
-    })
     const [deleteItemId, setDeleteItemId] = useState<number | null>(null);
+    const [refreshTrigger, setRefreshTrigger] = useState(0); // Trigger for manual refresh
     const router = useRouter();
 
-    // Fetch data
-    // 1. Bungkus dengan useCallback
-    const fetchData = useCallback(async (searchTerm: string = activeSearch) => {
-        setIsLoading(true);
-        try {
-            const result = await getBarang(currentPage, pageSize, searchTerm, filter?.date);
-            setData(result);
-        } catch (error) {
-            console.error("Error fetching barang:", error);
-            toast.error("Gagal mengambil data barang");
-        } finally {
-            setIsLoading(false);
+    // Initialize filter from localStorage
+    const [filter, setFilter] = useState<{ date: string }>(() => {
+        // Only runs once on mount
+        if (typeof window !== 'undefined') {
+            const dataFilter = localStorage.getItem('filter_tabel');
+            if (dataFilter) {
+                return JSON.parse(dataFilter);
+            }
+            // Set default filter to localStorage
+            const defaultFilter = { date: 'ascending' };
+            localStorage.setItem('filter_tabel', JSON.stringify(defaultFilter));
+            return defaultFilter;
         }
-    }, [currentPage, pageSize, activeSearch, filter]); // 2. Tambahkan semua dependensi fungsi di sini
+        return { date: 'ascending' };
+    });
 
-    // 3. Sekarang useEffect aman untuk bergantung pada fetchData
+    // Fetch data with direct dependencies - no useCallback needed
     useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const result = await getBarang(currentPage, pageSize, activeSearch, filter.date);
+                setData(result);
+            } catch (error) {
+                console.error("Error fetching barang:", error);
+                toast.error("Gagal mengambil data barang");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
         fetchData();
-    }, [fetchData]);
-
-    useEffect(() => {
-        const dataFilter = localStorage.getItem('filter_tabel')
-        if (!dataFilter) {
-            localStorage.setItem('filter_tabel', JSON.stringify({
-                date: 'ascending',
-            }))
-        } else {
-            setFilter(JSON.parse(dataFilter))
-        }
-    }, [])
+    }, [currentPage, pageSize, activeSearch, filter.date, refreshTrigger])
 
     // Handle search button click
     const handleSearch = () => {
@@ -148,8 +147,13 @@ export function BarangTable() {
             // TODO: Implement delete API call
             toast.success("Barang berhasil dihapus");
 
-            // Refresh data after delete
-            await fetchData(activeSearch);
+            // Trigger re-fetch by incrementing refresh counter
+            setRefreshTrigger(prev => prev + 1);
+
+            // Reset to page 1 if only one item left on current page
+            if (data && data.data.length === 1 && currentPage > 1) {
+                setCurrentPage(currentPage - 1);
+            }
         } catch (error) {
             console.error("Error deleting barang:", error);
             toast.error("Gagal menghapus barang");
@@ -159,26 +163,14 @@ export function BarangTable() {
     };
 
     const handleFilter = () => {
-        if (filter.date == 'ascending') {
-            setFilter({ date: 'descending' })
-        } else {
-            setFilter({ date: 'ascending' })
-        }
-    }
+        const newFilter = filter.date === 'ascending'
+            ? { date: 'descending' }
+            : { date: 'ascending' };
 
-    // if (isLoading) {
-    //     return <div className="flex w-full max-w-full flex-col gap-2">
-    //         {Array.from({ length: 5 }).map((_, index) => (
-    //             <div className="flex gap-4" key={index}>
-    //                 <Skeleton className="h-4 flex-1" />
-    //                 <Skeleton className="h-4 flex-1" />
-    //                 <Skeleton className="h-4 flex-1" />
-    //                 <Skeleton className="h-4 flex-1" />
-    //                 <Skeleton className="h-4 flex-1" />
-    //             </div>
-    //         ))}
-    //     </div>
-    // }
+        setFilter(newFilter);
+        // Persist to localStorage
+        localStorage.setItem('filter_tabel', JSON.stringify(newFilter));
+    }
 
     return (
         <div className="flex flex-col gap-4">
