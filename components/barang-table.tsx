@@ -222,7 +222,7 @@ export function BarangTable() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {true ? (
+                        {isLoading ? (
                             <TableRow>
                                 <TableCell>
                                     <div className="flex flex-col gap-2">
