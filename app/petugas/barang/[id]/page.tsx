@@ -2,8 +2,9 @@
 
 import { useParams } from "next/navigation"
 import CardBarang from "@/components/Card-barang"
+import { Suspense } from "react"
 
 export default function Page() {
     const { id } = useParams()
-    return <CardBarang id={Number(id)} />
+    return <Suspense fallback={<div>Loading...</div>}><CardBarang id={Number(id)} /></Suspense>
 }
