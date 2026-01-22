@@ -7,15 +7,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Badge } from "./ui/badge"
 import { CalendarIcon, TagIcon, PackageIcon } from "lucide-react"
 import { Skeleton } from "./ui/skeleton"
+import { useParams } from "next/navigation"
 
-export default function CardBarang({ id }: { id: number }) {
+export default function CardBarang() {
+    const { id } = useParams()
     const [data, setData] = useState<Barang | null>(null)
     const [isLoading, setIsLoading] = useState(true)
 
     const fetching = async () => {
         setIsLoading(true)
         try {
-            const result = await getBarangById(id)
+            const result = await getBarangById(Number(id))
             setData(result)
         } catch (error) {
             toast.error("Gagal mengambil data barang")
