@@ -20,58 +20,61 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useUser } from "@/hooks/useUser"
 
-const data = {
-    user: {
-        name: "Administrator",
-        email: "admin@lelang.com",
-        avatar: "/avatars/admin.jpg",
+const navMain = [
+    {
+        title: "Dashboard",
+        url: "/admin/dashboard",
+        icon: LayoutDashboardIcon,
     },
-    navMain: [
-        {
-            title: "Dashboard",
-            url: "/admin/dashboard",
-            icon: LayoutDashboardIcon,
-        },
-        {
-            title: "Pendataan Barang",
-            url: "/admin/barang",
-            icon: PackageIcon,
-            items: [
-                {
-                    title: "Daftar Barang",
-                    url: "/admin/barang",
-                },
-                {
-                    title: "Tambah Barang",
-                    url: "/admin/barang/create",
-                },
-            ],
-        },
-        {
-            title: "Laporan",
-            url: "/admin/laporan",
-            icon: FileTextIcon,
-            items: [
-                {
-                    title: "Laporan Lelang",
-                    url: "/admin/laporan/lelang",
-                },
-                {
-                    title: "Laporan Pembayaran",
-                    url: "/admin/laporan/pembayaran",
-                },
-                {
-                    title: "Laporan Barang",
-                    url: "/admin/laporan/barang",
-                },
-            ],
-        },
-    ],
-    navSecondary: [],
-}
+    {
+        title: "Pendataan Barang",
+        url: "/admin/barang",
+        icon: PackageIcon,
+        items: [
+            {
+                title: "Daftar Barang",
+                url: "/admin/barang",
+            },
+            {
+                title: "Tambah Barang",
+                url: "/admin/barang/create",
+            },
+        ],
+    },
+    {
+        title: "Laporan",
+        url: "/admin/laporan",
+        icon: FileTextIcon,
+        items: [
+            {
+                title: "Laporan Lelang",
+                url: "/admin/laporan/lelang",
+            },
+            {
+                title: "Laporan Pembayaran",
+                url: "/admin/laporan/pembayaran",
+            },
+            {
+                title: "Laporan Barang",
+                url: "/admin/laporan/barang",
+            },
+        ],
+    },
+]
+
+const navSecondary: any[] = []
 
 export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const { user, loading } = useUser()
+
+    const userData = {
+        name: user?.user_metadata?.nama || user?.email?.split('@')[0] || "Administrator",
+        email: user?.email || "admin@lelang.com",
+        avatar: user?.user_metadata?.avatar_url || "/avatars/admin.jpg",
+    }
+
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
@@ -90,11 +93,11 @@ export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
-                <NavMain items={data.navMain} />
-                <NavSecondary items={data.navSecondary} className="mt-auto" />
+                <NavMain items={navMain} />
+                <NavSecondary items={navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={data.user} />
+                <NavUser user={userData} />
             </SidebarFooter>
         </Sidebar>
     )

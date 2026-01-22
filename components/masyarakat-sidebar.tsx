@@ -21,49 +21,52 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useUser } from "@/hooks/useUser"
 
-const data = {
-    user: {
-        name: "Masyarakat",
-        email: "user@lelang.com",
-        avatar: "/avatars/user.jpg",
+const navMain = [
+    {
+        title: "Dashboard",
+        url: "/masyarakat/dashboard",
+        icon: LayoutDashboardIcon,
     },
-    navMain: [
-        {
-            title: "Dashboard",
-            url: "/masyarakat/dashboard",
-            icon: LayoutDashboardIcon,
-        },
-        {
-            title: "Lelang Aktif",
-            url: "/masyarakat/lelang",
-            icon: SearchIcon,
-        },
-        {
-            title: "Penawaran Saya",
-            url: "/masyarakat/penawaran",
-            icon: HandIcon,
-        },
-        {
-            title: "Pembayaran",
-            url: "/masyarakat/pembayaran",
-            icon: WalletIcon,
-            items: [
-                {
-                    title: "Menang Lelang",
-                    url: "/masyarakat/pembayaran/wins",
-                },
-                {
-                    title: "Riwayat Pembayaran",
-                    url: "/masyarakat/pembayaran/history",
-                },
-            ],
-        },
-    ],
-    navSecondary: [],
-}
+    {
+        title: "Lelang Aktif",
+        url: "/masyarakat/lelang",
+        icon: SearchIcon,
+    },
+    {
+        title: "Penawaran Saya",
+        url: "/masyarakat/penawaran",
+        icon: HandIcon,
+    },
+    {
+        title: "Pembayaran",
+        url: "/masyarakat/pembayaran",
+        icon: WalletIcon,
+        items: [
+            {
+                title: "Menang Lelang",
+                url: "/masyarakat/pembayaran/wins",
+            },
+            {
+                title: "Riwayat Pembayaran",
+                url: "/masyarakat/pembayaran/history",
+            },
+        ],
+    },
+]
+
+const navSecondary: any[] = []
 
 export function MasyarakatSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const { user, loading } = useUser()
+
+    const userData = {
+        name: user?.user_metadata?.nama || user?.email?.split('@')[0] || "User",
+        email: user?.email || "user@lelang.com",
+        avatar: user?.user_metadata?.avatar_url || "/avatars/user.jpg",
+    }
+
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
@@ -82,11 +85,11 @@ export function MasyarakatSidebar({ ...props }: React.ComponentProps<typeof Side
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
-                <NavMain items={data.navMain} />
-                <NavSecondary items={data.navSecondary} className="mt-auto" />
+                <NavMain items={navMain} />
+                <NavSecondary items={navSecondary} className="mt-auto" />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={data.user} />
+                <NavUser user={userData} />
             </SidebarFooter>
         </Sidebar>
     )
