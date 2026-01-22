@@ -23,8 +23,8 @@ export default function Page() {
                             </div>
                             <div className="px-4 lg:px-6">
                                 <Suspense fallback={<div>Loading...</div>}>
-                                    <BarangTable />
                                 </Suspense>
+                                <BarangTable />
                             </div>
                         </div>
                     </div>

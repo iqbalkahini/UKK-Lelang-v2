@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "./ui/skeleton";
 
 export function BarangTable() {
     const [data, setData] = useState<GetBarangResponse | null>(null);
@@ -165,6 +166,20 @@ export function BarangTable() {
         }
     }
 
+    // if (isLoading) {
+    //     return <div className="flex w-full max-w-full flex-col gap-2">
+    //         {Array.from({ length: 5 }).map((_, index) => (
+    //             <div className="flex gap-4" key={index}>
+    //                 <Skeleton className="h-4 flex-1" />
+    //                 <Skeleton className="h-4 flex-1" />
+    //                 <Skeleton className="h-4 flex-1" />
+    //                 <Skeleton className="h-4 flex-1" />
+    //                 <Skeleton className="h-4 flex-1" />
+    //             </div>
+    //         ))}
+    //     </div>
+    // }
+
     return (
         <div className="flex flex-col gap-4">
             {/* Search Filter */}
@@ -207,10 +222,55 @@ export function BarangTable() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {isLoading ? (
+                        {true ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
-                                    Loading...
+                                <TableCell>
+                                    <div className="flex flex-col gap-2">
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col gap-2">
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col gap-2">
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col gap-2">
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col gap-2">
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex flex-col gap-2">
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ) : data?.data.length ? (
