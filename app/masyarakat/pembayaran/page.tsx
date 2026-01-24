@@ -4,7 +4,7 @@ import Link from "next/link"
 export default function PembayaranPage() {
     return (
         <>
-            <SiteHeader />
+            <SiteHeader title={'Pembayaran'} />
             <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
                 <div>
                     <h1 className="text-3xl font-bold">Pembayaran</h1>

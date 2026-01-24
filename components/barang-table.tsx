@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { getBarang, type Barang, type GetBarangResponse } from "@/api/barang";
+import { getBarang, deleteBarang, type Barang, type GetBarangResponse } from "@/api/barang";
 import {
     Table,
     TableBody,
@@ -154,7 +154,7 @@ export function BarangTable() {
         if (!deleteItemId) return;
 
         try {
-            // TODO: Implement delete API call
+            await deleteBarang(deleteItemId);
             toast.success("Barang berhasil dihapus");
 
             // Trigger re-fetch by incrementing refresh counter
