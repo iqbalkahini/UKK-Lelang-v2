@@ -38,7 +38,7 @@ export default function DetailBarangPage() {
 
                 if (error) throw error
                 setBarang(data)
-                // Set initial image
+                // Set initial image    
                 if (data.image_urls && data.image_urls.length > 0) {
                     setSelectedImage(data.image_urls[0])
                 }
@@ -48,17 +48,7 @@ export default function DetailBarangPage() {
                 setLoading(false)
             }
         }
-
-        // Debug log
-        console.log("Detail Page Mounted. ID:", id, "Type:", typeof id);
-
-        if (id && !isNaN(Number(id))) {
-            console.log("Fetching barang for ID:", id);
-            fetchBarang()
-        } else {
-            console.warn("Invalid or missing ID:", id)
-            setLoading(false)
-        }
+        fetchBarang()
     }, [id])
 
     const formatCurrency = (amount: number) => {
