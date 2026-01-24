@@ -18,7 +18,6 @@ interface Barang {
     image_urls: string[] | null
 }
 
-
 export default function DetailBarangPage() {
     const { id } = useParams()
     const router = useRouter()
@@ -27,17 +26,32 @@ export default function DetailBarangPage() {
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
     useEffect(() => {
+        // 1. Cek apakah ID ada
+        if (!id) return;
+
+        // 2. Konversi ke Number
+        const numericId = Number(id);
+
+        // 3. VALIDASI PENTING: Jika hasil konversi adalah NaN (Not a Number), HENTIKAN PROSES.
+        // Ini mencegah string sampah dari ekstensi browser dikirim ke Database.
+        if (isNaN(numericId)) {
+            console.warn("ID tidak valid terdeteksi:", id);
+            return;
+        }
+
         const fetchBarang = async () => {
             try {
                 const supabase = createClient()
                 const { data, error } = await supabase
                     .from('tb_barang')
                     .select('*')
-                    .eq('id', Number(id))
+                    .eq('id', numericId) // Gunakan numericId yang sudah divalidasi
                     .single()
 
                 if (error) throw error
+
                 setBarang(data)
+
                 // Set initial image    
                 if (data.image_urls && data.image_urls.length > 0) {
                     setSelectedImage(data.image_urls[0])
@@ -48,6 +62,7 @@ export default function DetailBarangPage() {
                 setLoading(false)
             }
         }
+
         fetchBarang()
     }, [id])
 
@@ -83,12 +98,11 @@ export default function DetailBarangPage() {
         )
     }
 
-    console.log(barang)
-
     if (!barang) {
         return (
             <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-[50vh] text-center">
                 <h2 className="text-2xl font-bold mb-2">Barang tidak ditemukan</h2>
+                <p className="text-muted-foreground mb-4">Mungkin ID barang salah atau barang sudah dihapus.</p>
                 <Button variant="outline" onClick={() => router.back()}>
                     <ArrowLeft className="mr-2 h-4 w-4" /> Kembali
                 </Button>
@@ -97,7 +111,7 @@ export default function DetailBarangPage() {
     }
 
     // Default image if no images uploaded
-    const displayImage = selectedImage || "/placeholder-image.jpg" // You might want to use a real public placeholder URL here if you have one, e.g. from generated assets or public folder
+    const displayImage = selectedImage || "/placeholder-image.jpg"
 
     return (
         <div className="container mx-auto p-4 md:p-6 max-w-6xl">
@@ -110,7 +124,6 @@ export default function DetailBarangPage() {
                 {/* Left Column: Image Gallery */}
                 <div className="md:col-span-7 flex flex-col gap-4">
                     <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl border bg-muted">
-                        {/* Use standard img for simplicity with external URLs, or next/image if domains configured */}
                         <img
                             src={displayImage}
                             alt={barang.nama_barang}
@@ -181,7 +194,7 @@ export default function DetailBarangPage() {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="flex flex-col gap-1 p-3 rounded-lg bg-muted/50">
                                 <span className="text-xs text-muted-foreground uppercase font-bold">Status Lelang</span>
-                                <span className="font-medium">Belum Dimulai</span> {/* Logic for status could be added if joined with tb_lelang */}
+                                <span className="font-medium">Belum Dimulai</span>
                             </div>
                             <div className="flex flex-col gap-1 p-3 rounded-lg bg-muted/50">
                                 <span className="text-xs text-muted-foreground uppercase font-bold">Total Foto</span>
@@ -191,7 +204,6 @@ export default function DetailBarangPage() {
                     </div>
 
                     <div className="flex gap-3 pt-4">
-                        {/* Action Buttons Placeholder */}
                         <Button className="w-full h-12 text-lg" disabled>
                             Buka Lelang
                         </Button>
