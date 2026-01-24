@@ -19,7 +19,7 @@ interface Barang {
 }
 
 export default function DetailBarangPage() {
-    const params = useParams()
+    const { id } = useParams()
     const router = useRouter()
     const [barang, setBarang] = useState<Barang | null>(null)
     const [loading, setLoading] = useState(true)
@@ -32,7 +32,7 @@ export default function DetailBarangPage() {
                 const { data, error } = await supabase
                     .from('tb_barang')
                     .select('*')
-                    .eq('id', params.id)
+                    .eq('id', Number(id))
                     .single()
 
                 if (error) throw error
@@ -50,10 +50,10 @@ export default function DetailBarangPage() {
 
         // Validate that ID is a number to prevent "invalid input syntax for type bigint" errors
         // This handles cases where Vercel/Next.js passes placeholders like "%%drp:id:..." during build/preview
-        if (params.id && !isNaN(Number(params.id))) {
+        if (id && !isNaN(Number(id))) {
             fetchBarang()
         }
-    }, [params.id])
+    }, [id])
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('id-ID', {
