@@ -52,6 +52,9 @@ export default function DetailBarangPage() {
         // This handles cases where Vercel/Next.js passes placeholders like "%%drp:id:..." during build/preview
         if (id && !isNaN(Number(id))) {
             fetchBarang()
+        } else {
+            console.warn("Invalid or missing ID:", id)
+            setLoading(false)
         }
     }, [id])
 
