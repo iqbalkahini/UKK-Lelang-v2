@@ -22,6 +22,15 @@ import {
     TrashIcon,
     ArrowBigUp,
     ArrowBigDown,
+    MoreHorizontalIcon,
+    MailCheckIcon,
+    ArchiveIcon,
+    ClockIcon,
+    CalendarPlusIcon,
+    ListFilterIcon,
+    TagIcon,
+    Trash2Icon,
+    Eye,
 } from "lucide-react";
 import {
     Select,
@@ -43,6 +52,7 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "./ui/skeleton";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
 export function BarangTable() {
     const [data, setData] = useState<GetBarangResponse | null>(null);
@@ -279,33 +289,29 @@ export function BarangTable() {
                                     </TableCell>
                                     <TableCell className="text-center">
                                         <div className="flex items-center justify-center gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => router.push(`/petugas/barang/${barang.id}`)}
-                                                className="h-8"
-                                            >
-                                                <PencilIcon className="h-4 w-4" />
-                                                <span className="hidden sm:inline ml-1">Detail</span>
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleEdit(barang)}
-                                                className="h-8"
-                                            >
-                                                <PencilIcon className="h-4 w-4" />
-                                                <span className="hidden sm:inline ml-1">Edit</span>
-                                            </Button>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => handleDeleteClick(barang.id)}
-                                                className="h-8 text-destructive hover:text-destructive"
-                                            >
-                                                <TrashIcon className="h-4 w-4" />
-                                                <span className="hidden sm:inline ml-1">Hapus</span>
-                                            </Button>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="outline" size="icon" aria-label="More Options">
+                                                        <MoreHorizontalIcon />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="w-40">
+                                                    <DropdownMenuGroup>
+                                                        <DropdownMenuItem onClick={() => router.push(`/petugas/barang/${barang.id}`)}>
+                                                            <Eye />
+                                                            Detail
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleEdit(barang)}>
+                                                            <PencilIcon />
+                                                            Edit
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleDeleteClick(barang.id)}>
+                                                            <TrashIcon />
+                                                            Hapus
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuGroup>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </div>
                                     </TableCell>
                                 </TableRow>

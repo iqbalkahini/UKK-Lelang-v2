@@ -18,8 +18,6 @@ export default function Page() {
                             <ChartAreaInteractive />
                         </div>
                         <div className="px-4 lg:px-6">
-                            <Suspense fallback={<div>Loading...</div>}>
-                            </Suspense>
                             <BarangTable />
                         </div>
                     </div>
