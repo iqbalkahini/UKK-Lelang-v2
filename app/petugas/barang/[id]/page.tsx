@@ -85,6 +85,8 @@ export default function DetailBarangPage() {
         )
     }
 
+    console.log(barang)
+
     if (!barang) {
         return (
             <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-[50vh] text-center">
@@ -129,8 +131,8 @@ export default function DetailBarangPage() {
                                     key={index}
                                     onClick={() => setSelectedImage(url)}
                                     className={`relative flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${selectedImage === url
-                                            ? "border-primary ring-2 ring-primary/20"
-                                            : "border-transparent opacity-70 hover:opacity-100"
+                                        ? "border-primary ring-2 ring-primary/20"
+                                        : "border-transparent opacity-70 hover:opacity-100"
                                         }`}
                                 >
                                     <img
