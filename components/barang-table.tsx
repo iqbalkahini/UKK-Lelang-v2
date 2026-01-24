@@ -297,9 +297,11 @@ export function BarangTable() {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="w-40">
                                                     <DropdownMenuGroup>
-                                                        <DropdownMenuItem onClick={() => router.push(`/petugas/barang/${barang.id}`)}>
-                                                            <Eye />
-                                                            Detail
+                                                        <DropdownMenuItem>
+                                                            <Button variant="default" onClick={() => router.push(`/petugas/barang/${barang.id}`)}>
+                                                                <Eye />
+                                                                Detail
+                                                            </Button>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem onClick={() => handleEdit(barang)}>
                                                             <PencilIcon />
