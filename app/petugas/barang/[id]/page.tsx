@@ -48,7 +48,9 @@ export default function DetailBarangPage() {
             }
         }
 
-        if (params.id) {
+        // Validate that ID is a number to prevent "invalid input syntax for type bigint" errors
+        // This handles cases where Vercel/Next.js passes placeholders like "%%drp:id:..." during build/preview
+        if (params.id && !isNaN(Number(params.id))) {
             fetchBarang()
         }
     }, [params.id])
