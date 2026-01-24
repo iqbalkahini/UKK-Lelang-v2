@@ -18,8 +18,6 @@ interface Barang {
     image_urls: string[] | null
 }
 
-// Force dynamic rendering to prevent Vercel from attempting static optimization with placeholders
-export const dynamic = "force-dynamic";
 
 export default function DetailBarangPage() {
     const { id } = useParams()
