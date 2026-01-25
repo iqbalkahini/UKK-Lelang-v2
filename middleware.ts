@@ -52,8 +52,6 @@ export async function middleware(request: NextRequest) {
   const isRegisterPage = path === "/auth/sign-up";
   const isLandingPage = path === "/";
 
-  console.log("pathname :", path);
-
   // 2. Jika user sudah login tapi mencoba akses halaman login/register/landing
   // Redirect ke dashboard sesuai role
   if ((isLoginPage || isRegisterPage || isLandingPage) && user) {
