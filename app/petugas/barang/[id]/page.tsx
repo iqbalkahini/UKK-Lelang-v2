@@ -33,11 +33,6 @@ export default function DetailBarangPage() {
         // 1. Jika ID belum tersedia, jangan lakukan apa-apa
         if (!id) return
 
-        // 2. Cek apakah ini placeholder Next.js (%drp:). Jika ya, jangan warning, cukup return.
-        if (id.startsWith('%drp:')) {
-            window.location.reload()
-        }
-
         const numericId = Number(id)
 
         // 3. Jika bukan angka valid, baru beri warning

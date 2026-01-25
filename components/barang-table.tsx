@@ -24,6 +24,7 @@ import {
     ArrowBigDown,
     MoreHorizontalIcon,
     Eye,
+    Link,
 } from "lucide-react";
 import {
     Select,
@@ -292,11 +293,10 @@ export function BarangTable() {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="w-40">
                                                     <DropdownMenuGroup>
-                                                        <DropdownMenuItem onClick={() => {
-                                                            router.push(`/petugas/barang/${barang.id}`)
-                                                            console.log(barang.id)
-                                                        }}>
-                                                            <Eye /> Detail
+                                                        <DropdownMenuItem asChild>
+                                                            <Link href={`/petugas/barang/${barang.id}`}>
+                                                                <Eye /> Detail
+                                                            </Link>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem onClick={() => handleEdit(barang)}>
                                                             <PencilIcon /> Edit
