@@ -131,14 +131,6 @@ export function BarangTable() {
         });
     };
 
-    // Handle edit
-    const handleEdit = (barang: Barang) => {
-        toast.info(`Edit barang: ${barang.nama}`);
-        router.push(`/petugas/barang/${barang.id}/edit`);
-        // TODO: Implement edit functionality
-        console.log("Edit barang:", barang);
-    };
-
     // Handle delete confirmation
     const handleDeleteClick = (id: number) => {
         setDeleteItemId(id);
@@ -299,8 +291,10 @@ export function BarangTable() {
                                                                 <Eye /> Detail
                                                             </a>
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => handleEdit(barang)}>
-                                                            <PencilIcon /> Edit
+                                                        <DropdownMenuItem asChild>
+                                                            <a href={`/petugas/barang/${barang.id}`}>
+                                                                <PencilIcon /> Edit
+                                                            </a>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem onClick={() => handleDeleteClick(barang.id)}>
                                                             <TrashIcon /> Hapus
