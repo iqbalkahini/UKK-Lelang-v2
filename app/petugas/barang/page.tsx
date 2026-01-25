@@ -1,3 +1,5 @@
+'use client'
+
 import { BarangTable } from "@/components/barang-table"
 
 export default function BarangPage() {
