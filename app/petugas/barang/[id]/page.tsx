@@ -29,6 +29,8 @@ export default function DetailBarangPage() {
         // 1. Cek apakah ID ada
         if (!id) return;
 
+        console.log(id)
+
         // 2. Konversi ke Number
         const numericId = Number(id);
 
