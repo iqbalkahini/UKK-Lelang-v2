@@ -25,6 +25,8 @@ export default function DetailBarangPage() {
     const [loading, setLoading] = useState(true)
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
+    if (!id) return <div>Loading...</div>
+
     useEffect(() => {
         // 1. Cek apakah ID ada
         if (!id) return;
