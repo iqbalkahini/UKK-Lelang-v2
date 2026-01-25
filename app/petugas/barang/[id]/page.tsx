@@ -34,7 +34,9 @@ export default function DetailBarangPage() {
         if (!id) return
 
         // 2. Cek apakah ini placeholder Next.js (%drp:). Jika ya, jangan warning, cukup return.
-        if (id.startsWith('%drp:')) return
+        if (id.startsWith('%drp:')) {
+            window.location.reload()
+        }
 
         const numericId = Number(id)
 
