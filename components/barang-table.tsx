@@ -182,6 +182,8 @@ export function BarangTable() {
         localStorage.setItem('filter_tabel', JSON.stringify(newFilter));
     }
 
+    console.log(data?.data)
+
     return (
         <div className="flex flex-col gap-4">
             {/* Search Filter */}
@@ -297,19 +299,14 @@ export function BarangTable() {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end" className="w-40">
                                                     <DropdownMenuGroup>
-                                                        <DropdownMenuItem>
-                                                            <Button variant="default" onClick={() => router.push(`/petugas/barang/${barang.id}`)}>
-                                                                <Eye />
-                                                                Detail
-                                                            </Button>
+                                                        <DropdownMenuItem onClick={() => router.push(`/petugas/barang/${barang.id}`)}>
+                                                            <Eye /> Detail
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem onClick={() => handleEdit(barang)}>
-                                                            <PencilIcon />
-                                                            Edit
+                                                            <PencilIcon /> Edit
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem onClick={() => handleDeleteClick(barang.id)}>
-                                                            <TrashIcon />
-                                                            Hapus
+                                                            <TrashIcon /> Hapus
                                                         </DropdownMenuItem>
                                                     </DropdownMenuGroup>
                                                 </DropdownMenuContent>
