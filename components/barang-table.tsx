@@ -134,6 +134,7 @@ export function BarangTable() {
     // Handle edit
     const handleEdit = (barang: Barang) => {
         toast.info(`Edit barang: ${barang.nama}`);
+        router.push(`/petugas/barang/${barang.id}/edit`);
         // TODO: Implement edit functionality
         console.log("Edit barang:", barang);
     };
