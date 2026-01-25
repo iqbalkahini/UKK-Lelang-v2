@@ -293,7 +293,7 @@ export function BarangTable() {
                                                 <DropdownMenuContent align="end" className="w-40">
                                                     <DropdownMenuGroup>
                                                         <DropdownMenuItem onClick={() => {
-                                                            // router.push(`/petugas/barang/${barang.id}`)
+                                                            router.push(`/petugas/barang/${barang.id}`)
                                                             console.log(barang.id)
                                                         }}>
                                                             <Eye /> Detail
