@@ -294,9 +294,9 @@ export function BarangTable() {
                                                 <DropdownMenuContent align="end" className="w-40">
                                                     <DropdownMenuGroup>
                                                         <DropdownMenuItem asChild>
-                                                            <Link href={`/petugas/barang/${barang.id}`}>
+                                                            <a href={`/petugas/barang/${barang.id}`}>
                                                                 <Eye /> Detail
-                                                            </Link>
+                                                            </a>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem onClick={() => handleEdit(barang)}>
                                                             <PencilIcon /> Edit
