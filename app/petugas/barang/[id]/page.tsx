@@ -66,7 +66,7 @@ export default function DetailBarangPage() {
         }
 
         fetchBarang()
-    }, [id])
+    }, [])
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('id-ID', {
