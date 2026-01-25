@@ -23,13 +23,6 @@ import {
     ArrowBigUp,
     ArrowBigDown,
     MoreHorizontalIcon,
-    MailCheckIcon,
-    ArchiveIcon,
-    ClockIcon,
-    CalendarPlusIcon,
-    ListFilterIcon,
-    TagIcon,
-    Trash2Icon,
     Eye,
 } from "lucide-react";
 import {
@@ -52,7 +45,7 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "./ui/skeleton";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
 export function BarangTable() {
     const [data, setData] = useState<GetBarangResponse | null>(null);
