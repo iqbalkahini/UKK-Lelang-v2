@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ArrowLeft, Calendar, Coins, Tag } from "lucide-react"
+import { ArrowLeft, Calendar, Tag } from "lucide-react"
 import Link from "next/link"
 
 interface Barang {
@@ -19,44 +19,46 @@ interface Barang {
 }
 
 export default function DetailBarangPage() {
-    const { id } = useParams()
+    const params = useParams()
     const router = useRouter()
     const [barang, setBarang] = useState<Barang | null>(null)
     const [loading, setLoading] = useState(true)
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
-    if (!id) return <div>Loading...</div>
+    // Mengambil ID dengan aman
+    const rawId = params?.id
+    const id = Array.isArray(rawId) ? rawId[0] : rawId
 
     useEffect(() => {
-        // 1. Cek apakah ID ada
-        if (!id) return;
+        // 1. Jika ID belum tersedia, jangan lakukan apa-apa
+        if (!id) return
 
-        console.log(id)
+        // 2. Cek apakah ini placeholder Next.js (%drp:). Jika ya, jangan warning, cukup return.
+        if (id.startsWith('%drp:')) return
 
-        // 2. Konversi ke Number
-        const numericId = Number(id);
+        const numericId = Number(id)
 
-        // 3. VALIDASI PENTING: Jika hasil konversi adalah NaN (Not a Number), HENTIKAN PROSES.
-        // Ini mencegah string sampah dari ekstensi browser dikirim ke Database.
+        // 3. Jika bukan angka valid, baru beri warning
         if (isNaN(numericId)) {
-            console.warn("ID tidak valid terdeteksi:", id);
-            return;
+            console.warn("ID tidak valid terdeteksi:", id)
+            setLoading(false)
+            return
         }
 
         const fetchBarang = async () => {
             try {
+                setLoading(true)
                 const supabase = createClient()
                 const { data, error } = await supabase
                     .from('tb_barang')
                     .select('*')
-                    .eq('id', numericId) // Gunakan numericId yang sudah divalidasi
+                    .eq('id', numericId)
                     .single()
 
                 if (error) throw error
 
                 setBarang(data)
-
-                // Set initial image    
+                // Set gambar default jika ada
                 if (data.image_urls && data.image_urls.length > 0) {
                     setSelectedImage(data.image_urls[0])
                 }
@@ -68,7 +70,7 @@ export default function DetailBarangPage() {
         }
 
         fetchBarang()
-    }, [])
+    }, [id]) // PENTING: Dependency array harus berisi [id] agar dijalankan ulang saat ID berubah dari placeholder -> valid
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('id-ID', {
