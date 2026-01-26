@@ -1,22 +1,17 @@
-'use client'
+"use client";
 
-import { SiteHeader } from "@/components/site-header"
+import { LelangTable } from "@/components/lelang-table";
 
 export default function BukaLelangPage() {
     return (
-        <>
-            <SiteHeader title={'Buka Lelang'} />
-            <div className="flex flex-1 flex-col gap-4 p-4 md:gap-6 md:p-6">
-                <div>
-                    <h1 className="text-3xl font-bold">Buka Lelang</h1>
-                    <p className="text-muted-foreground">Buka lelang untuk barang tertentu</p>
-                </div>
-                <div className="rounded-lg border p-4">
-                    <p className="text-sm text-muted-foreground">
-                        Form buka lelang akan ditampilkan di sini.
-                    </p>
-                </div>
+        <div className="px-4 lg:px-6 py-5">
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold tracking-tight">Buka Lelang</h1>
+                <p className="text-muted-foreground">
+                    Daftar lelang yang dapat dibuka (status: ditutup atau pending)
+                </p>
             </div>
-        </>
-    )
+            <LelangTable statusFilter="ditutup" />
+        </div>
+    );
 }

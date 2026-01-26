@@ -1,0 +1,114 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { getLelangById, updateLelang, type Lelang } from "@/api/lelang";
+import { LelangForm } from "@/components/lelang-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+
+export default function EditLelangPage({
+    params,
+}: {
+    params: { id: string };
+}) {
+    const [lelang, setLelang] = useState<Lelang | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
+
+    useEffect(() => {
+        const fetchLelang = async () => {
+            try {
+                const data = await getLelangById(parseInt(params.id));
+                setLelang(data);
+            } catch (error) {
+                console.error("Error fetching lelang:", error);
+                toast.error("Gagal mengambil data lelang");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchLelang();
+    }, [params.id]);
+
+    const handleSubmit = async (data: {
+        id_barang: number;
+        tanggal_lelang: string;
+        status: "dibuka" | "ditutup" | "pending";
+    }) => {
+        try {
+            await updateLelang(parseInt(params.id), data);
+            toast.success("Lelang berhasil diupdate");
+            router.push(`/petugas/lelang/${params.id}`);
+        } catch (error) {
+            console.error("Error updating lelang:", error);
+            toast.error("Gagal mengupdate lelang");
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="px-4 lg:px-6 py-5">
+                <Skeleton className="h-8 w-64 mb-6" />
+                <Card>
+                    <CardHeader>
+                        <Skeleton className="h-6 w-48" />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    if (!lelang) {
+        return (
+            <div className="px-4 lg:px-6 py-5">
+                <p className="text-center text-muted-foreground">Lelang tidak ditemukan</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="px-4 lg:px-6 py-5">
+            <div className="mb-6">
+                <Link href={`/petugas/lelang/${params.id}`}>
+                    <Button variant="ghost" size="sm" className="mb-4">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Kembali
+                    </Button>
+                </Link>
+                <h1 className="text-2xl font-bold tracking-tight">
+                    Edit Lelang #{lelang.id_lelang}
+                </h1>
+                <p className="text-muted-foreground">Perbarui informasi lelang</p>
+            </div>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Form Edit Lelang</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <LelangForm
+                        initialData={{
+                            id_barang: lelang.id_barang,
+                            tanggal_lelang: lelang.tanggal_lelang,
+                            status: lelang.status,
+                        }}
+                        onSubmit={handleSubmit}
+                        onCancel={() => router.push(`/petugas/lelang/${params.id}`)}
+                        submitLabel="Simpan Perubahan"
+                    />
+                </CardContent>
+            </Card>
+        </div>
+    );
+}
