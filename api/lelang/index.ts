@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 export type Lelang = {
   id_lelang: number;
   id_barang: number;
-  tanggal_lelang: string;
+  tgl_lelang: string;
   harga_akhir: number | null;
   status: "dibuka" | "ditutup" | "pending";
   user_id: string;
@@ -28,14 +28,14 @@ export type GetLelangResponse = {
 
 export type CreateLelangInput = {
   id_barang: number;
-  tanggal_lelang: string;
+  tgl_lelang: string;
   status: "dibuka" | "ditutup" | "pending";
   user_id: string;
 };
 
 export type UpdateLelangInput = {
   id_barang?: number;
-  tanggal_lelang?: string;
+  tgl_lelang?: string;
   status?: "dibuka" | "ditutup" | "pending";
   harga_akhir?: number | null;
 };
@@ -68,7 +68,7 @@ export const getLelang = async (
         )
       `,
       )
-      .order("tanggal_lelang", { ascending: date === "ascending" });
+      .order("tgl_lelang", { ascending: date === "ascending" });
 
     // Apply status filter
     if (statusFilter !== "all") {

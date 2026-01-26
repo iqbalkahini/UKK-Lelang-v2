@@ -287,7 +287,7 @@ export function LelangTable({
                                 <TableRow key={lelang.id_lelang}>
                                     <TableCell className="font-medium">{lelang.id_lelang}</TableCell>
                                     <TableCell>{lelang.barang?.nama || "-"}</TableCell>
-                                    <TableCell>{formatDate(lelang.tanggal_lelang)}</TableCell>
+                                    <TableCell>{formatDate(lelang.tgl_lelang)}</TableCell>
                                     <TableCell className="text-right">
                                         {formatCurrency(lelang.barang?.harga_awal ?? 0)}
                                     </TableCell>

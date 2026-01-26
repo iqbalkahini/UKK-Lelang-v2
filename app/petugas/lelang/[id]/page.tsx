@@ -196,7 +196,7 @@ export default function LelangDetailPage({
                             <p className="text-sm font-medium text-muted-foreground">
                                 Tanggal Lelang
                             </p>
-                            <p className="text-lg">{formatDate(lelang.tanggal_lelang)}</p>
+                            <p className="text-lg">{formatDate(lelang.tgl_lelang)}</p>
                         </div>
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">

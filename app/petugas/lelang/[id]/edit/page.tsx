@@ -38,7 +38,7 @@ export default function EditLelangPage({
 
     const handleSubmit = async (data: {
         id_barang: number;
-        tanggal_lelang: string;
+        tgl_lelang: string;
         status: "dibuka" | "ditutup" | "pending";
     }) => {
         try {
@@ -100,7 +100,7 @@ export default function EditLelangPage({
                     <LelangForm
                         initialData={{
                             id_barang: lelang.id_barang,
-                            tanggal_lelang: lelang.tanggal_lelang,
+                            tgl_lelang: lelang.tgl_lelang,
                             status: lelang.status,
                         }}
                         onSubmit={handleSubmit}

@@ -14,7 +14,7 @@ export default function CreateLelangPage() {
 
     const handleSubmit = async (data: {
         id_barang: number;
-        tanggal_lelang: string;
+        tgl_lelang: string;
         status: "dibuka" | "ditutup" | "pending";
     }) => {
         try {

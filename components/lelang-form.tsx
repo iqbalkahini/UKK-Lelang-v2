@@ -18,12 +18,12 @@ import { Loader2 } from "lucide-react";
 type LelangFormProps = {
     initialData?: {
         id_barang?: number;
-        tanggal_lelang?: string;
+        tgl_lelang?: string;
         status?: "dibuka" | "ditutup" | "pending";
     };
     onSubmit: (data: {
         id_barang: number;
-        tanggal_lelang: string;
+        tgl_lelang: string;
         status: "dibuka" | "ditutup" | "pending";
     }) => Promise<void>;
     onCancel?: () => void;
@@ -42,8 +42,8 @@ export function LelangForm({
 
     const [formData, setFormData] = useState({
         id_barang: initialData?.id_barang?.toString() || "",
-        tanggal_lelang: initialData?.tanggal_lelang
-            ? new Date(initialData.tanggal_lelang).toISOString().slice(0, 16)
+        tgl_lelang: initialData?.tgl_lelang
+            ? new Date(initialData.tgl_lelang).toISOString().slice(0, 16)
             : "",
         status: initialData?.status || ("pending" as "dibuka" | "ditutup" | "pending"),
     });
@@ -73,7 +73,7 @@ export function LelangForm({
             return;
         }
 
-        if (!formData.tanggal_lelang) {
+        if (!formData.tgl_lelang) {
             toast.error("Tanggal lelang harus diisi");
             return;
         }
@@ -82,7 +82,7 @@ export function LelangForm({
         try {
             await onSubmit({
                 id_barang: parseInt(formData.id_barang),
-                tanggal_lelang: new Date(formData.tanggal_lelang).toISOString(),
+                tgl_lelang: new Date(formData.tgl_lelang).toISOString(),
                 status: formData.status,
             });
         } catch (error) {
@@ -130,9 +130,9 @@ export function LelangForm({
                 <Input
                     id="tanggal_lelang"
                     type="datetime-local"
-                    value={formData.tanggal_lelang}
+                    value={formData.tgl_lelang}
                     onChange={(e) =>
-                        setFormData({ ...formData, tanggal_lelang: e.target.value })
+                        setFormData({ ...formData, tgl_lelang: e.target.value })
                     }
                     required
                 />
