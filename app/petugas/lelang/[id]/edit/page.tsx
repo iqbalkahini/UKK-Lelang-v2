@@ -37,7 +37,7 @@ export default function EditLelangPage({
     }, [params.id]);
 
     const handleSubmit = async (data: {
-        id_barang: number;
+        barang_id: number;
         tgl_lelang: string;
         status: "dibuka" | "ditutup" | "pending";
     }) => {
@@ -99,7 +99,7 @@ export default function EditLelangPage({
                 <CardContent>
                     <LelangForm
                         initialData={{
-                            id_barang: lelang.id_barang,
+                            barang_id: lelang.id_barang,
                             tgl_lelang: lelang.tgl_lelang,
                             status: lelang.status,
                         }}

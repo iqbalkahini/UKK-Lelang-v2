@@ -17,12 +17,12 @@ import { Loader2 } from "lucide-react";
 
 type LelangFormProps = {
     initialData?: {
-        id_barang?: number;
+        barang_id?: number;
         tgl_lelang?: string;
         status?: "dibuka" | "ditutup" | "pending";
     };
     onSubmit: (data: {
-        id_barang: number;
+        barang_id: number;
         tgl_lelang: string;
         status: "dibuka" | "ditutup" | "pending";
     }) => Promise<void>;
@@ -41,7 +41,7 @@ export function LelangForm({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [formData, setFormData] = useState({
-        id_barang: initialData?.id_barang?.toString() || "",
+        id_barang: initialData?.barang_id?.toString() || "",
         tgl_lelang: initialData?.tgl_lelang
             ? new Date(initialData.tgl_lelang).toISOString().slice(0, 16)
             : "",
@@ -81,7 +81,7 @@ export function LelangForm({
         setIsSubmitting(true);
         try {
             await onSubmit({
-                id_barang: parseInt(formData.id_barang),
+                barang_id: parseInt(formData.id_barang),
                 tgl_lelang: new Date(formData.tgl_lelang).toISOString(),
                 status: formData.status,
             });

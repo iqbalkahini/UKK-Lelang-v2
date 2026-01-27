@@ -13,7 +13,7 @@ export default function CreateLelangPage() {
     const { user } = useUser();
 
     const handleSubmit = async (data: {
-        id_barang: number;
+        barang_id: number;
         tgl_lelang: string;
         status: "dibuka" | "ditutup" | "pending";
     }) => {

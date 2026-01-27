@@ -27,7 +27,7 @@ export type GetLelangResponse = {
 };
 
 export type CreateLelangInput = {
-  id_barang: number;
+  barang_id: number;
   tgl_lelang: string;
   status: "dibuka" | "ditutup" | "pending";
   user_id: string;
