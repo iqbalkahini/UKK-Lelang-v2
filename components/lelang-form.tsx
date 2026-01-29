@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getBarang, type Barang } from "@/api/barang";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { getBarang, getBarangById, type Barang } from "@/api/barang";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,11 +54,10 @@ export function LelangForm({
     onCancel,
     submitLabel = "Simpan",
 }: LelangFormProps) {
-    const [barangList, setBarangList] = useState<Barang[]>([]);
-    const [isLoadingBarang, setIsLoadingBarang] = useState(true);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [open, setOpen] = useState(false);
+    // Defines
+    const ITEMS_PER_PAGE = 10;
 
+    // Form State
     const [formData, setFormData] = useState({
         id_barang: initialData?.barang_id?.toString() || "",
         tgl_lelang: initialData?.tgl_lelang
@@ -68,22 +67,103 @@ export function LelangForm({
         waktu_selesai: initialData?.waktu_selesai || "",
         status: initialData?.status || ("pending" as "dibuka" | "ditutup" | "pending"),
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Combobox State
+    const [open, setOpen] = useState(false);
+    const [barangList, setBarangList] = useState<Barang[]>([]);
+    const [selectedBarang, setSelectedBarang] = useState<Barang | null>(null);
+    const [isLoadingBarang, setIsLoadingBarang] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [page, setPage] = useState(1);
+    const [hasMore, setHasMore] = useState(true);
+
+    // Observer for infinite scroll
+    const observer = useRef<IntersectionObserver | null>(null);
+    const lastBarangElementRef = useCallback((node: HTMLDivElement) => {
+        if (isLoadingBarang || !hasMore) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage(prevPage => prevPage + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [isLoadingBarang, hasMore]);
+
+    // Fetch Barang List (Search & Pagination)
     useEffect(() => {
-        const fetchBarang = async () => {
+        const fetchBarangList = async () => {
+            setIsLoadingBarang(true);
             try {
-                const result = await getBarang(1, 1000); // Get all barang
-                setBarangList(result.data);
+                const result = await getBarang(page, ITEMS_PER_PAGE, searchQuery);
+
+                setBarangList(prev => {
+                    if (page === 1) return result.data;
+                    // Filter duplicates just in case
+                    const newData = result.data.filter(item => !prev.some(p => p.id === item.id));
+                    return [...prev, ...newData];
+                });
+
+                setHasMore(result.data.length === ITEMS_PER_PAGE);
+                console.log(result.data);
             } catch (error) {
-                console.error("Error fetching barang:", error);
+                console.error("Error fetching barang list:", error);
                 toast.error("Gagal mengambil data barang");
             } finally {
                 setIsLoadingBarang(false);
             }
         };
 
-        fetchBarang();
-    }, []);
+        // Debounce search if it changed, otherwise normal fetch
+        const timeoutId = setTimeout(() => {
+            fetchBarangList();
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [page, searchQuery]);
+
+    // Reset pagination when search changes
+    useEffect(() => {
+        setPage(1);
+        // Do NOT clear list here immediately to avoid flickering, let the fetch replace it.
+        // But if we don't clear, append logic might mess up if the fetch is slow.
+        // Ideally we handle 'page 1' logic in the fetch effect carefully.
+        // Actually, clearing list is safer for UI feedback.
+        if (page === 1) {
+            // If we are already at page 1, the effect above will run.
+            // If we were at page > 1, setting page to 1 will trigger effect.
+        }
+    }, [searchQuery]);
+
+    // Fetch Selected Barang Detail (Initial Load)
+    useEffect(() => {
+        const fetchSelectedBarang = async () => {
+            if (formData.id_barang && !selectedBarang) {
+                // Check if already in list
+                const inList = barangList.find(b => b.id.toString() === formData.id_barang);
+                if (inList) {
+                    setSelectedBarang(inList);
+                    return;
+                }
+
+                // If not in list, fetch details
+                try {
+                    const data = await getBarangById(parseInt(formData.id_barang));
+                    setSelectedBarang(data);
+                } catch (error) {
+                    console.error("Error fetching selected barang:", error);
+                }
+            } else if (selectedBarang && selectedBarang.id.toString() !== formData.id_barang) {
+                // Update selected barang from list if ID changes manually (unlikely but good for safety)
+                const inList = barangList.find(b => b.id.toString() === formData.id_barang);
+                if (inList) setSelectedBarang(inList);
+            }
+        };
+
+        fetchSelectedBarang();
+    }, [formData.id_barang, barangList, selectedBarang]);
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -131,56 +211,72 @@ export function LelangForm({
             {/* Barang Selection */}
             <div className="space-y-2 flex flex-col">
                 <Label htmlFor="id_barang">Barang</Label>
-                {isLoadingBarang ? (
-                    <div className="flex items-center text-sm text-muted-foreground">
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Memuat data barang...
-                    </div>
-                ) : (
-                    <Popover open={open} onOpenChange={setOpen}>
-                        <PopoverTrigger asChild>
-                            <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={open}
-                                className="w-full justify-between"
-                            >
-                                {formData.id_barang
-                                    ? barangList.find((barang) => barang.id.toString() === formData.id_barang)?.nama
-                                    : "Pilih barang..."}
-                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                            <Command>
-                                <CommandInput placeholder="Cari barang..." />
-                                <CommandList>
-                                    <CommandEmpty>Barang tidak ditemukan.</CommandEmpty>
-                                    <CommandGroup>
-                                        {barangList.map((barang) => (
-                                            <CommandItem
-                                                key={barang.id}
-                                                value={barang.nama}
-                                                onSelect={() => {
-                                                    setFormData({ ...formData, id_barang: barang.id.toString() })
-                                                    setOpen(false)
-                                                }}
-                                            >
-                                                <Check
-                                                    className={cn(
-                                                        "mr-2 h-4 w-4",
-                                                        formData.id_barang === barang.id.toString() ? "opacity-100" : "opacity-0"
-                                                    )}
-                                                />
-                                                {barang.nama} - Rp {barang.harga_awal.toLocaleString("id-ID")}
-                                            </CommandItem>
-                                        ))}
-                                    </CommandGroup>
-                                </CommandList>
-                            </Command>
-                        </PopoverContent>
-                    </Popover>
-                )}
+                <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={open}
+                            className="w-full justify-between"
+                        >
+                            {/* Prefer selectedBarang for name, otherwise fallback to finding in list, otherwise placeholder */}
+                            {selectedBarang
+                                ? selectedBarang.nama
+                                : (formData.id_barang
+                                    ? "Memuat..."
+                                    : "Pilih barang...")}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                        <Command shouldFilter={false}>
+                            <CommandInput
+                                placeholder="Cari barang..."
+                                value={searchQuery}
+                                onValueChange={(val) => {
+                                    setSearchQuery(val);
+                                    // Reset page when search changes
+                                    setPage(1);
+                                }}
+                            />
+                            <CommandList>
+                                <CommandEmpty>
+                                    {isLoadingBarang ? "Memuat..." : "Barang tidak ditemukan."}
+                                </CommandEmpty>
+                                <CommandGroup>
+                                    {barangList.map((barang) => (
+                                        <CommandItem
+                                            key={barang.id}
+                                            value={barang.nama}
+                                            onSelect={() => {
+                                                setFormData({ ...formData, id_barang: barang.id.toString() });
+                                                setSelectedBarang(barang);
+                                                setOpen(false);
+                                            }}
+                                        >
+                                            <Check
+                                                className={cn(
+                                                    "mr-2 h-4 w-4",
+                                                    formData.id_barang === barang.id.toString() ? "opacity-100" : "opacity-0"
+                                                )}
+                                            />
+                                            {barang.nama} - Rp {barang.harga_awal.toLocaleString("id-ID")}
+                                        </CommandItem>
+                                    ))}
+
+                                    {/* Sentinel for infinite scroll */}
+                                    <div ref={lastBarangElementRef} className="h-2 w-full" />
+
+                                    {isLoadingBarang && page > 1 && (
+                                        <div className="py-2 text-center text-xs text-muted-foreground">
+                                            Memuat lebih banyak...
+                                        </div>
+                                    )}
+                                </CommandGroup>
+                            </CommandList>
+                        </Command>
+                    </PopoverContent>
+                </Popover>
             </div>
 
             {/* Tanggal Lelang */}
