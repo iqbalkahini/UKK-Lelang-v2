@@ -15,6 +15,8 @@ export default function CreateLelangPage() {
   const handleSubmit = async (data: {
     barang_id: number;
     tgl_lelang: string;
+    waktu_mulai: string;
+    waktu_selesai: string;
     status: "dibuka" | "ditutup" | "pending";
   }) => {
     try {
@@ -27,8 +29,6 @@ export default function CreateLelangPage() {
         ...data,
         user_id: user.id,
         petugas_id: user.id,
-        waktu_mulai: data.tgl_lelang,
-        waktu_selesai: data.tgl_lelang, // Default to start time, or potentially add input for this
         harga_akhir: 0,
       });
 

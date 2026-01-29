@@ -33,11 +33,15 @@ type LelangFormProps = {
     initialData?: {
         barang_id?: number;
         tgl_lelang?: string;
+        waktu_mulai?: string;
+        waktu_selesai?: string;
         status?: "dibuka" | "ditutup" | "pending";
     };
     onSubmit: (data: {
         barang_id: number;
         tgl_lelang: string;
+        waktu_mulai: string;
+        waktu_selesai: string;
         status: "dibuka" | "ditutup" | "pending";
     }) => Promise<void>;
     onCancel?: () => void;
@@ -58,8 +62,10 @@ export function LelangForm({
     const [formData, setFormData] = useState({
         id_barang: initialData?.barang_id?.toString() || "",
         tgl_lelang: initialData?.tgl_lelang
-            ? new Date(initialData.tgl_lelang).toISOString().slice(0, 16)
+            ? new Date(initialData.tgl_lelang).toISOString().slice(0, 10)
             : "",
+        waktu_mulai: initialData?.waktu_mulai || "",
+        waktu_selesai: initialData?.waktu_selesai || "",
         status: initialData?.status || ("pending" as "dibuka" | "ditutup" | "pending"),
     });
 
@@ -93,11 +99,23 @@ export function LelangForm({
             return;
         }
 
+        if (!formData.waktu_mulai) {
+            toast.error("Waktu mulai harus diisi");
+            return;
+        }
+
+        if (!formData.waktu_selesai) {
+            toast.error("Waktu selesai harus diisi");
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             await onSubmit({
                 barang_id: parseInt(formData.id_barang),
                 tgl_lelang: new Date(formData.tgl_lelang).toISOString(),
+                waktu_mulai: formData.waktu_mulai,
+                waktu_selesai: formData.waktu_selesai,
                 status: formData.status,
             });
         } catch (error) {
@@ -167,16 +185,46 @@ export function LelangForm({
 
             {/* Tanggal Lelang */}
             <div className="space-y-2">
-                <Label htmlFor="tanggal_lelang">Tanggal & Waktu Lelang</Label>
+                <Label htmlFor="tanggal_lelang">Tanggal Lelang</Label>
                 <Input
                     id="tanggal_lelang"
-                    type="datetime-local"
+                    type="date"
                     value={formData.tgl_lelang}
                     onChange={(e) =>
                         setFormData({ ...formData, tgl_lelang: e.target.value })
                     }
                     required
                 />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                {/* Waktu Mulai */}
+                <div className="space-y-2">
+                    <Label htmlFor="waktu_mulai">Waktu Mulai</Label>
+                    <Input
+                        id="waktu_mulai"
+                        type="time"
+                        value={formData.waktu_mulai}
+                        onChange={(e) =>
+                            setFormData({ ...formData, waktu_mulai: e.target.value })
+                        }
+                        required
+                    />
+                </div>
+
+                {/* Waktu Selesai */}
+                <div className="space-y-2">
+                    <Label htmlFor="waktu_selesai">Waktu Selesai</Label>
+                    <Input
+                        id="waktu_selesai"
+                        type="time"
+                        value={formData.waktu_selesai}
+                        onChange={(e) =>
+                            setFormData({ ...formData, waktu_selesai: e.target.value })
+                        }
+                        required
+                    />
+                </div>
             </div>
 
             {/* Status */}

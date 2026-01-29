@@ -6,6 +6,8 @@ export type Lelang = {
   id_lelang: number;
   id_barang: number;
   tgl_lelang: string;
+  waktu_mulai: string;
+  waktu_selesai: string;
   harga_akhir: number | null;
   status: "dibuka" | "ditutup" | "pending";
   user_id: string;
@@ -29,10 +31,10 @@ export type GetLelangResponse = {
 export type CreateLelangInput = {
   barang_id: number;
   tgl_lelang: string;
-  waktu_mulai : string
-  waktu_selesai : string
-  harga_akhir :number;
-  petugas_id : string
+  waktu_mulai: string;
+  waktu_selesai: string;
+  harga_akhir: number;
+  petugas_id: string;
   status: "dibuka" | "ditutup" | "pending";
   user_id: string;
 };
@@ -40,6 +42,8 @@ export type CreateLelangInput = {
 export type UpdateLelangInput = {
   id_barang?: number;
   tgl_lelang?: string;
+  waktu_mulai?: string;
+  waktu_selesai?: string;
   status?: "dibuka" | "ditutup" | "pending";
   harga_akhir?: number | null;
 };
