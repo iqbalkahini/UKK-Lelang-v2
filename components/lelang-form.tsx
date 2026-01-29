@@ -12,8 +12,22 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+} from "@/components/ui/command"
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover"
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type LelangFormProps = {
     initialData?: {
@@ -39,6 +53,7 @@ export function LelangForm({
     const [barangList, setBarangList] = useState<Barang[]>([]);
     const [isLoadingBarang, setIsLoadingBarang] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [open, setOpen] = useState(false);
 
     const [formData, setFormData] = useState({
         id_barang: initialData?.barang_id?.toString() || "",
@@ -96,7 +111,7 @@ export function LelangForm({
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Barang Selection */}
-            <div className="space-y-2">
+            <div className="space-y-2 flex flex-col">
                 <Label htmlFor="id_barang">Barang</Label>
                 {isLoadingBarang ? (
                     <div className="flex items-center text-sm text-muted-foreground">
@@ -104,23 +119,49 @@ export function LelangForm({
                         Memuat data barang...
                     </div>
                 ) : (
-                    <Select
-                        value={formData.id_barang}
-                        onValueChange={(value) =>
-                            setFormData({ ...formData, id_barang: value })
-                        }
-                    >
-                        <SelectTrigger id="id_barang">
-                            <SelectValue placeholder="Pilih barang" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {barangList.map((barang) => (
-                                <SelectItem key={barang.id} value={barang.id.toString()}>
-                                    {barang.nama} - Rp {barang.harga_awal.toLocaleString("id-ID")}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <Popover open={open} onOpenChange={setOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={open}
+                                className="w-full justify-between"
+                            >
+                                {formData.id_barang
+                                    ? barangList.find((barang) => barang.id.toString() === formData.id_barang)?.nama
+                                    : "Pilih barang..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                                <CommandInput placeholder="Cari barang..." />
+                                <CommandList>
+                                    <CommandEmpty>Barang tidak ditemukan.</CommandEmpty>
+                                    <CommandGroup>
+                                        {barangList.map((barang) => (
+                                            <CommandItem
+                                                key={barang.id}
+                                                value={barang.nama}
+                                                onSelect={() => {
+                                                    setFormData({ ...formData, id_barang: barang.id.toString() })
+                                                    setOpen(false)
+                                                }}
+                                            >
+                                                <Check
+                                                    className={cn(
+                                                        "mr-2 h-4 w-4",
+                                                        formData.id_barang === barang.id.toString() ? "opacity-100" : "opacity-0"
+                                                    )}
+                                                />
+                                                {barang.nama} - Rp {barang.harga_awal.toLocaleString("id-ID")}
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
                 )}
             </div>
 
