@@ -89,7 +89,7 @@ export default function EditLelangPage({
                     </Button>
                 </Link>
                 <h1 className="text-2xl font-bold tracking-tight">
-                    Edit Lelang #{lelang.id_lelang}
+                    Edit Lelang #{lelang.id}
                 </h1>
                 <p className="text-muted-foreground">Perbarui informasi lelang</p>
             </div>

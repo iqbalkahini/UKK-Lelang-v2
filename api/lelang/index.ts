@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 
 export type Lelang = {
-  id_lelang: number;
+  id: number;
   id_barang: number;
   tgl_lelang: string;
   waktu_mulai: string;
@@ -265,7 +265,7 @@ export const deleteLelang = async (id: number): Promise<boolean> => {
     const { error } = await supabase
       .from("tb_lelang")
       .delete()
-      .eq("id_lelang", id);
+      .eq("id", id);
 
     if (error) throw error;
     return true;

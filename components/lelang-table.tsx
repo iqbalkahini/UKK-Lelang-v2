@@ -106,7 +106,6 @@ export function LelangTable({
                     statusFilter,
                     filter.date
                 );
-                console.log(result);
                 setData(result);
             } catch (error) {
                 console.error("Error fetching lelang:", error);
@@ -161,7 +160,6 @@ export function LelangTable({
 
     const handleDelete = async () => {
         if (!deleteItemId) return;
-
         try {
             await deleteLelang(deleteItemId);
             toast.success("Lelang berhasil dihapus");
@@ -190,10 +188,10 @@ export function LelangTable({
             // If closing, get highest bid
             let harga_akhir = undefined;
             if (newStatus === "ditutup") {
-                harga_akhir = await getHighestBid(lelang.id_lelang);
+                harga_akhir = await getHighestBid(lelang.id);
             }
 
-            await updateStatusLelang(lelang.id_lelang, newStatus, harga_akhir ?? undefined);
+            await updateStatusLelang(lelang.id, newStatus, harga_akhir ?? undefined);
             toast.success(
                 `Lelang berhasil ${newStatus === "dibuka" ? "dibuka" : "ditutup"}`
             );
@@ -285,8 +283,8 @@ export function LelangTable({
                             </TableRow>
                         ) : data?.data.length ? (
                             data.data.map((lelang) => (
-                                <TableRow key={lelang.id_lelang}>
-                                    <TableCell className="font-medium">{lelang.id_lelang}</TableCell>
+                                <TableRow key={lelang.id}>
+                                    <TableCell className="font-medium">{lelang.id}</TableCell>
                                     <TableCell>{lelang.barang?.nama || "-"}</TableCell>
                                     <TableCell>{formatDate(lelang.tgl_lelang)}</TableCell>
                                     <TableCell className="text-right">
@@ -314,12 +312,12 @@ export function LelangTable({
                                                     <DropdownMenuContent align="end" className="w-48">
                                                         <DropdownMenuGroup>
                                                             <DropdownMenuItem asChild>
-                                                                <a href={`/petugas/lelang/${lelang.id_lelang}`}>
+                                                                <a href={`/petugas/lelang/${lelang.id}`}>
                                                                     <Eye /> Detail
                                                                 </a>
                                                             </DropdownMenuItem>
                                                             <DropdownMenuItem asChild>
-                                                                <a href={`/petugas/lelang/${lelang.id_lelang}/edit`}>
+                                                                <a href={`/petugas/lelang/${lelang.id}/edit`}>
                                                                     <PencilIcon /> Edit
                                                                 </a>
                                                             </DropdownMenuItem>
@@ -337,7 +335,7 @@ export function LelangTable({
                                                                 )}
                                                             </DropdownMenuItem>
                                                             <DropdownMenuItem
-                                                                onClick={() => handleDeleteClick(lelang.id_lelang)}
+                                                                onClick={() => handleDeleteClick(lelang.id)}
                                                             >
                                                                 <TrashIcon /> Hapus
                                                             </DropdownMenuItem>
