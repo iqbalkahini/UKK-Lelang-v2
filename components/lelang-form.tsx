@@ -117,7 +117,6 @@ export function LelangForm({
     // Fetch Barang List (Search & Pagination)
     useEffect(() => {
         const fetchBarangList = async () => {
-            setIsLoadingBarang(true);
             try {
                 const result = await getBarang(page, ITEMS_PER_PAGE, searchQuery);
 
@@ -256,6 +255,8 @@ export function LelangForm({
                                 placeholder="Cari barang..."
                                 value={searchQuery}
                                 onValueChange={(val) => {
+                                    setBarangList([])
+                                    setIsLoadingBarang(true)
                                     setSearchQuery(val);
                                     // Reset page when search changes
                                     setPage(1);
