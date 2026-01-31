@@ -8,6 +8,7 @@ export type Barang = {
   tanggal: string;
   harga_awal: number;
   deskripsi_barang: string;
+  image_urls: string[];
 };
 
 export type GetBarangResponse = {

@@ -48,7 +48,12 @@ import { useRouter } from "next/navigation";
 import { Skeleton } from "./ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 
-export function BarangTable() {
+
+type BarangTableProps = {
+    basePath?: string;
+};
+
+export function BarangTable({ basePath = "/petugas/barang" }: BarangTableProps) {
     const [data, setData] = useState<GetBarangResponse | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
@@ -287,12 +292,12 @@ export function BarangTable() {
                                                 <DropdownMenuContent align="end" className="w-40">
                                                     <DropdownMenuGroup>
                                                         <DropdownMenuItem asChild>
-                                                            <a href={`/petugas/barang/${barang.id}`}>
+                                                            <a href={`${basePath}/${barang.id}`}>
                                                                 <Eye /> Detail
                                                             </a>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem asChild>
-                                                            <a href={`/petugas/barang/${barang.id}`}>
+                                                            <a href={`${basePath}/${barang.id}/edit`}>
                                                                 <PencilIcon /> Edit
                                                             </a>
                                                         </DropdownMenuItem>
