@@ -69,7 +69,7 @@ export function LelangForm({
             : "",
         waktu_mulai: initialData?.waktu_mulai || "",
         waktu_selesai: initialData?.waktu_selesai || "",
-        status: initialData?.status || ("dibuka" as "dibuka" | "ditutup"),
+        status: initialData?.status || ("pending" as "dibuka" | "ditutup" | 'pending'),
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
