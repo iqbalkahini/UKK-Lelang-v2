@@ -118,6 +118,7 @@ export function LelangForm({
     useEffect(() => {
         const fetchBarangList = async () => {
             try {
+                setIsLoadingBarang(true)
                 const result = await getBarang(page, ITEMS_PER_PAGE, searchQuery);
 
                 setBarangList(prev => {
