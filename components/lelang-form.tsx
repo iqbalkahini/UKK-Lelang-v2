@@ -140,7 +140,7 @@ export function LelangForm({
         // Debounce search if it changed, otherwise normal fetch
         const timeoutId = setTimeout(() => {
             fetchBarangList();
-        }, 300);
+        }, 400);
 
         return () => clearTimeout(timeoutId);
     }, [page, searchQuery]);
