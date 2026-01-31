@@ -17,7 +17,7 @@ export default function CreateLelangPage() {
     tgl_lelang: string;
     waktu_mulai: string;
     waktu_selesai: string;
-    status: "dibuka" | "ditutup" | "pending";
+    status: 'pending' | "dibuka" | "ditutup";
   }) => {
     try {
       if (!user) {
@@ -27,8 +27,7 @@ export default function CreateLelangPage() {
 
       await createLelang({
         ...data,
-        user_id: user.id,
-        petugas_id: user.id,
+        petugas_auth_id: user.id,
         harga_akhir: 0,
       });
 

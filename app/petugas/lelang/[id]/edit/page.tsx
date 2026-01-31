@@ -41,7 +41,7 @@ export default function EditLelangPage({
         tgl_lelang: string;
         waktu_mulai: string;
         waktu_selesai: string;
-        status: "dibuka" | "ditutup" | "pending";
+        status: 'pending' | "dibuka" | "ditutup";
     }) => {
         try {
             await updateLelang(parseInt(params.id), data);

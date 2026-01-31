@@ -34,9 +34,8 @@ export type CreateLelangInput = {
   waktu_mulai: string;
   waktu_selesai: string;
   harga_akhir: number;
-  petugas_id: string;
+  petugas_auth_id: string;
   status: "dibuka" | "ditutup" | "pending";
-  user_id: string;
 };
 
 export type UpdateLelangInput = {
@@ -149,9 +148,33 @@ export const createLelang = async (
 ): Promise<Lelang> => {
   try {
     const supabase = await createClient();
+
+    // 1. Get petugas ID from auth ID
+    const { data: petugasData, error: petugasError } = await supabase
+      .from("tb_petugas")
+      .select("id")
+      .eq("user_id", input.petugas_auth_id)
+      .single();
+
+    if (petugasError || !petugasData) {
+      throw new Error("Petugas not found");
+    }
+
+    // 2. Prepare payload
+    const payload = {
+      barang_id: input.barang_id,
+      tgl_lelang: input.tgl_lelang,
+      waktu_mulai: input.waktu_mulai,
+      waktu_selesai: input.waktu_selesai,
+      harga_akhir: input.harga_akhir,
+      status: input.status,
+      petugas_id: petugasData.id,
+      user_id: petugasData.id,
+    };
+
     const { data, error } = await supabase
       .from("tb_lelang")
-      .insert([input])
+      .insert([payload])
       .select()
       .single();
 

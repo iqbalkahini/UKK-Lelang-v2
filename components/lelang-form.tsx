@@ -39,14 +39,14 @@ type LelangFormProps = {
         tgl_lelang?: string;
         waktu_mulai?: string;
         waktu_selesai?: string;
-        status?: "dibuka" | "ditutup" | "pending";
+        status?: "dibuka" | "ditutup" | 'pending';
     };
     onSubmit: (data: {
         barang_id: number;
         tgl_lelang: string;
         waktu_mulai: string;
         waktu_selesai: string;
-        status: "dibuka" | "ditutup" | "pending";
+        status: "dibuka" | "ditutup" | 'pending';
     }) => Promise<void>;
     onCancel?: () => void;
     submitLabel?: string;
@@ -69,7 +69,7 @@ export function LelangForm({
             : "",
         waktu_mulai: initialData?.waktu_mulai || "",
         waktu_selesai: initialData?.waktu_selesai || "",
-        status: initialData?.status || ("pending" as "dibuka" | "ditutup" | "pending"),
+        status: initialData?.status || ("dibuka" as "dibuka" | "ditutup"),
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -400,7 +400,7 @@ export function LelangForm({
                 <Label htmlFor="status">Status</Label>
                 <Select
                     value={formData.status}
-                    onValueChange={(value: "dibuka" | "ditutup" | "pending") =>
+                    onValueChange={(value: "dibuka" | "ditutup") =>
                         setFormData({ ...formData, status: value })
                     }
                 >
@@ -408,7 +408,6 @@ export function LelangForm({
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="dibuka">Dibuka</SelectItem>
                         <SelectItem value="ditutup">Ditutup</SelectItem>
                     </SelectContent>
