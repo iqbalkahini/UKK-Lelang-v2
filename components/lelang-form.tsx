@@ -26,8 +26,12 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { toast } from "sonner";
-import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
+import { CalendarIcon, Check, ChevronsUpDown, Clock2Icon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Card, CardContent, CardFooter } from "./ui/card";
+import { Calendar } from "./ui/calendar";
+import { Field, FieldGroup, FieldLabel } from "./ui/field";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
 
 type LelangFormProps = {
     initialData?: {
@@ -279,48 +283,98 @@ export function LelangForm({
                 </Popover>
             </div>
 
-            {/* Tanggal Lelang */}
-            <div className="space-y-2">
-                <Label htmlFor="tanggal_lelang">Tanggal Lelang</Label>
-                <Input
-                    id="tanggal_lelang"
-                    type="date"
-                    value={formData.tgl_lelang}
-                    onChange={(e) =>
-                        setFormData({ ...formData, tgl_lelang: e.target.value })
-                    }
-                    required
-                />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                {/* Waktu Mulai */}
-                <div className="space-y-2">
-                    <Label htmlFor="waktu_mulai">Waktu Mulai</Label>
-                    <Input
-                        id="waktu_mulai"
-                        type="time"
-                        value={formData.waktu_mulai}
-                        onChange={(e) =>
-                            setFormData({ ...formData, waktu_mulai: e.target.value })
-                        }
-                        required
-                    />
-                </div>
-
-                {/* Waktu Selesai */}
-                <div className="space-y-2">
-                    <Label htmlFor="waktu_selesai">Waktu Selesai</Label>
-                    <Input
-                        id="waktu_selesai"
-                        type="time"
-                        value={formData.waktu_selesai}
-                        onChange={(e) =>
-                            setFormData({ ...formData, waktu_selesai: e.target.value })
-                        }
-                        required
-                    />
-                </div>
+            {/* Tanggal & Waktu Lelang */}
+            <div className="space-y-2 flex flex-col">
+                <Label>Jadwal Lelang</Label>
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !formData.tgl_lelang && "text-muted-foreground"
+                            )}
+                        >
+                            {formData.tgl_lelang ? (
+                                <>
+                                    {new Date(formData.tgl_lelang).toLocaleDateString("id-ID", {
+                                        weekday: "long",
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                    })}
+                                    {formData.waktu_mulai && formData.waktu_selesai ? ` • ${formData.waktu_mulai} - ${formData.waktu_selesai}` : ""}
+                                </>
+                            ) : (
+                                <span>Pilih tanggal dan waktu</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 max-h-[80vh] overflow-y-auto" align="start">
+                        <Card className="border-0 shadow-none flex pt-4">
+                            <CardContent>
+                                <Calendar
+                                    mode="single"
+                                    selected={
+                                        formData.tgl_lelang
+                                            ? new Date(formData.tgl_lelang + "T00:00:00")
+                                            : undefined
+                                    }
+                                    onSelect={(date) => {
+                                        if (date) {
+                                            const year = date.getFullYear();
+                                            const month = String(date.getMonth() + 1).padStart(2, "0");
+                                            const day = String(date.getDate()).padStart(2, "0");
+                                            setFormData({ ...formData, tgl_lelang: `${year}-${month}-${day}` });
+                                        } else {
+                                            setFormData({ ...formData, tgl_lelang: "" });
+                                        }
+                                    }}
+                                    className="p-0"
+                                />
+                            </CardContent>
+                            <CardFooter className="bg-card border-l">
+                                <FieldGroup>
+                                    <Field>
+                                        <FieldLabel htmlFor="waktu_mulai">Waktu Mulai</FieldLabel>
+                                        <InputGroup>
+                                            <InputGroupInput
+                                                id="waktu_mulai"
+                                                type="time"
+                                                value={formData.waktu_mulai}
+                                                onChange={(e) =>
+                                                    setFormData({ ...formData, waktu_mulai: e.target.value })
+                                                }
+                                                className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none w-full"
+                                            />
+                                            <InputGroupAddon>
+                                                <Clock2Icon className="text-muted-foreground h-4 w-4" />
+                                            </InputGroupAddon>
+                                        </InputGroup>
+                                    </Field>
+                                    <Field>
+                                        <FieldLabel htmlFor="waktu_selesai">Waktu Selesai</FieldLabel>
+                                        <InputGroup>
+                                            <InputGroupInput
+                                                id="waktu_selesai"
+                                                type="time"
+                                                value={formData.waktu_selesai}
+                                                onChange={(e) =>
+                                                    setFormData({ ...formData, waktu_selesai: e.target.value })
+                                                }
+                                                className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none w-full"
+                                            />
+                                            <InputGroupAddon>
+                                                <Clock2Icon className="text-muted-foreground h-4 w-4" />
+                                            </InputGroupAddon>
+                                        </InputGroup>
+                                    </Field>
+                                </FieldGroup>
+                            </CardFooter>
+                        </Card>
+                    </PopoverContent>
+                </Popover>
             </div>
 
             {/* Status */}
