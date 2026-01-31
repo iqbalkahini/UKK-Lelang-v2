@@ -149,9 +149,24 @@ export function LelangTable({
             year: "numeric",
             month: "long",
             day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
         });
+    };
+
+    const formatTime = (timeString: string) => {
+        if (!timeString) return "-";
+        // Check if it matches HH:MM:SS or HH:MM
+        if (/^\d{2}:\d{2}(:\d{2})?$/.test(timeString)) {
+            return timeString.substring(0, 5) + " WIB";
+        }
+        try {
+            return new Date(timeString).toLocaleTimeString("id-ID", {
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZoneName: "short"
+            });
+        } catch (e) {
+            return timeString;
+        }
     };
 
     const handleDeleteClick = (id: number) => {
@@ -223,6 +238,8 @@ export function LelangTable({
         }
     };
 
+    console.log(data);
+
     return (
         <div className="flex flex-col gap-4">
             {/* Search Filter */}
@@ -261,6 +278,7 @@ export function LelangTable({
                                 Tanggal Lelang{" "}
                                 {filter.date === "ascending" ? <ArrowBigUp /> : <ArrowBigDown />}
                             </TableHead>
+                            <TableHead className="text-right">Waktu Mulai / Selesai</TableHead>
                             <TableHead className="text-right">Harga Awal</TableHead>
                             <TableHead className="text-right">Harga Akhir</TableHead>
                             <TableHead className="text-center">Status</TableHead>
@@ -287,6 +305,7 @@ export function LelangTable({
                                     <TableCell className="font-medium">{lelang.id}</TableCell>
                                     <TableCell>{lelang.barang?.nama || "-"}</TableCell>
                                     <TableCell>{formatDate(lelang.tgl_lelang)}</TableCell>
+                                    <TableCell>{formatTime(lelang.waktu_mulai)} - {formatTime(lelang.waktu_selesai)}</TableCell>
                                     <TableCell className="text-right">
                                         {formatCurrency(lelang.barang?.harga_awal ?? 0)}
                                     </TableCell>
