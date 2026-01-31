@@ -408,6 +408,7 @@ export function LelangForm({
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="dibuka">Dibuka</SelectItem>
                         <SelectItem value="ditutup">Ditutup</SelectItem>
                     </SelectContent>
