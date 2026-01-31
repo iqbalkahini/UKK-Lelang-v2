@@ -33,9 +33,13 @@ export default function CreateLelangPage() {
 
       toast.success("Lelang berhasil dibuat");
       router.push("/petugas/lelang");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating lelang:", error);
-      toast.error("Gagal membuat lelang");
+      if (error?.code === "23505" || error?.message?.includes("409") || error?.details?.includes("already exists")) {
+        toast.error("Barang ini sudah dilelang");
+      } else {
+        toast.error(error?.message || "Gagal membuat lelang");
+      }
     }
   };
 

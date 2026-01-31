@@ -193,7 +193,7 @@ export const createLelang = async (
       harga_akhir: input.harga_akhir,
       status: input.status,
       petugas_id: petugasData.id,
-      user_id: petugasData.id,
+      user_id: null,
     };
 
     const { data, error } = await supabase
