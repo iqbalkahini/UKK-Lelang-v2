@@ -7,7 +7,7 @@ export default function AdminLayout({
     children: React.ReactNode
 }) {
     return (
-        <SidebarProvider defaultOpen={true}>
+        <SidebarProvider>
             <AdminSidebar />
             <SidebarInset>
                 {children}

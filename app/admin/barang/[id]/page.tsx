@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -19,15 +19,18 @@ interface Barang {
     image_urls: string[] | null
 }
 
-export default function DetailBarangPage() {
-    const params = useParams()
+export default function DetailBarangPage({
+    params,
+}: {
+    params: { id: string };
+}) {
     const router = useRouter()
     const [barang, setBarang] = useState<Barang | null>(null)
     const [loading, setLoading] = useState(true)
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
-    const rawId = params?.id
-    const id = Array.isArray(rawId) ? rawId[0] : rawId
+    // Handle potential array or string (though simpler in prop usually)
+    const id = params.id
 
     useEffect(() => {
         if (!id) return
