@@ -368,7 +368,7 @@ export function LelangTable({
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={showActions ? 7 : 6} className="h-24 text-center">
+                                <TableCell colSpan={8} className="h-24 text-center">
                                     {activeSearch
                                         ? "Tidak ada data yang cocok dengan pencarian."
                                         : "Tidak ada data."}
