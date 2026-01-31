@@ -51,11 +51,11 @@ export default function LelangDetailPage({
 
             let harga_akhir = undefined;
             if (newStatus === "ditutup") {
-                harga_akhir = await getHighestBid(lelang.id_lelang);
+                harga_akhir = await getHighestBid(lelang.id);
             }
 
             const updatedLelang = await updateStatusLelang(
-                lelang.id_lelang,
+                lelang.id,
                 newStatus,
                 harga_akhir ?? undefined
             );
@@ -142,14 +142,14 @@ export default function LelangDetailPage({
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">
-                            Detail Lelang #{lelang.id_lelang}
+                            Detail Lelang #{lelang.id}
                         </h1>
                         <p className="text-muted-foreground">
                             Informasi lengkap tentang lelang ini
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        <Link href={`/petugas/lelang/${lelang.id_lelang}/edit`}>
+                        <Link href={`/petugas/lelang/${lelang.id}/edit`}>
                             <Button variant="outline">
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
@@ -185,7 +185,7 @@ export default function LelangDetailPage({
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">ID Lelang</p>
-                                <p className="text-lg font-semibold">{lelang.id_lelang}</p>
+                                <p className="text-lg font-semibold">{lelang.id}</p>
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-muted-foreground">Status</p>

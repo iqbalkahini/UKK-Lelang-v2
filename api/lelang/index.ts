@@ -156,7 +156,7 @@ export const getLelangById = async (id: number): Promise<Lelang> => {
         )
       `,
       )
-      .eq("id_lelang", id)
+      .eq("id", id)
       .single();
 
     if (error) throw error;
@@ -219,7 +219,7 @@ export const updateLelang = async (
     const { data, error } = await supabase
       .from("tb_lelang")
       .update(input)
-      .eq("id_lelang", id)
+      .eq("id", id)
       .select()
       .single();
 
@@ -247,7 +247,7 @@ export const updateStatusLelang = async (
     const { data, error } = await supabase
       .from("tb_lelang")
       .update(updateData)
-      .eq("id_lelang", id)
+      .eq("id", id)
       .select()
       .single();
 
