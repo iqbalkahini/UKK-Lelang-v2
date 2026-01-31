@@ -174,8 +174,6 @@ export function BarangTable({ basePath = "/petugas/barang" }: BarangTableProps) 
         localStorage.setItem('filter_tabel', JSON.stringify(newFilter));
     }
 
-    console.log(data?.data)
-
     return (
         <div className="flex flex-col gap-4">
             {/* Search Filter */}
