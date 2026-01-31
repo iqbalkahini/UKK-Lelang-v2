@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { LelangForm } from "@/components/lelang-form";
 import { createLelang } from "@/api/lelang";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,11 +52,13 @@ export default function CreateLelangPage() {
           <CardTitle>Form Lelang Baru</CardTitle>
         </CardHeader>
         <CardContent>
-          <LelangForm
-            onSubmit={handleSubmit}
-            onCancel={() => router.push("/petugas/lelang")}
-            submitLabel="Buat Lelang"
-          />
+          <Suspense fallback={<div>Loading...</div>}>
+            <LelangForm
+              onSubmit={handleSubmit}
+              onCancel={() => router.push("/petugas/lelang")}
+              submitLabel="Buat Lelang"
+            />
+          </Suspense>
         </CardContent>
       </Card>
     </div>

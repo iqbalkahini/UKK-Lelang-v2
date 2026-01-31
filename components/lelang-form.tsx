@@ -95,6 +95,25 @@ export function LelangForm({
         if (node) observer.current.observe(node);
     }, [isLoadingBarang, hasMore]);
 
+    // Set default date and time on client-side only to avoid hydration mismatch
+    useEffect(() => {
+        setFormData(prev => {
+            const now = new Date();
+            // Calculate timezone offset in minutes and convert to ms
+            const offset = now.getTimezoneOffset() * 60000;
+            // Adjust to local time before slicing
+            const localISOTime = new Date(now.getTime() - offset).toISOString().slice(0, 10);
+
+            return {
+                ...prev,
+                waktu_mulai: initialData?.waktu_mulai || prev.waktu_mulai || now.toTimeString().slice(0, 5),
+                tgl_lelang: initialData?.tgl_lelang
+                    ? new Date(initialData.tgl_lelang).toISOString().slice(0, 10)
+                    : (prev.tgl_lelang || localISOTime)
+            };
+        });
+    }, [initialData]);
+
     // Fetch Barang List (Search & Pagination)
     useEffect(() => {
         const fetchBarangList = async () => {
@@ -110,7 +129,6 @@ export function LelangForm({
                 });
 
                 setHasMore(result.data.length === ITEMS_PER_PAGE);
-                console.log(result.data);
             } catch (error) {
                 console.error("Error fetching barang list:", error);
                 toast.error("Gagal mengambil data barang");
@@ -195,16 +213,16 @@ export function LelangForm({
 
         setIsSubmitting(true);
         try {
+            const tgl = formData.tgl_lelang.split("T")[0];
             await onSubmit({
                 barang_id: parseInt(formData.id_barang),
-                tgl_lelang: new Date(formData.tgl_lelang).toISOString(),
+                tgl_lelang: tgl,
                 waktu_mulai: formData.waktu_mulai,
                 waktu_selesai: formData.waktu_selesai,
                 status: formData.status,
             });
         } catch (error) {
-            console.error("Error submitting form:", error);
-            toast.error("Gagal menyimpan data lelang");
+            throw error;
         } finally {
             setIsSubmitting(false);
         }
