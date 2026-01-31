@@ -27,24 +27,36 @@ declare global {
 
 export default function DompetPage() {
     const [saldo, setSaldo] = useState<number | null>(null);
+    const [transactions, setTransactions] = useState<any[]>([]);
     const [amount, setAmount] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
     const [isLoadingSaldo, setIsLoadingSaldo] = useState(true);
 
-    const fetchSaldo = async () => {
+    const fetchData = async () => {
         try {
             const supabase = createClient();
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return;
 
-            const { data } = await supabase
+            // Fetch Saldo
+            const { data: masyarakatData } = await supabase
                 .from('tb_masyarakat')
-                .select('saldo')
+                .select('id, saldo') // Need ID for transaction query
                 .eq('user_id', user.id)
                 .single();
 
-            if (data) {
-                setSaldo(data.saldo);
+            if (masyarakatData) {
+                setSaldo(masyarakatData.saldo);
+
+                // Fetch Transactions
+                const { data: transactionData } = await supabase
+                    .from('tb_topup')
+                    .select('*')
+                    .eq('id_user', masyarakatData.id)
+                    .order('created_at', { ascending: false });
+                if (transactionData) {
+                    setTransactions(transactionData);
+                }
             }
         } catch (error) {
             console.error(error);
@@ -54,7 +66,7 @@ export default function DompetPage() {
     };
 
     useEffect(() => {
-        fetchSaldo();
+        fetchData();
     }, []);
 
     const handleTopup = async () => {
@@ -73,13 +85,15 @@ export default function DompetPage() {
                         toast.success("Pembayaran berhasil!");
                         setAmount("");
                         // Wait a bit for webhook to process
-                        setTimeout(fetchSaldo, 2000);
+                        setTimeout(fetchData, 2000);
                     },
                     onPending: function (result: any) {
                         toast.info("Menunggu pembayaran...");
+                        setTimeout(fetchData, 1000);
                     },
                     onError: function (result: any) {
                         toast.error("Pembayaran gagal!");
+                        setTimeout(fetchData, 1000);
                     },
                     onClose: function () {
                         // Customer closed the popup without finishing the payment
@@ -96,6 +110,30 @@ export default function DompetPage() {
             setIsLoading(false);
         }
     };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'settlement': return 'bg-green-100 text-green-800 border-green-200';
+            case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+            case 'failure':
+            case 'deny':
+            case 'cancel':
+            case 'expire': return 'bg-red-100 text-red-800 border-red-200';
+            default: return 'bg-gray-100 text-gray-800 border-gray-200';
+        }
+    };
+
+    const getStatusLabel = (status: string) => {
+        switch (status) {
+            case 'settlement': return 'Berhasil';
+            case 'pending': return 'Menunggu';
+            case 'failure':
+            case 'deny':
+            case 'cancel':
+            case 'expire': return 'Gagal';
+            default: return status;
+        }
+    }
 
     return (
         <>
@@ -161,6 +199,79 @@ export default function DompetPage() {
                             Lanjutkan Pembayaran
                         </Button>
                     </CardFooter>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Riwayat Transaksi</CardTitle>
+                        <CardDescription>
+                            Daftar riwayat deposit dan topup saldo Anda.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {transactions.length === 0 ? (
+                            <div className="text-center py-8 text-muted-foreground">
+                                Belum ada transaksi.
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {transactions.map((trx) => (
+                                    <div key={trx.id} className="flex justify-between items-center p-4 border rounded-lg">
+                                        <div>
+                                            <p className="font-medium text-lg">
+                                                {new Intl.NumberFormat("id-ID", {
+                                                    style: "currency",
+                                                    currency: "IDR",
+                                                    minimumFractionDigits: 0
+                                                }).format(trx.amount)}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {new Date(trx.created_at).toLocaleDateString('id-ID', {
+                                                    day: 'numeric',
+                                                    month: 'long',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            {trx.status === 'pending' && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-7 text-xs"
+                                                    onClick={async () => {
+                                                        const toastId = toast.loading("Cek status...");
+                                                        try {
+                                                            const res = await fetch('/api/payment/check-status', {
+                                                                method: 'POST',
+                                                                headers: { 'Content-Type': 'application/json' },
+                                                                body: JSON.stringify({ order_id: trx.id })
+                                                            });
+                                                            if (res.ok) {
+                                                                toast.success("Status diperbarui", { id: toastId });
+                                                                fetchData();
+                                                            } else {
+                                                                toast.error("Gagal cek status", { id: toastId });
+                                                            }
+                                                        } catch (e) {
+                                                            toast.error("Error network", { id: toastId });
+                                                        }
+                                                    }}
+                                                >
+                                                    Cek Status
+                                                </Button>
+                                            )}
+                                            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(trx.status)}`}>
+                                                {getStatusLabel(trx.status)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </CardContent>
                 </Card>
             </div>
         </>
