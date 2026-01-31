@@ -84,16 +84,40 @@ export const getLelang = async (
     }
 
     // Apply search filter
+    // if (search && search.trim() !== "") {
+    //   const searchTerm = `%${search.trim()}%`;
+    //   // Search in barang nama through join
+    //   countQuery = countQuery.or(
+    //     `barang_id.in.(select id from tb_barang where nama ilike '${searchTerm}')`,
+    //   );
+    //   dataQuery = dataQuery.select("*, tb_barang!inner(nama)").ilike("tb_barang.nama", `%${search.trim()}%`);
+    // }
+
+    // Apply search filter
     if (search && search.trim() !== "") {
       const searchTerm = `%${search.trim()}%`;
-      // Search in barang nama through join
-      countQuery = countQuery.or(
-        `barang_id.in.(select id from tb_barang where nama ilike '${searchTerm}')`,
-      );
-      dataQuery = dataQuery.or(
-        `barang_id.in.(select id from tb_barang where nama ilike '${searchTerm}')`,
-      );
+
+      // Count query dengan join
+      countQuery = supabase
+        .from("tb_lelang")
+        .select("id, tb_barang!inner(nama)", { count: "exact", head: true })
+        .ilike("tb_barang.nama", searchTerm);
+
+      // Data query dengan join
+      dataQuery = dataQuery
+        .select(
+          `
+      *,
+      barang:tb_barang!inner (
+        nama,
+        harga_awal,
+        deskripsi_barang
+      )
+    `,
+        )
+        .ilike("tb_barang.nama", searchTerm);
     }
+
 
     const { count, error: countError } = await countQuery;
     if (countError) throw countError;

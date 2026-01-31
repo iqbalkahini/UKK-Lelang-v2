@@ -106,6 +106,7 @@ export function LelangTable({
                     statusFilter,
                     filter.date
                 );
+                console.log(result);
                 setData(result);
             } catch (error) {
                 console.error("Error fetching lelang:", error);
