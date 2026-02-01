@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react"; // 1. Tambah import 'use'
 import { getLelangById, updateLelang, type Lelang } from "@/api/lelang";
 import { LelangForm } from "@/components/lelang-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,19 +11,26 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+// 2. Hapus kata 'async' di depan function
 export default function EditLelangPage({
     params,
 }: {
-    params: { id: string };
+    params: Promise<{ id: string }>; // Tipe params adalah Promise
 }) {
+    // 3. Gunakan 'use()' untuk membuka Promise params di Client Component
+    const { id } = use(params);
+
     const [lelang, setLelang] = useState<Lelang | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
     useEffect(() => {
+        // Karena id sudah didapat dari use(params), kita bisa pakai langsung
+        if (!id) return;
+
         const fetchLelang = async () => {
             try {
-                const data = await getLelangById(parseInt(params.id));
+                const data = await getLelangById(parseInt(id));
                 setLelang(data);
             } catch (error) {
                 console.error("Error fetching lelang:", error);
@@ -34,7 +41,7 @@ export default function EditLelangPage({
         };
 
         fetchLelang();
-    }, [params.id]);
+    }, [id]);
 
     const handleSubmit = async (data: {
         barang_id: number;
@@ -44,9 +51,10 @@ export default function EditLelangPage({
         status: 'pending' | "dibuka" | "ditutup";
     }) => {
         try {
-            await updateLelang(parseInt(params.id), data);
+            await updateLelang(parseInt(id), data);
             toast.success("Lelang berhasil diupdate");
-            router.push(`/petugas/lelang/${params.id}`);
+            router.push(`/petugas/lelang/${id}`);
+            router.refresh(); // Refresh agar data terbaru tampil
         } catch (error) {
             console.error("Error updating lelang:", error);
             toast.error("Gagal mengupdate lelang");
@@ -82,7 +90,7 @@ export default function EditLelangPage({
     return (
         <div className="px-4 lg:px-6 py-5">
             <div className="mb-6">
-                <Link href={`/petugas/lelang/${params.id}`}>
+                <Link href={`/petugas/lelang/${id}`}>
                     <Button variant="ghost" size="sm" className="mb-4">
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Kembali
@@ -108,7 +116,7 @@ export default function EditLelangPage({
                             status: lelang.status,
                         }}
                         onSubmit={handleSubmit}
-                        onCancel={() => router.push(`/petugas/lelang/${params.id}`)}
+                        onCancel={() => router.push(`/petugas/lelang/${id}`)}
                         submitLabel="Simpan Perubahan"
                     />
                 </CardContent>

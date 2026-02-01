@@ -1,5 +1,6 @@
 import { PetugasSidebar } from "@/components/petugas-sidebar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { Suspense } from "react"
 
 export default function PetugasLayout({
     children,
@@ -10,7 +11,9 @@ export default function PetugasLayout({
         <SidebarProvider>
             <PetugasSidebar />
             <SidebarInset>
-                {children}
+                <Suspense>
+                    {children}
+                </Suspense>
             </SidebarInset>
         </SidebarProvider>
     )

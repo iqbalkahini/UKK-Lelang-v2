@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { getLelangById, updateStatusLelang, getHighestBid, type Lelang } from "@/api/lelang";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,9 +14,8 @@ import Link from "next/link";
 export default function LelangDetailPage({
     params,
 }: {
-    params: Promise<{ id: string }>;
+    params: { id: string };
 }) {
-    const { id } = use(params);
     const [lelang, setLelang] = useState<Lelang | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
@@ -25,7 +24,7 @@ export default function LelangDetailPage({
     useEffect(() => {
         const fetchLelang = async () => {
             try {
-                const data = await getLelangById(parseInt(id));
+                const data = await getLelangById(parseInt(params.id));
                 setLelang(data);
             } catch (error) {
                 console.error("Error fetching lelang:", error);
@@ -36,7 +35,7 @@ export default function LelangDetailPage({
         };
 
         fetchLelang();
-    }, [id]);
+    }, [params.id]);
 
     const handleToggleStatus = async () => {
         if (!lelang) return;
