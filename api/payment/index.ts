@@ -83,7 +83,7 @@ export async function cancelTopup(orderId: string) {
     }
 }
 
-export async function getWalletData() {
+export async function getWalletData(page: number = 1, limit: number = 7) {
     try {
         const supabase = await createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -97,12 +97,17 @@ export async function getWalletData() {
             .single();
 
         if (masyarakatData) {
+            // Calculate range
+            const from = (page - 1) * limit;
+            const to = from + limit - 1;
+
             // Fetch Transactions
             const { data: transactionData } = await supabase
                 .from('tb_topup')
                 .select('*')
                 .eq('id_user', masyarakatData.id)
-                .order('created_at', { ascending: false });
+                .order('created_at', { ascending: false })
+                .range(from, to);
 
             return {
                 saldo: masyarakatData.saldo,
