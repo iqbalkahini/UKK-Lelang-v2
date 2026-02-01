@@ -210,14 +210,14 @@ export default function DompetPage() {
                 strategy="lazyOnload"
             />
 
-            <div className="container p-4 md:p-8 mx-auto">
+            <div className="container p-4 md:p-8 mx-auto relative">
                 <div>
                     <h1 className="text-3xl font-bold">Dompet & Saldo</h1>
                     <p className="text-muted-foreground">Kelola saldo untuk mengikuti lelang.</p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div className="mt-4 space-y-3">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+                    <div className="mt-4 space-y-3 sticky top-4">
                         <Card className="bg-primary/5 border-primary/20 shadow-sm">
                             <CardHeader className="pb-2">
                                 <CardDescription>Saldo Anda Saat Ini</CardDescription>
