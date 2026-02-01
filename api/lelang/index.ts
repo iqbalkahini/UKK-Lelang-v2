@@ -17,6 +17,7 @@ export type Lelang = {
     nama: string;
     harga_awal: number;
     deskripsi_barang: string;
+    image_urls: string[] | null;
   };
 };
 
@@ -299,5 +300,26 @@ export const getHighestBid = async (
   } catch (error) {
     console.error("Error getting highest bid:", error);
     return null;
+  }
+};
+
+// Get Active Auctions for Masyarakat Catalog
+export const getActiveAuctions = async (): Promise<Lelang[]> => {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from('tb_lelang')
+      .select(`
+            *,
+            barang:tb_barang(*)
+        `)
+      .eq('status', 'dibuka')
+      .order('tgl_lelang', { ascending: false });
+
+    if (error) throw error;
+    return data as Lelang[];
+  } catch (error) {
+    console.error("Error fetching active auctions:", error);
+    return [];
   }
 };

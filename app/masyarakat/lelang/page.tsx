@@ -5,18 +5,13 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { Calendar, Clock } from "lucide-react";
+import { getActiveAuctions } from "@/api/lelang";
 
 export default async function LelangAktifPage() {
-    const supabase = await createClient();
+    const auctions = await getActiveAuctions();
 
-    const { data: auctions } = await supabase
-        .from('tb_lelang')
-        .select(`
-            *,
-            barang:tb_barang(*)
-        `)
-        .eq('status', 'dibuka')
-        .order('tgl_lelang', { ascending: false });
+
+    console.log(auctions);
 
     return (
         <>

@@ -40,6 +40,11 @@ const navMain = [
         icon: HandIcon,
     },
     {
+        title: "Dompet",
+        url: "/masyarakat/dompet",
+        icon: WalletIcon,
+    },
+    {
         title: "Pembayaran",
         url: "/masyarakat/pembayaran",
         icon: WalletIcon,
