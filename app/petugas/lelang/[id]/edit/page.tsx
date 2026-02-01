@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { getLelangById, updateLelang, type Lelang } from "@/api/lelang";
 import { LelangForm } from "@/components/lelang-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,9 +14,8 @@ import Link from "next/link";
 export default function EditLelangPage({
     params,
 }: {
-    params: Promise<{ id: string }>;
+    params: { id: string };
 }) {
-    const { id } = use(params);
     const [lelang, setLelang] = useState<Lelang | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
@@ -24,7 +23,7 @@ export default function EditLelangPage({
     useEffect(() => {
         const fetchLelang = async () => {
             try {
-                const data = await getLelangById(parseInt(id));
+                const data = await getLelangById(parseInt(params.id));
                 setLelang(data);
             } catch (error) {
                 console.error("Error fetching lelang:", error);
@@ -35,7 +34,7 @@ export default function EditLelangPage({
         };
 
         fetchLelang();
-    }, [id]);
+    }, [params.id]);
 
     const handleSubmit = async (data: {
         barang_id: number;
@@ -45,9 +44,9 @@ export default function EditLelangPage({
         status: 'pending' | "dibuka" | "ditutup";
     }) => {
         try {
-            await updateLelang(parseInt(id), data);
+            await updateLelang(parseInt(params.id), data);
             toast.success("Lelang berhasil diupdate");
-            router.push(`/petugas/lelang/${id}`);
+            router.push(`/petugas/lelang/${params.id}`);
         } catch (error) {
             console.error("Error updating lelang:", error);
             toast.error("Gagal mengupdate lelang");
@@ -83,7 +82,7 @@ export default function EditLelangPage({
     return (
         <div className="px-4 lg:px-6 py-5">
             <div className="mb-6">
-                <Link href={`/petugas/lelang/${id}`}>
+                <Link href={`/petugas/lelang/${params.id}`}>
                     <Button variant="ghost" size="sm" className="mb-4">
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Kembali
@@ -109,7 +108,7 @@ export default function EditLelangPage({
                             status: lelang.status,
                         }}
                         onSubmit={handleSubmit}
-                        onCancel={() => router.push(`/petugas/lelang/${id}`)}
+                        onCancel={() => router.push(`/petugas/lelang/${params.id}`)}
                         submitLabel="Simpan Perubahan"
                     />
                 </CardContent>
