@@ -12,7 +12,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { createTopupToken } from "@/api/payment";
+import { createTopupToken, cancelTopup } from "@/api/payment";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Wallet } from "lucide-react";
@@ -77,7 +77,7 @@ export default function DompetPage() {
 
         setIsLoading(true);
         try {
-            const token = await createTopupToken(parseInt(amount));
+            const { token, orderId } = await createTopupToken(parseInt(amount));
 
             if (window.snap) {
                 window.snap.pay(token, {
@@ -95,8 +95,17 @@ export default function DompetPage() {
                         toast.error("Pembayaran gagal!");
                         setTimeout(fetchData, 1000);
                     },
-                    onClose: function () {
+                    onClose: async function () {
                         // Customer closed the popup without finishing the payment
+                        toast.dismiss();
+                        toast.warning("Pembayaran dibatalkan");
+                        try {
+                            await cancelTopup(orderId);
+                        } catch (e) {
+                            console.error("Failed to cancel topup", e);
+                        }
+
+                        fetchData();
                     }
                 });
             } else {

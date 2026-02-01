@@ -61,10 +61,24 @@ export async function createTopupToken(amount: number) {
             .update({ snap_token: token })
             .eq('id', topupRecord.id);
 
-        return token;
+        return { token, orderId: topupRecord.id };
 
     } catch (error) {
         console.error("Error creating topup token:", error);
         throw error;
+    }
+}
+
+export async function cancelTopup(orderId: string) {
+    try {
+        const supabase = await createClient();
+        await supabase
+            .from('tb_topup')
+            .update({ status: 'cancel' })
+            .eq('id', orderId);
+        return { success: true };
+    } catch (error) {
+        console.error("Error cancelling topup:", error);
+        return { success: false };
     }
 }
