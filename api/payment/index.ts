@@ -82,3 +82,36 @@ export async function cancelTopup(orderId: string) {
         return { success: false };
     }
 }
+
+export async function getWalletData() {
+    try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return null;
+
+        // Fetch Saldo
+        const { data: masyarakatData } = await supabase
+            .from('tb_masyarakat')
+            .select('id, saldo')
+            .eq('user_id', user.id)
+            .single();
+
+        if (masyarakatData) {
+            // Fetch Transactions
+            const { data: transactionData } = await supabase
+                .from('tb_topup')
+                .select('*')
+                .eq('id_user', masyarakatData.id)
+                .order('created_at', { ascending: false });
+
+            return {
+                saldo: masyarakatData.saldo,
+                transactions: transactionData || []
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching wallet data:", error);
+        return null; // Handle error gracefully or rethrow depending on needs
+    }
+}

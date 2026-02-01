@@ -12,7 +12,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { createTopupToken, cancelTopup } from "@/api/payment";
+import { createTopupToken, cancelTopup, getWalletData } from "@/api/payment";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { Loader2, Wallet } from "lucide-react";
@@ -33,30 +33,12 @@ export default function DompetPage() {
     const [isLoadingSaldo, setIsLoadingSaldo] = useState(true);
 
     const fetchData = async () => {
+        setIsLoadingSaldo(true);
         try {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return;
-
-            // Fetch Saldo
-            const { data: masyarakatData } = await supabase
-                .from('tb_masyarakat')
-                .select('id, saldo') // Need ID for transaction query
-                .eq('user_id', user.id)
-                .single();
-
-            if (masyarakatData) {
-                setSaldo(masyarakatData.saldo);
-
-                // Fetch Transactions
-                const { data: transactionData } = await supabase
-                    .from('tb_topup')
-                    .select('*')
-                    .eq('id_user', masyarakatData.id)
-                    .order('created_at', { ascending: false });
-                if (transactionData) {
-                    setTransactions(transactionData);
-                }
+            const data = await getWalletData();
+            if (data) {
+                setSaldo(data.saldo);
+                setTransactions(data.transactions);
             }
         } catch (error) {
             console.error(error);
@@ -67,6 +49,36 @@ export default function DompetPage() {
 
     useEffect(() => {
         fetchData();
+
+        // Realtime Subscription
+        const supabase = createClient();
+        const channel = supabase
+            .channel('topup-realtime')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'tb_topup'
+                },
+                (payload: any) => {
+                    // Check if it's our transaction (optional if RLS is strict, but good practice if not)
+                    // Note: accessing state inside useEffect with empty dependency array is tricky if we needed userId constant, 
+                    // but fetchData handles the data refresh.
+                    if (payload.new.status === 'settlement' && payload.old.status !== 'settlement') {
+                        toast.success("Pembayaran Berhasil! Saldo telah diperbarui.");
+                        fetchData();
+                    } else if (payload.new.status === 'expire' || payload.new.status === 'cancel') {
+                        toast.error("Status pembayaran diperbarui: " + payload.new.status);
+                        fetchData();
+                    }
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     const handleTopup = async () => {
