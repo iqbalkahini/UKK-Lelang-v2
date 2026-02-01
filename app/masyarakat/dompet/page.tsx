@@ -236,7 +236,7 @@ export default function DompetPage() {
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            {trx.status === 'pending' && (
+                                            {trx.status === 'pending' && process.env.NODE_ENV === 'development' && (
                                                 <Button
                                                     variant="outline"
                                                     size="sm"

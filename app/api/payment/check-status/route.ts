@@ -23,8 +23,6 @@ export async function POST(req: NextRequest) {
         const transactionStatus = statusResponse.transaction_status;
         const fraudStatus = statusResponse.fraud_status;
 
-        console.log(`Manual Status Check. Order ID: ${order_id}. Status: ${transactionStatus}`);
-
         const supabase = await createClient();
 
         // Determine status (same logic as notification)

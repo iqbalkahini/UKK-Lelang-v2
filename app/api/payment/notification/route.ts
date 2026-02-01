@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
         const orderId = statusResponse.order_id;
         const transactionStatus = statusResponse.transaction_status;
         const fraudStatus = statusResponse.fraud_status;
+
         const supabase = await createClient();
 
         // Determine status
