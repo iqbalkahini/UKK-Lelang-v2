@@ -224,7 +224,7 @@ export default function DompetPage() {
                                 <CardTitle className="text-4xl font-bold text-primary flex items-center gap-2">
                                     <Wallet className="h-8 w-8" />
                                     {isLoadingSaldo ? (
-                                        <Loader2 className="h-8 w-8 animate-spin" />
+                                        <Skeleton className="h-8 w-48" />
                                     ) : (
                                         new Intl.NumberFormat("id-ID", {
                                             style: "currency",
