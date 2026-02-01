@@ -129,6 +129,7 @@ export default function DompetPage() {
             toast.error("Gagal memproses topup");
         } finally {
             setIsLoading(false);
+            setAmount("");
         }
     };
 
