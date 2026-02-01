@@ -150,7 +150,7 @@ export const getLelangById = async (id: number): Promise<Lelang> => {
       .select(
         `
         *,
-        barang:tb_barang!id_barang (
+        barang:tb_barang!barang_id (
           nama,
           harga_awal,
           deskripsi_barang
