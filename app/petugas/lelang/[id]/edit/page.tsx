@@ -53,8 +53,7 @@ export default function EditLelangPage({
         try {
             await updateLelang(parseInt(id), data);
             toast.success("Lelang berhasil diupdate");
-            router.push(`/petugas/lelang/${id}`);
-            router.refresh(); // Refresh agar data terbaru tampil
+            router.push(`/petugas/lelang`);
         } catch (error) {
             console.error("Error updating lelang:", error);
             toast.error("Gagal mengupdate lelang");
@@ -109,7 +108,7 @@ export default function EditLelangPage({
                 <CardContent>
                     <LelangForm
                         initialData={{
-                            barang_id: lelang.id_barang,
+                            barang_id: lelang.barang_id,
                             tgl_lelang: lelang.tgl_lelang,
                             waktu_mulai: lelang.waktu_mulai,
                             waktu_selesai: lelang.waktu_selesai,

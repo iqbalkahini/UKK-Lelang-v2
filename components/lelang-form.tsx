@@ -63,7 +63,7 @@ export function LelangForm({
 
     // Form State
     const [formData, setFormData] = useState({
-        id_barang: initialData?.barang_id?.toString() || "",
+        barang_id: initialData?.barang_id?.toString() || "",
         tgl_lelang: initialData?.tgl_lelang
             ? new Date(initialData.tgl_lelang).toISOString().slice(0, 10)
             : "",
@@ -161,9 +161,9 @@ export function LelangForm({
     // Fetch Selected Barang Detail (Initial Load)
     useEffect(() => {
         const fetchSelectedBarang = async () => {
-            if (formData.id_barang && !selectedBarang) {
+            if (formData.barang_id && !selectedBarang) {
                 // Check if already in list
-                const inList = barangList.find(b => b.id.toString() === formData.id_barang);
+                const inList = barangList.find(b => b.id.toString() === formData.barang_id);
                 if (inList) {
                     setSelectedBarang(inList);
                     return;
@@ -171,27 +171,27 @@ export function LelangForm({
 
                 // If not in list, fetch details
                 try {
-                    const data = await getBarangById(parseInt(formData.id_barang));
+                    const data = await getBarangById(parseInt(formData.barang_id));
                     setSelectedBarang(data);
                 } catch (error) {
                     console.error("Error fetching selected barang:", error);
                 }
-            } else if (selectedBarang && selectedBarang.id.toString() !== formData.id_barang) {
+            } else if (selectedBarang && selectedBarang.id.toString() !== formData.barang_id) {
                 // Update selected barang from list if ID changes manually (unlikely but good for safety)
-                const inList = barangList.find(b => b.id.toString() === formData.id_barang);
+                const inList = barangList.find(b => b.id.toString() === formData.barang_id);
                 if (inList) setSelectedBarang(inList);
             }
         };
 
         fetchSelectedBarang();
-    }, [formData.id_barang, barangList, selectedBarang]);
+    }, [formData.barang_id, barangList, selectedBarang]);
 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         // Validation
-        if (!formData.id_barang) {
+        if (!formData.barang_id) {
             toast.error("Pilih barang terlebih dahulu");
             return;
         }
@@ -215,7 +215,7 @@ export function LelangForm({
         try {
             const tgl = formData.tgl_lelang.split("T")[0];
             await onSubmit({
-                barang_id: parseInt(formData.id_barang),
+                barang_id: parseInt(formData.barang_id),
                 tgl_lelang: tgl,
                 waktu_mulai: formData.waktu_mulai,
                 waktu_selesai: formData.waktu_selesai,
@@ -244,7 +244,7 @@ export function LelangForm({
                             {/* Prefer selectedBarang for name, otherwise fallback to finding in list, otherwise placeholder */}
                             {selectedBarang
                                 ? selectedBarang.nama
-                                : (formData.id_barang
+                                : (formData.barang_id
                                     ? "Memuat..."
                                     : "Pilih barang...")}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -273,7 +273,7 @@ export function LelangForm({
                                             key={barang.id}
                                             value={barang.nama}
                                             onSelect={() => {
-                                                setFormData({ ...formData, id_barang: barang.id.toString() });
+                                                setFormData({ ...formData, barang_id: barang.id.toString() });
                                                 setSelectedBarang(barang);
                                                 setOpen(false);
                                             }}
@@ -281,7 +281,7 @@ export function LelangForm({
                                             <Check
                                                 className={cn(
                                                     "mr-2 h-4 w-4",
-                                                    formData.id_barang === barang.id.toString() ? "opacity-100" : "opacity-0"
+                                                    formData.barang_id === barang.id.toString() ? "opacity-100" : "opacity-0"
                                                 )}
                                             />
                                             {barang.nama} - Rp {barang.harga_awal.toLocaleString("id-ID")}

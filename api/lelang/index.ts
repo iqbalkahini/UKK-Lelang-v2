@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 
 export type Lelang = {
   id: number;
-  id_barang: number;
+  barang_id: number;
   tgl_lelang: string;
   waktu_mulai: string;
   waktu_selesai: string;
@@ -40,7 +40,7 @@ export type CreateLelangInput = {
 };
 
 export type UpdateLelangInput = {
-  id_barang?: number;
+  barang_id?: number;
   tgl_lelang?: string;
   waktu_mulai?: string;
   waktu_selesai?: string;
