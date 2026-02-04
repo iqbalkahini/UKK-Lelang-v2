@@ -86,9 +86,7 @@ export default function LelangDetailPage({
         return new Date(dateString).toLocaleDateString("id-ID", {
             year: "numeric",
             month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
+            day: "numeric"
         });
     };
 
@@ -198,7 +196,7 @@ export default function LelangDetailPage({
                             <p className="text-sm font-medium text-muted-foreground">
                                 Tanggal Lelang
                             </p>
-                            <p className="text-lg">{formatDate(lelang.tgl_lelang)}</p>
+                            <p className="text-lg">{formatDate(lelang.tgl_lelang)} {lelang.waktu_mulai} - {lelang.waktu_selesai}</p>
                         </div>
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">
