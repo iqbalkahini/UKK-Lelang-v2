@@ -89,6 +89,10 @@ export default function LelangDetailPage({
         });
     };
 
+    const formatTime = (timeString: string) => {
+        return timeString.substring(0, 5) + " WIB";
+    };
+
     const getStatusBadge = (status: string) => {
         switch (status) {
             case "dibuka":
@@ -195,7 +199,7 @@ export default function LelangDetailPage({
                             <p className="text-sm font-medium text-muted-foreground">
                                 Tanggal Lelang
                             </p>
-                            <p className="text-lg">{formatDate(lelang.tgl_lelang)} {lelang.waktu_mulai} - {lelang.waktu_selesai}</p>
+                            <p className="text-lg">{formatDate(lelang.tgl_lelang)} | {formatTime(lelang.waktu_mulai)} - {formatTime(lelang.waktu_selesai)}</p>
                         </div>
                         <div>
                             <p className="text-sm font-medium text-muted-foreground">
