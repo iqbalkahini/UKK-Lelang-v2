@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getBarang, getBarangById, type Barang } from "@/api/barang";
+import { getBarang, getBarangById, getBarangForSelect, type Barang } from "@/api/barang";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -119,7 +119,8 @@ export function LelangForm({
         const fetchBarangList = async () => {
             try {
                 setIsLoadingBarang(true)
-                const result = await getBarang(page, ITEMS_PER_PAGE, searchQuery);
+                const excludeId = formData.barang_id ? parseInt(formData.barang_id) : undefined;
+                const result = await getBarangForSelect(page, ITEMS_PER_PAGE, searchQuery, excludeId);
 
                 setBarangList(prev => {
                     if (page === 1) return result.data;
@@ -268,6 +269,29 @@ export function LelangForm({
                                     {isLoadingBarang ? "Memuat..." : "Barang tidak ditemukan."}
                                 </CommandEmpty>
                                 <CommandGroup>
+                                    {/* Render selected item at the top if it exists and matches search (or search is empty) */}
+                                    {selectedBarang && (
+                                        (!searchQuery || selectedBarang.nama.toLowerCase().includes(searchQuery.toLowerCase())) && (
+                                            <CommandItem
+                                                key={selectedBarang.id}
+                                                value={selectedBarang.nama}
+                                                onSelect={() => {
+                                                    setFormData({ ...formData, barang_id: selectedBarang.id.toString() });
+                                                    setOpen(false);
+                                                }}
+                                                className="bg-accent/50" // Highlight selected item slightly
+                                            >
+                                                <Check
+                                                    className={cn(
+                                                        "mr-2 h-4 w-4",
+                                                        "opacity-100" // Always checked since it's the selected one
+                                                    )}
+                                                />
+                                                {selectedBarang.nama} - Rp {selectedBarang.harga_awal.toLocaleString("id-ID")}
+                                                <span className="ml-2 text-xs text-muted-foreground">(Terpilih)</span>
+                                            </CommandItem>
+                                        )
+                                    )}
                                     {barangList.map((barang) => (
                                         <CommandItem
                                             key={barang.id}
