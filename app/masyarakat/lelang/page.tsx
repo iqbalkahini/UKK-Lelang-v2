@@ -1,15 +1,24 @@
-import { createClient } from "@/lib/supabase/server";
+'use client'
+
 import { SiteHeader } from "@/components/site-header";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
 import { Calendar, Clock } from "lucide-react";
-import { getActiveAuctions } from "@/api/lelang";
+import { getActiveAuctions, Lelang } from "@/api/lelang";
+import { useEffect, useState } from "react";
 
-export default async function LelangAktifPage() {
-    const auctions = await getActiveAuctions();
+export default function LelangAktifPage() {
+    const [auctions, setAuctions] = useState<Lelang[]>([]);
 
+    useEffect(() => {
+        const fetchAuctions = async () => {
+            const auctions = await getActiveAuctions();
+            setAuctions(auctions);
+        }
+        fetchAuctions();
+    }, []);
 
     console.log(auctions);
 
