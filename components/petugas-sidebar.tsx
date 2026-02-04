@@ -56,7 +56,7 @@ const navMain = [
             },
             {
                 title: "Tambah Lelang",
-                url: "/petugas/lelang/create",
+                url: "/petugas/lelang/buat",
             },
             {
                 title: "Buka Lelang",

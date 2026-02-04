@@ -15,7 +15,7 @@ export default function LelangPage() {
                         Daftar semua lelang yang tersedia
                     </p>
                 </div>
-                <Link href="/petugas/lelang/create">
+                <Link href="/petugas/lelang/buat">
                     <Button>
                         <PlusCircle className="mr-2 h-4 w-4" />
                         Tambah Lelang
