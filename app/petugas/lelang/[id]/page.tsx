@@ -23,7 +23,6 @@ export default function LelangDetailPage({
     const router = useRouter();
 
     useEffect(() => {
-        console.log(id)
         const fetchLelang = async () => {
             try {
                 const data = await getLelangById(parseInt(id));
