@@ -20,8 +20,6 @@ export default function LelangAktifPage() {
         fetchAuctions();
     }, []);
 
-    console.log(auctions);
-
     return (
         <>
             <SiteHeader title={'Lelang Aktif'} />
