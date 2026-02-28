@@ -19,7 +19,6 @@ export default function LelangAktifPage() {
         }
         fetchAuctions();
     }, []);
-
     return (
         <>
             <SiteHeader title={'Lelang Aktif'} />

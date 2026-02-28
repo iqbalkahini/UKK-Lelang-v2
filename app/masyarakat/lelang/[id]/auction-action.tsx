@@ -31,7 +31,11 @@ export function AuctionAction({ lelangId, hargaAwal, highestBid, hasDeposited }:
 
         setIsLoading(true);
         try {
-            await joinAuction(lelangId, hargaAwal);
+            const res = await joinAuction(lelangId, hargaAwal);
+            if (res?.error) {
+                toast.error(res.error);
+                return;
+            }
             toast.success("Berhasil membayar jaminan! Silakan tawar barang ini.");
             router.refresh();
         } catch (error: any) {
@@ -52,7 +56,11 @@ export function AuctionAction({ lelangId, hargaAwal, highestBid, hasDeposited }:
 
         setIsLoading(true);
         try {
-            await placeBid(lelangId, amount);
+            const res = await placeBid(lelangId, amount);
+            if (res?.error) {
+                toast.error(res.error);
+                return;
+            }
             toast.success("Penawaran berhasil dikirim!");
             setBidAmount("");
             router.refresh();

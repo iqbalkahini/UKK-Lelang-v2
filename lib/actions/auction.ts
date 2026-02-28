@@ -8,7 +8,7 @@ export async function joinAuction(lelangId: number, hargaAwal: number) {
 
     // 1. Get User
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Unauthorized");
+    if (!user) return { error: "Unauthorized" };
 
     // 2. Get Masyarakat Data (Saldo & ID)
     const { data: masyarakat } = await supabase
@@ -17,11 +17,11 @@ export async function joinAuction(lelangId: number, hargaAwal: number) {
         .eq('user_id', user.id)
         .single();
 
-    if (!masyarakat) throw new Error("Masyarakat data not found");
+    if (!masyarakat) return { error: "Masyarakat data not found" };
 
     // 3. Check Saldo
     if ((masyarakat.saldo || 0) < hargaAwal) {
-        throw new Error("Saldo tidak mencukupi untuk membayar jaminan.");
+        return { error: "Saldo tidak mencukupi untuk membayar jaminan." };
     }
 
     // 4. Check if already deposited (Double check)
@@ -44,7 +44,7 @@ export async function joinAuction(lelangId: number, hargaAwal: number) {
         .update({ saldo: newSaldo })
         .eq('id', masyarakat.id);
 
-    if (updateError) throw new Error("Gagal memotong saldo");
+    if (updateError) return { error: "Gagal memotong saldo" };
 
     // B. Create Deposit
     const { error: insertError } = await supabase
@@ -61,7 +61,7 @@ export async function joinAuction(lelangId: number, hargaAwal: number) {
             .from('tb_masyarakat')
             .update({ saldo: masyarakat.saldo }) // Restore old balance
             .eq('id', masyarakat.id);
-        throw new Error("Gagal menyimpan data deposit");
+        return { error: "Gagal menyimpan data deposit" };
     }
 
     revalidatePath(`/masyarakat/lelang/${lelangId}`);
@@ -72,7 +72,7 @@ export async function placeBid(lelangId: number, amount: number) {
     const supabase = await createClient();
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Unauthorized");
+    if (!user) return { error: "Unauthorized" };
 
     const { data: masyarakat } = await supabase
         .from('tb_masyarakat')
@@ -80,7 +80,7 @@ export async function placeBid(lelangId: number, amount: number) {
         .eq('user_id', user.id)
         .single();
 
-    if (!masyarakat) throw new Error("User not found");
+    if (!masyarakat) return { error: "User not found" };
 
     // 1. Validate Deposit
     const { data: deposit } = await supabase
@@ -90,7 +90,7 @@ export async function placeBid(lelangId: number, amount: number) {
         .eq('id_user', masyarakat.id)
         .single();
 
-    if (!deposit) throw new Error("Anda harus membayar jaminan terlebih dahulu.");
+    if (!deposit) return { error: "Anda harus membayar jaminan terlebih dahulu." };
 
     // 2. Validate Bid Amount vs Highest Bid
     const { data: highestBidRecord } = await supabase
@@ -115,7 +115,7 @@ export async function placeBid(lelangId: number, amount: number) {
     const minBid = Math.max(currentHighest, hargaAwal);
 
     if (amount <= minBid) {
-        throw new Error(`Tawaran harus lebih tinggi dari ${new Intl.NumberFormat('id-ID').format(minBid)}`);
+        return { error: `Tawaran harus lebih tinggi dari ${new Intl.NumberFormat('id-ID').format(minBid)}` };
     }
 
     // 3. Insert Bid
@@ -131,7 +131,7 @@ export async function placeBid(lelangId: number, amount: number) {
             penawaran_harga: amount
         });
 
-    if (error) throw new Error("Gagal melakukan penawaran");
+    if (error) return { error: "Gagal melakukan penawaran" };
 
     revalidatePath(`/masyarakat/lelang/${lelangId}`);
     return { success: true };
