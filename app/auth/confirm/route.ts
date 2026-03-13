@@ -17,7 +17,11 @@ export async function GET(request: NextRequest) {
       token_hash,
     });
     if (!error) {
-      // redirect user to specified redirect URL or root of app
+      // Jika type adalah recovery (reset password), selalu arahkan ke update-password
+      if (type === "recovery") {
+        redirect("/auth/update-password");
+      }
+      // Untuk type lain, redirect ke next atau root
       redirect(next);
     } else {
       // redirect the user to an error page with some instructions
