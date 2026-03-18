@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { LelangForm } from "@/components/lelang-form";
 import { createLelang } from "@/api/lelang";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,8 +17,8 @@ export default function CreateLelangPage() {
     tgl_lelang: string;
     waktu_mulai: string;
     waktu_selesai: string;
-    status: 'pending' | "dibuka" | "ditutup";
-    is_manual: boolean
+    harga_akhir: number;
+    status: "dibuka" | "ditutup" | "pending";
   }) => {
     try {
       if (!user) {
@@ -28,19 +28,15 @@ export default function CreateLelangPage() {
 
       await createLelang({
         ...data,
-        petugas_auth_id: user.id,
-        harga_akhir: 0,
+        user_id: user.id,
+        petugas_id: user.id,
       });
 
       toast.success("Lelang berhasil dibuat");
       router.push("/petugas/lelang");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error creating lelang:", error);
-      if (error?.code === "23505" || error?.message?.includes("409") || error?.details?.includes("already exists")) {
-        toast.error("Barang ini sudah dilelang");
-      } else {
-        toast.error(error?.message || "Gagal membuat lelang");
-      }
+      toast.error("Gagal membuat lelang");
     }
   };
 
@@ -56,13 +52,11 @@ export default function CreateLelangPage() {
           <CardTitle>Form Lelang Baru</CardTitle>
         </CardHeader>
         <CardContent>
-          <Suspense fallback={<div>Loading...</div>}>
-            <LelangForm
-              onSubmit={handleSubmit}
-              onCancel={() => router.push("/petugas/lelang")}
-              submitLabel="Buat Lelang"
-            />
-          </Suspense>
+          <LelangForm
+            onSubmit={handleSubmit}
+            onCancel={() => router.push("/petugas/lelang")}
+            submitLabel="Buat Lelang"
+          />
         </CardContent>
       </Card>
     </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ThemeSwitcher } from "./theme-switcher";
 import { Suspense } from "react";
 import { Gavel } from "lucide-react";
+import { Button } from "./ui/button";
 
 export function LandingNavbar() {
     return (
@@ -28,6 +29,9 @@ export function LandingNavbar() {
 
                 <div className="flex items-center gap-4">
                     <ThemeSwitcher />
+                    <Button asChild>
+                        <Link href="/auth/login">Login</Link>
+                    </Button>
                 </div>
             </div>
         </nav>

@@ -1,464 +1,222 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { getBarang, getBarangById, getBarangForSelect, type Barang } from "@/api/barang";
+import { useState, useEffect } from "react";
+import { getBarang, type Barang } from "@/api/barang";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList,
-} from "@/components/ui/command"
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
 import { toast } from "sonner";
-import { CalendarIcon, Check, ChevronsUpDown, Clock2Icon, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Card, CardContent, CardFooter } from "./ui/card";
-import { Calendar } from "./ui/calendar";
-import { Field, FieldGroup, FieldLabel } from "./ui/field";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "./ui/input-group";
+import { Loader2 } from "lucide-react";
 
 type LelangFormProps = {
-    initialData?: {
-        barang_id?: number;
-        tgl_lelang?: string;
-        waktu_mulai?: string;
-        waktu_selesai?: string;
-        status?: "dibuka" | "ditutup" | 'pending';
-    };
-    onSubmit: (data: {
-        barang_id: number;
-        tgl_lelang: string;
-        waktu_mulai: string;
-        waktu_selesai: string;
-        status: "dibuka" | "ditutup" | 'pending';
-    }) => Promise<void>;
-    onCancel?: () => void;
-    submitLabel?: string;
+  initialData?: {
+    barang_id?: number;
+    tgl_lelang?: string;
+    waktu_mulai: string;
+    waktu_selesai: string;
+    status: "dibuka" | "ditutup" | "pending";
+    is_manual: boolean;
+  };
+  onSubmit: (data: {
+    barang_id: number;
+    tgl_lelang: string;
+    waktu_mulai: string;
+    waktu_selesai: string;
+    status: "dibuka" | "ditutup" | "pending";
+    is_manual: boolean;
+  }) => Promise<void>;
+  onCancel?: () => void;
+  submitLabel?: string;
 };
 
 export function LelangForm({
-    initialData,
-    onSubmit,
-    onCancel,
-    submitLabel = "Simpan",
+  initialData,
+  onSubmit,
+  onCancel,
+  submitLabel = "Simpan",
 }: LelangFormProps) {
-    // Defines
-    const ITEMS_PER_PAGE = 10;
+  const [barangList, setBarangList] = useState<Barang[]>([]);
+  const [isLoadingBarang, setIsLoadingBarang] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Form State
-    const [formData, setFormData] = useState({
-        barang_id: initialData?.barang_id?.toString() || "",
-        tgl_lelang: initialData?.tgl_lelang
-            ? new Date(initialData.tgl_lelang).toISOString().slice(0, 10)
-            : "",
-        waktu_mulai: initialData?.waktu_mulai || "",
-        waktu_selesai: initialData?.waktu_selesai || "",
-        status: initialData?.status || ("pending" as "dibuka" | "ditutup" | 'pending'),
-    });
-    const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    id_barang: initialData?.barang_id?.toString() || "",
+    tgl_lelang: initialData?.tgl_lelang
+      ? new Date(initialData.tgl_lelang).toISOString().slice(0, 10)
+      : new Date().toISOString().slice(0, 10),
+    waktu_mulai: initialData?.waktu_mulai || "08:00",
+    waktu_selesai: initialData?.waktu_selesai || "16:00",
+    status:
+      initialData?.status || ("pending" as "dibuka" | "ditutup" | "pending"),
+    is_manual: initialData?.is_manual || true,
+  });
 
-    // Combobox State
-    const [open, setOpen] = useState(false);
-    const [barangList, setBarangList] = useState<Barang[]>([]);
-    const [selectedBarang, setSelectedBarang] = useState<Barang | null>(null);
-    const [isLoadingBarang, setIsLoadingBarang] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-    const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(true);
-
-    // Observer for infinite scroll
-    const observer = useRef<IntersectionObserver | null>(null);
-    const lastBarangElementRef = useCallback((node: HTMLDivElement) => {
-        if (isLoadingBarang || !hasMore) return;
-        if (observer.current) observer.current.disconnect();
-        observer.current = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && hasMore) {
-                setPage(prevPage => prevPage + 1);
-            }
-        });
-        if (node) observer.current.observe(node);
-    }, [isLoadingBarang, hasMore]);
-
-    // Set default date and time on client-side only to avoid hydration mismatch
-    useEffect(() => {
-        setFormData(prev => {
-            const now = new Date();
-            // Calculate timezone offset in minutes and convert to ms
-            const offset = now.getTimezoneOffset() * 60000;
-            // Adjust to local time before slicing
-            const localISOTime = new Date(now.getTime() - offset).toISOString().slice(0, 10);
-
-            return {
-                ...prev,
-                waktu_mulai: initialData?.waktu_mulai || prev.waktu_mulai || now.toTimeString().slice(0, 5),
-                tgl_lelang: initialData?.tgl_lelang
-                    ? new Date(initialData.tgl_lelang).toISOString().slice(0, 10)
-                    : (prev.tgl_lelang || localISOTime)
-            };
-        });
-    }, [initialData]);
-
-    // Fetch Barang List (Search & Pagination)
-    useEffect(() => {
-        const fetchBarangList = async () => {
-            try {
-                setIsLoadingBarang(true)
-                const excludeId = formData.barang_id ? parseInt(formData.barang_id) : undefined;
-                const result = await getBarangForSelect(page, ITEMS_PER_PAGE, searchQuery, excludeId);
-
-                setBarangList(prev => {
-                    if (page === 1) return result.data;
-                    // Filter duplicates just in case
-                    const newData = result.data.filter(item => !prev.some(p => p.id === item.id));
-                    return [...prev, ...newData];
-                });
-
-                setHasMore(result.data.length === ITEMS_PER_PAGE);
-            } catch (error) {
-                console.error("Error fetching barang list:", error);
-                toast.error("Gagal mengambil data barang");
-            } finally {
-                setIsLoadingBarang(false);
-            }
-        };
-
-        // Debounce search if it changed, otherwise normal fetch
-        const timeoutId = setTimeout(() => {
-            fetchBarangList();
-        }, 400);
-
-        return () => clearTimeout(timeoutId);
-    }, [page, searchQuery]);
-
-    // Reset pagination when search changes
-    useEffect(() => {
-        setPage(1);
-        // Do NOT clear list here immediately to avoid flickering, let the fetch replace it.
-        // But if we don't clear, append logic might mess up if the fetch is slow.
-        // Ideally we handle 'page 1' logic in the fetch effect carefully.
-        // Actually, clearing list is safer for UI feedback.
-        if (page === 1) {
-            // If we are already at page 1, the effect above will run.
-            // If we were at page > 1, setting page to 1 will trigger effect.
-        }
-    }, [searchQuery]);
-
-    // Fetch Selected Barang Detail (Initial Load)
-    useEffect(() => {
-        const fetchSelectedBarang = async () => {
-            if (formData.barang_id && !selectedBarang) {
-                // Check if already in list
-                const inList = barangList.find(b => b.id.toString() === formData.barang_id);
-                if (inList) {
-                    setSelectedBarang(inList);
-                    return;
-                }
-
-                // If not in list, fetch details
-                try {
-                    const data = await getBarangById(parseInt(formData.barang_id));
-                    setSelectedBarang(data);
-                } catch (error) {
-                    console.error("Error fetching selected barang:", error);
-                }
-            } else if (selectedBarang && selectedBarang.id.toString() !== formData.barang_id) {
-                // Update selected barang from list if ID changes manually (unlikely but good for safety)
-                const inList = barangList.find(b => b.id.toString() === formData.barang_id);
-                if (inList) setSelectedBarang(inList);
-            }
-        };
-
-        fetchSelectedBarang();
-    }, [formData.barang_id, barangList, selectedBarang]);
-
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        // Validation
-        if (!formData.barang_id) {
-            toast.error("Pilih barang terlebih dahulu");
-            return;
-        }
-
-        if (!formData.tgl_lelang) {
-            toast.error("Tanggal lelang harus diisi");
-            return;
-        }
-
-        if (!formData.waktu_mulai) {
-            toast.error("Waktu mulai harus diisi");
-            return;
-        }
-
-        if (!formData.waktu_selesai) {
-            toast.error("Waktu selesai harus diisi");
-            return;
-        }
-
-        setIsSubmitting(true);
-        try {
-            const tgl = formData.tgl_lelang.split("T")[0];
-            await onSubmit({
-                barang_id: parseInt(formData.barang_id),
-                tgl_lelang: tgl,
-                waktu_mulai: formData.waktu_mulai,
-                waktu_selesai: formData.waktu_selesai,
-                status: formData.status,
-            });
-        } catch (error) {
-            throw error;
-        } finally {
-            setIsSubmitting(false);
-        }
+  useEffect(() => {
+    const fetchBarang = async () => {
+      try {
+        const result = await getBarang(1, 1000); // Get all barang
+        setBarangList(result.data);
+      } catch (error) {
+        console.error("Error fetching barang:", error);
+        toast.error("Gagal mengambil data barang");
+      } finally {
+        setIsLoadingBarang(false);
+      }
     };
 
-    return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Barang Selection */}
-            <div className="space-y-2 flex flex-col">
-                <Label htmlFor="id_barang">Barang</Label>
-                <Popover open={open} onOpenChange={setOpen}>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={open}
-                            className="w-full justify-between"
-                        >
-                            {/* Prefer selectedBarang for name, otherwise fallback to finding in list, otherwise placeholder */}
-                            {selectedBarang
-                                ? selectedBarang.nama
-                                : (formData.barang_id
-                                    ? "Memuat..."
-                                    : "Pilih barang...")}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
-                        <Command shouldFilter={false}>
-                            <CommandInput
-                                placeholder="Cari barang..."
-                                value={searchQuery}
-                                onValueChange={(val) => {
-                                    setBarangList([])
-                                    setIsLoadingBarang(true)
-                                    setSearchQuery(val);
-                                    // Reset page when search changes
-                                    setPage(1);
-                                }}
-                            />
-                            <CommandList>
-                                <CommandEmpty>
-                                    {isLoadingBarang ? "Memuat..." : "Barang tidak ditemukan."}
-                                </CommandEmpty>
-                                <CommandGroup>
-                                    {/* Render selected item at the top if it exists and matches search (or search is empty) */}
-                                    {selectedBarang && (
-                                        (!searchQuery || selectedBarang.nama.toLowerCase().includes(searchQuery.toLowerCase())) && (
-                                            <CommandItem
-                                                key={selectedBarang.id}
-                                                value={selectedBarang.nama}
-                                                onSelect={() => {
-                                                    setFormData({ ...formData, barang_id: selectedBarang.id.toString() });
-                                                    setOpen(false);
-                                                }}
-                                                className="bg-accent/50" // Highlight selected item slightly
-                                            >
-                                                <Check
-                                                    className={cn(
-                                                        "mr-2 h-4 w-4",
-                                                        "opacity-100" // Always checked since it's the selected one
-                                                    )}
-                                                />
-                                                {selectedBarang.nama} - Rp {selectedBarang.harga_awal.toLocaleString("id-ID")}
-                                                <span className="ml-2 text-xs text-muted-foreground">(Terpilih)</span>
-                                            </CommandItem>
-                                        )
-                                    )}
-                                    {barangList.map((barang) => (
-                                        <CommandItem
-                                            key={barang.id}
-                                            value={barang.nama}
-                                            onSelect={() => {
-                                                setFormData({ ...formData, barang_id: barang.id.toString() });
-                                                setSelectedBarang(barang);
-                                                setOpen(false);
-                                            }}
-                                        >
-                                            <Check
-                                                className={cn(
-                                                    "mr-2 h-4 w-4",
-                                                    formData.barang_id === barang.id.toString() ? "opacity-100" : "opacity-0"
-                                                )}
-                                            />
-                                            {barang.nama} - Rp {barang.harga_awal.toLocaleString("id-ID")}
-                                        </CommandItem>
-                                    ))}
+    fetchBarang();
+  }, []);
 
-                                    {/* Sentinel for infinite scroll */}
-                                    <div ref={lastBarangElementRef} className="h-2 w-full" />
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-                                    {isLoadingBarang && page > 1 && (
-                                        <div className="py-2 text-center text-xs text-muted-foreground">
-                                            Memuat lebih banyak...
-                                        </div>
-                                    )}
-                                </CommandGroup>
-                            </CommandList>
-                        </Command>
-                    </PopoverContent>
-                </Popover>
-            </div>
+    // Validation
+    if (!formData.id_barang) {
+      toast.error("Pilih barang terlebih dahulu");
+      return;
+    }
 
-            {/* Tanggal & Waktu Lelang */}
-            <div className="space-y-2 flex flex-col">
-                <Label>Jadwal Lelang</Label>
-                <Popover>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant={"outline"}
-                            className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !formData.tgl_lelang && "text-muted-foreground"
-                            )}
-                        >
-                            {formData.tgl_lelang ? (
-                                <>
-                                    {new Date(formData.tgl_lelang).toLocaleDateString("id-ID", {
-                                        weekday: "long",
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                    })}
-                                    {formData.waktu_mulai && formData.waktu_selesai ? ` • ${formData.waktu_mulai} - ${formData.waktu_selesai}` : ""}
-                                </>
-                            ) : (
-                                <span>Pilih tanggal dan waktu</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 max-h-[80vh] overflow-y-auto" align="start">
-                        <Card className="border-0 shadow-none flex pt-4">
-                            <CardContent>
-                                <Calendar
-                                    mode="single"
-                                    selected={
-                                        formData.tgl_lelang
-                                            ? new Date(formData.tgl_lelang + "T00:00:00")
-                                            : undefined
-                                    }
-                                    onSelect={(date) => {
-                                        if (date) {
-                                            const year = date.getFullYear();
-                                            const month = String(date.getMonth() + 1).padStart(2, "0");
-                                            const day = String(date.getDate()).padStart(2, "0");
-                                            setFormData({ ...formData, tgl_lelang: `${year}-${month}-${day}` });
-                                        } else {
-                                            setFormData({ ...formData, tgl_lelang: "" });
-                                        }
-                                    }}
-                                    className="p-0"
-                                />
-                            </CardContent>
-                            <CardFooter className="bg-card border-l">
-                                <FieldGroup>
-                                    <Field>
-                                        <FieldLabel htmlFor="waktu_mulai">Waktu Mulai</FieldLabel>
-                                        <InputGroup>
-                                            <InputGroupInput
-                                                id="waktu_mulai"
-                                                type="time"
-                                                value={formData.waktu_mulai}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, waktu_mulai: e.target.value })
-                                                }
-                                                className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none w-full"
-                                            />
-                                            <InputGroupAddon>
-                                                <Clock2Icon className="text-muted-foreground h-4 w-4" />
-                                            </InputGroupAddon>
-                                        </InputGroup>
-                                    </Field>
-                                    <Field>
-                                        <FieldLabel htmlFor="waktu_selesai">Waktu Selesai</FieldLabel>
-                                        <InputGroup>
-                                            <InputGroupInput
-                                                id="waktu_selesai"
-                                                type="time"
-                                                value={formData.waktu_selesai}
-                                                onChange={(e) =>
-                                                    setFormData({ ...formData, waktu_selesai: e.target.value })
-                                                }
-                                                className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none w-full"
-                                            />
-                                            <InputGroupAddon>
-                                                <Clock2Icon className="text-muted-foreground h-4 w-4" />
-                                            </InputGroupAddon>
-                                        </InputGroup>
-                                    </Field>
-                                </FieldGroup>
-                            </CardFooter>
-                        </Card>
-                    </PopoverContent>
-                </Popover>
-            </div>
+    if (!formData.tgl_lelang) {
+      toast.error("Tanggal lelang harus diisi");
+      return;
+    }
 
-            {/* Status */}
-            <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                    value={formData.status}
-                    onValueChange={(value: "dibuka" | "ditutup") =>
-                        setFormData({ ...formData, status: value })
-                    }
-                >
-                    <SelectTrigger id="status">
-                        <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="dibuka">Dibuka</SelectItem>
-                        <SelectItem value="ditutup">Ditutup</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
+    setIsSubmitting(true);
+    try {
+      await onSubmit({
+        barang_id: parseInt(formData.id_barang),
+        tgl_lelang: formData.tgl_lelang,
+        waktu_mulai: `${formData.waktu_mulai}:00`,
+        waktu_selesai: `${formData.waktu_selesai}:00`,
+        status: formData.status,
+        is_manual: true,
+      });
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("Gagal menyimpan data lelang");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-            {/* Action Buttons */}
-            <div className="flex gap-4">
-                <Button type="submit" disabled={isSubmitting || isLoadingBarang}>
-                    {isSubmitting ? (
-                        <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Menyimpan...
-                        </>
-                    ) : (
-                        submitLabel
-                    )}
-                </Button>
-                {onCancel && (
-                    <Button type="button" variant="outline" onClick={onCancel}>
-                        Batal
-                    </Button>
-                )}
-            </div>
-        </form>
-    );
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Barang Selection */}
+      <div className="space-y-2">
+        <Label htmlFor="id_barang">Barang</Label>
+        {isLoadingBarang ? (
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Memuat data barang...
+          </div>
+        ) : (
+          <Select
+            value={formData.id_barang}
+            onValueChange={(value) =>
+              setFormData({ ...formData, id_barang: value })
+            }
+          >
+            <SelectTrigger id="id_barang">
+              <SelectValue placeholder="Pilih barang" />
+            </SelectTrigger>
+            <SelectContent>
+              {barangList.map((barang) => (
+                <SelectItem key={barang.id} value={barang.id.toString()}>
+                  {barang.nama} - Rp {barang.harga_awal.toLocaleString("id-ID")}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+
+      {/* Tanggal Lelang */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="tgl_lelang">Tanggal Lelang</Label>
+          <Input
+            id="tgl_lelang"
+            type="date"
+            value={formData.tgl_lelang}
+            onChange={(e) =>
+              setFormData({ ...formData, tgl_lelang: e.target.value })
+            }
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="waktu_mulai">Waktu Mulai</Label>
+          <Input
+            id="waktu_mulai"
+            type="time"
+            value={formData.waktu_mulai}
+            onChange={(e) =>
+              setFormData({ ...formData, waktu_mulai: e.target.value })
+            }
+            required
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="waktu_selesai">Waktu Selesai</Label>
+          <Input
+            id="waktu_selesai"
+            type="time"
+            value={formData.waktu_selesai}
+            onChange={(e) =>
+              setFormData({ ...formData, waktu_selesai: e.target.value })
+            }
+            required
+          />
+        </div>
+      </div>
+
+      {/* Status */}
+      <div className="space-y-2">
+        <Label htmlFor="status">Status</Label>
+        <Select
+          value={formData.status}
+          onValueChange={(value: "dibuka" | "ditutup" | "pending") =>
+            setFormData({ ...formData, status: value })
+          }
+        >
+          <SelectTrigger id="status">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="pending">Tertunda</SelectItem>
+            <SelectItem value="dibuka">Dibuka</SelectItem>
+            <SelectItem value="ditutup">Ditutup</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex gap-4">
+        <Button type="submit" disabled={isSubmitting || isLoadingBarang}>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Menyimpan...
+            </>
+          ) : (
+            submitLabel
+          )}
+        </Button>
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Batal
+          </Button>
+        )}
+      </div>
+    </form>
+  );
 }
