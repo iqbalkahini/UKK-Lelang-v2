@@ -54,7 +54,7 @@ export const getLelang = async (
   page: number = 1,
   limit: number = 10,
   search: string = "",
-  statusFilter: string = "all",
+  statusFilter: string | string[] = "all",
   date: string = "descending",
 ): Promise<GetLelangResponse> => {
   try {
@@ -74,7 +74,8 @@ export const getLelang = async (
         barang:tb_barang!barang_id (
           nama,
           harga_awal,
-          deskripsi_barang
+          deskripsi_barang,
+          image_urls
         )
       `,
       )
@@ -82,8 +83,13 @@ export const getLelang = async (
 
     // Apply status filter
     if (statusFilter !== "all") {
-      countQuery = countQuery.eq("status", statusFilter);
-      dataQuery = dataQuery.eq("status", statusFilter);
+      if (Array.isArray(statusFilter)) {
+        countQuery = countQuery.in("status", statusFilter);
+        dataQuery = dataQuery.in("status", statusFilter);
+      } else {
+        countQuery = countQuery.eq("status", statusFilter);
+        dataQuery = dataQuery.eq("status", statusFilter);
+      }
     }
 
     // Apply search filter
@@ -114,7 +120,8 @@ export const getLelang = async (
       barang:tb_barang!inner (
         nama,
         harga_awal,
-        deskripsi_barang
+        deskripsi_barang,
+        image_urls
       )
     `,
         )
