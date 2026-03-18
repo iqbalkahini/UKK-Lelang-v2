@@ -3,15 +3,16 @@ import { BarangForm } from "@/components/barang-form";
 import { getBarangById } from "@/api/barang";
 import { notFound } from "next/navigation";
 
-export default async function EditBarangPage({ params }: { params: { id: string } }) {
-    const id = parseInt(params.id);
-    
-    if (isNaN(id)) {
+export default async function EditBarangPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    const idNumber = parseInt(id);
+
+    if (isNaN(idNumber)) {
         notFound();
     }
 
     try {
-        const barang = await getBarangById(id);
+        const barang = await getBarangById(idNumber);
 
         if (!barang) {
             notFound();

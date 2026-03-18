@@ -100,6 +100,8 @@ export function PetugasSidebar({ ...props }: React.ComponentProps<typeof Sidebar
     const urlwWithoutLayout = [
         "/petugas/lelang/buat",
         "/petugas/lelang/[id]/edit",
+        "/petugas/barang/buat",
+        "/petugas/barang/[id]/edit",
     ];
 
     // Check if current path matches any of the paths in urlwWithoutLayout
