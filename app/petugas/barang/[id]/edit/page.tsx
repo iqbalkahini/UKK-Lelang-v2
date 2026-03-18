@@ -2,8 +2,7 @@
 
 import { useParams } from "next/navigation"
 
-export default function EditBarangPage() {
-    const params = useParams()
+export default function EditBarangPage({ params }: { params: { id: string } }) {
     const id = params.id
     return (
         <div>
