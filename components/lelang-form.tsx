@@ -46,7 +46,16 @@ export function LelangForm({
   const [isLoadingBarang, setIsLoadingBarang] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
+  type LelangFormData = {
+    id_barang: string;
+    tgl_lelang: string;
+    waktu_mulai: string;
+    waktu_selesai: string;
+    status: "dibuka" | "ditutup" | "pending";
+    is_manual: boolean;
+  };
+
+  const [formData, setFormData] = useState<LelangFormData>({
     id_barang: initialData?.barang_id?.toString() || "",
     tgl_lelang: initialData?.tgl_lelang
       ? new Date(initialData.tgl_lelang).toISOString().slice(0, 10)
@@ -55,7 +64,7 @@ export function LelangForm({
     waktu_selesai: initialData?.waktu_selesai || "16:00",
     status:
       initialData?.status || ("pending" as "dibuka" | "ditutup" | "pending"),
-    is_manual: initialData?.is_manual || true,
+    is_manual: initialData?.is_manual ?? true,
   });
 
   useEffect(() => {
@@ -96,7 +105,7 @@ export function LelangForm({
         waktu_mulai: `${formData.waktu_mulai}:00`,
         waktu_selesai: `${formData.waktu_selesai}:00`,
         status: formData.status,
-        is_manual: true,
+        is_manual: formData.is_manual,
       });
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -195,6 +204,25 @@ export function LelangForm({
             <SelectItem value="pending">Tertunda</SelectItem>
             <SelectItem value="dibuka">Dibuka</SelectItem>
             <SelectItem value="ditutup">Ditutup</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* is_manual */}
+      <div className="space-y-2">
+        <Label htmlFor="is_manual">Pengaturan Waktu</Label>
+        <Select
+          value={formData.is_manual.toString()}
+          onValueChange={(value: "true" | "false") =>
+            setFormData({ ...formData, is_manual: value === "true" })
+          }
+        >
+          <SelectTrigger id="is_manual">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="true">Manual</SelectItem>
+            <SelectItem value="false">Otomatis</SelectItem>
           </SelectContent>
         </Select>
       </div>
