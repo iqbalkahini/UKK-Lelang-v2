@@ -17,8 +17,8 @@ export default function CreateLelangPage() {
     tgl_lelang: string;
     waktu_mulai: string;
     waktu_selesai: string;
-    harga_akhir: number;
     status: "dibuka" | "ditutup" | "pending";
+    is_manual: boolean;
   }) => {
     try {
       if (!user) {
@@ -28,8 +28,8 @@ export default function CreateLelangPage() {
 
       await createLelang({
         ...data,
-        user_id: user.id,
-        petugas_id: user.id,
+        harga_akhir: 0, // Initial harga_akhir is 0
+        petugas_id: user.id, // Assuming user.id is the UUID needed for petugas_id
       });
 
       toast.success("Lelang berhasil dibuat");

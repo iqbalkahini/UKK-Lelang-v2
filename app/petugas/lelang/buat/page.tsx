@@ -28,7 +28,7 @@ export default function CreateLelangPage() {
 
       await createLelang({
         ...data,
-        petugas_auth_id: user.id,
+        petugas_id: user.id,
         harga_akhir: 0,
       });
 

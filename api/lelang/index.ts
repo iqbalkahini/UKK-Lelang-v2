@@ -36,8 +36,9 @@ export type CreateLelangInput = {
   waktu_mulai: string;
   waktu_selesai: string;
   harga_akhir: number;
-  petugas_auth_id: string;
+  petugas_id: string; // The UUID from tb_petugas
   status: "dibuka" | "ditutup" | "pending";
+  is_manual: boolean;
 };
 
 export type UpdateLelangInput = {
@@ -175,17 +176,6 @@ export const createLelang = async (
   try {
     const supabase = await createClient();
 
-    // 1. Get petugas ID from auth ID
-    const { data: petugasData, error: petugasError } = await supabase
-      .from("tb_petugas")
-      .select("id")
-      .eq("user_id", input.petugas_auth_id)
-      .single();
-
-    if (petugasError || !petugasData) {
-      throw new Error("Petugas not found");
-    }
-
     // 2. Prepare payload
     const payload = {
       barang_id: input.barang_id,
@@ -194,7 +184,8 @@ export const createLelang = async (
       waktu_selesai: input.waktu_selesai,
       harga_akhir: input.harga_akhir,
       status: input.status,
-      petugas_id: petugasData.id,
+      petugas_id: input.petugas_id,
+      is_manual: input.is_manual,
       user_id: null,
     };
 
