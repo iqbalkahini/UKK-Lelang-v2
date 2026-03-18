@@ -12,6 +12,7 @@ import {
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
+import { usePathname } from "next/navigation"
 import {
     Sidebar,
     SidebarContent,
@@ -55,10 +56,6 @@ const navMain = [
                 url: "/petugas/lelang",
             },
             {
-                title: "Tambah Lelang",
-                url: "/petugas/lelang/buat",
-            },
-            {
                 title: "Buka Lelang",
                 url: "/petugas/lelang/buka",
             },
@@ -97,7 +94,24 @@ const navMain = [
 const navSecondary: any[] = []
 
 export function PetugasSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const pathname = usePathname()
     const { user, loading } = useUser()
+
+    const urlwWithoutLayout = [
+        "/petugas/lelang/buat",
+        "/petugas/lelang/[id]/edit",
+    ];
+
+    // Check if current path matches any of the paths in urlwWithoutLayout
+    const isHidden = urlwWithoutLayout.some(path => {
+        if (path.includes('[id]')) {
+            const regex = new RegExp('^' + path.replace('[id]', '[^/]+') + '$');
+            return regex.test(pathname);
+        }
+        return path === pathname;
+    });
+
+    if (isHidden) return null;
 
     const userData = {
         name: user?.user_metadata?.nama || user?.email?.split('@')[0] || "Petugas",

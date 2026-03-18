@@ -60,8 +60,8 @@ export function LelangForm({
     tgl_lelang: initialData?.tgl_lelang
       ? new Date(initialData.tgl_lelang).toISOString().slice(0, 10)
       : new Date().toISOString().slice(0, 10),
-    waktu_mulai: initialData?.waktu_mulai || "08:00",
-    waktu_selesai: initialData?.waktu_selesai || "16:00",
+    waktu_mulai: initialData?.waktu_mulai?.slice(0, 5) || "08:00",
+    waktu_selesai: initialData?.waktu_selesai?.slice(0, 5) || "16:00",
     status:
       initialData?.status || ("pending" as "dibuka" | "ditutup" | "pending"),
     is_manual: initialData?.is_manual ?? true,
@@ -98,12 +98,18 @@ export function LelangForm({
     }
 
     setIsSubmitting(true);
+    const formatTimeForDB = (timeStr: string) => {
+      // Ensure time is in HH:mm:ss format for database
+      if (timeStr.length === 5) return `${timeStr}:00`;
+      return timeStr;
+    };
+
     try {
       await onSubmit({
         barang_id: parseInt(formData.id_barang),
         tgl_lelang: formData.tgl_lelang,
-        waktu_mulai: `${formData.waktu_mulai}:00`,
-        waktu_selesai: `${formData.waktu_selesai}:00`,
+        waktu_mulai: formatTimeForDB(formData.waktu_mulai),
+        waktu_selesai: formatTimeForDB(formData.waktu_selesai),
         status: formData.status,
         is_manual: formData.is_manual,
       });

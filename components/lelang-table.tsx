@@ -191,32 +191,6 @@ export function LelangTable({
         }
     };
 
-    const handleToggleStatus = async (lelang: Lelang) => {
-        try {
-            const newStatus =
-                lelang.status === "dibuka"
-                    ? "ditutup"
-                    : lelang.status === "ditutup"
-                        ? "dibuka"
-                        : "dibuka";
-
-            // If closing, get highest bid
-            let harga_akhir = undefined;
-            if (newStatus === "ditutup") {
-                harga_akhir = await getHighestBid(lelang.id);
-            }
-
-            await updateStatusLelang(lelang.id, newStatus, harga_akhir ?? undefined);
-            toast.success(
-                `Lelang berhasil ${newStatus === "dibuka" ? "dibuka" : "ditutup"}`
-            );
-            setRefreshTrigger((prev) => prev + 1);
-        } catch (error) {
-            console.error("Error toggling status:", error);
-            toast.error("Gagal mengubah status lelang");
-        }
-    };
-
     const handleFilter = () => {
         const newFilter =
             filter.date === "ascending" ? { date: "descending" } : { date: "ascending" };
@@ -337,19 +311,6 @@ export function LelangTable({
                                                                 <a href={`/petugas/lelang/${lelang.id}/edit`}>
                                                                     <PencilIcon /> Edit
                                                                 </a>
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem
-                                                                onClick={() => handleToggleStatus(lelang)}
-                                                            >
-                                                                {lelang.status === "dibuka" ? (
-                                                                    <>
-                                                                        <StopCircle /> Tutup Lelang
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <PlayCircle /> Buka Lelang
-                                                                    </>
-                                                                )}
                                                             </DropdownMenuItem>
                                                             <DropdownMenuItem
                                                                 onClick={() => handleDeleteClick(lelang.id)}
