@@ -14,9 +14,10 @@ import { Barang } from "@/api/barang";
 
 interface BarangFormProps {
     initialData?: Barang;
+    onCancel?: () => void;
 }
 
-export function BarangForm({ initialData }: BarangFormProps) {
+export function BarangForm({ initialData, onCancel }: BarangFormProps) {
     const [namaBarang, setNamaBarang] = useState(initialData?.nama || "");
     const [hargaAwal, setHargaAwal] = useState(initialData?.harga_awal?.toString() || "");
     const [deskripsi, setDeskripsi] = useState(initialData?.deskripsi_barang || "");
@@ -232,16 +233,24 @@ export function BarangForm({ initialData }: BarangFormProps) {
                         </p>
                     </div>
 
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Menyimpan...
-                            </>
-                        ) : (
-                            initialData ? "Simpan Perubahan" : "Simpan Barang"
+                    <div className="flex gap-4">
+                        <Button type="submit" className={onCancel ? "flex-1" : "w-full"} disabled={isLoading}>
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Menyimpan...
+                                </>
+                            ) : (
+                                initialData ? "Simpan Perubahan" : "Simpan Barang"
+                            )}
+                        </Button>
+                        {onCancel && (
+                            <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>
+                                Batal
+                            </Button>
                         )}
-                    </Button>
+
+                    </div>
                 </form>
             </CardContent>
         </Card>
