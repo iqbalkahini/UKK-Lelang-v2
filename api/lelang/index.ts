@@ -12,6 +12,7 @@ export type Lelang = {
   status: "dibuka" | "ditutup" | "pending";
   user_id: string;
   created_at?: string;
+  is_manual: boolean;
   // Joined fields from barang
   barang?: {
     nama: string;

@@ -113,6 +113,7 @@ export default function EditLelangPage({
                             waktu_mulai: lelang.waktu_mulai,
                             waktu_selesai: lelang.waktu_selesai,
                             status: lelang.status,
+                            is_manual: lelang.is_manual,
                         }}
                         onSubmit={handleSubmit}
                         onCancel={() => router.push(`/petugas/lelang/${id}`)}
