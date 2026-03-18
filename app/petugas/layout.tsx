@@ -9,7 +9,9 @@ export default function PetugasLayout({
 }) {
     return (
         <SidebarProvider>
-            <PetugasSidebar />
+            <Suspense>
+                <PetugasSidebar />
+            </Suspense>
             <SidebarInset>
                 <Suspense>
                     {children}

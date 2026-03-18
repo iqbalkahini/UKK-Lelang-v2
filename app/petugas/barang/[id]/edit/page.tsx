@@ -1,7 +1,5 @@
 'use client'
 
-import { useParams } from "next/navigation"
-
 export default function EditBarangPage({ params }: { params: { id: string } }) {
     const id = params.id
     return (
