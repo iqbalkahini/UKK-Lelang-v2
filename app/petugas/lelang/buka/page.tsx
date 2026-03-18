@@ -14,7 +14,7 @@ export default function BukaLelangPage() {
     };
 
     return (
-        <div className="px-4 lg:px-8 py-8 max-w-7xl mx-auto">
+        <div className="px-4 lg:px-8 py-8 w-full">
             <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div className="space-y-2">
                     <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
