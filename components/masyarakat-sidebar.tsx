@@ -4,7 +4,6 @@ import {
     LayoutDashboardIcon,
     SearchIcon,
     HandIcon,
-    WalletIcon,
     GavelIcon,
     ReceiptIcon,
 } from "lucide-react"
@@ -39,11 +38,6 @@ const navMain = [
         title: "Penawaran Saya",
         url: "/masyarakat/penawaran",
         icon: HandIcon,
-    },
-    {
-        title: "Dompet",
-        url: "/masyarakat/dompet",
-        icon: WalletIcon,
     },
     {
         title: "Pembayaran",
