@@ -127,6 +127,16 @@ export function LelangCard({ lelang, onOpen }: LelangCardProps) {
                         <Clock className="w-4 h-4" />
                         <span>{formatTime(lelang.waktu_mulai)} - {formatTime(lelang.waktu_selesai)} WIB</span>
                     </div>
+                    <div className="flex items-center text-xs font-medium gap-2 pt-1">
+                        <Badge 
+                            variant="outline" 
+                            className={lelang.is_manual 
+                                ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-50" 
+                                : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50"}
+                        >
+                            Pengaturan: {lelang.is_manual ? "Manual" : "Otomatis"}
+                        </Badge>
+                    </div>
                 </div>
 
                 <div className="pt-2 border-t border-muted-foreground/10">

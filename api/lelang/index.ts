@@ -48,6 +48,7 @@ export type UpdateLelangInput = {
   waktu_selesai?: string;
   status?: "dibuka" | "ditutup" | "pending";
   harga_akhir?: number | null;
+  is_manual?: boolean;
 };
 
 export const getLelang = async (
