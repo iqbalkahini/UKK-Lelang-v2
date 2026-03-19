@@ -10,7 +10,7 @@ interface Bid {
     id: number;
     penawaran_harga: number;
     created_at: string;
-    masyarakat: {
+    tb_masyarakat: {
         nama_lengkap: string;
     };
 }
@@ -30,17 +30,21 @@ export function BidHistory({ lelangId }: { lelangId: number }) {
 
         // 1. Initial Fetch
         const fetchBids = async () => {
-            const { data } = await supabase
+            const { data, error } = await supabase
                 .from('history_lelang')
                 .select(`
                     id, 
                     penawaran_harga, 
                     created_at,
-                    masyarakat:tb_masyarakat(nama_lengkap)
+                    tb_masyarakat!user_id(nama_lengkap)
                 `)
                 .eq('lelang_id', lelangId)
                 .order('penawaran_harga', { ascending: false });
             
+            if (error) {
+                console.error("Error fetching bids:", error);
+                return;
+            }
             if (data) setBids(data as any);
         };
 
@@ -199,7 +203,7 @@ export function BidHistory({ lelangId }: { lelangId: number }) {
                                     >
                                         <div className="flex flex-col">
                                             <span className="text-xs text-muted-foreground line-clamp-1">
-                                                {bid.masyarakat?.nama_lengkap}
+                                                {bid.tb_masyarakat?.nama_lengkap}
                                             </span>
                                             <span className={cn(
                                                 "text-sm",

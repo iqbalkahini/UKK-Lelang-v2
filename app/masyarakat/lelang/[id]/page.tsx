@@ -39,18 +39,16 @@ export default async function DetailLelangPage({ params }: { params: Promise<{ i
     const { data: { user } } = await supabase.auth.getUser();
 
     let hasDeposited = false;
-    let userSaldo = 0;
 
     if (user) {
         // Get Masyarakat ID
         const { data: masyarakat } = await supabase
             .from('tb_masyarakat')
-            .select('id, saldo')
+            .select('id')
             .eq('user_id', user.id)
             .single();
 
         if (masyarakat) {
-            userSaldo = masyarakat.saldo;
             // Check Deposit
             const { data: deposit } = await supabase
                 .from('tb_lelang_deposit')
@@ -148,7 +146,6 @@ export default async function DetailLelangPage({ params }: { params: Promise<{ i
                         )}
 
                         <div className="text-xs text-muted-foreground space-y-1">
-                            <p>Saldo Anda: {new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR" }).format(userSaldo)}</p>
                             <p className="italic">*Uang jaminan diperlukan untuk memastikan keseriusan penawar.</p>
                         </div>
 

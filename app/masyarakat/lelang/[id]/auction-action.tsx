@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { placeBid } from "@/lib/actions/auction";
-import { createTopupToken, cancelTopup } from "@/api/payment";
+import { createTopupToken, cancelTopup, syncTopupStatus } from "@/api/payment";
 import { Loader2, Gavel } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
@@ -65,16 +65,19 @@ export function AuctionAction({ lelangId, hargaAwal, highestBid, hasDeposited }:
 
             if (window.snap) {
                 window.snap.pay(token, {
-                    onSuccess: function (result: any) {
-                        toast.success("Pembayaran berhasil! Menunggu konfirmasi sistem...");
+                    onSuccess: async function (result: any) {
+                        toast.success("Pembayaran berhasil! Mengonfirmasi...");
+                        await syncTopupStatus(orderId);
                         router.refresh();
                     },
-                    onPending: function (result: any) {
+                    onPending: async function (result: any) {
                         toast.info("Menunggu pembayaran...");
+                        await syncTopupStatus(orderId);
                         router.refresh();
                     },
-                    onError: function (result: any) {
+                    onError: async function (result: any) {
                         toast.error("Pembayaran gagal!");
+                        await syncTopupStatus(orderId);
                         router.refresh();
                     },
                     onClose: async function () {
@@ -162,10 +165,18 @@ export function AuctionAction({ lelangId, hargaAwal, highestBid, hasDeposited }:
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Nominal Tawaran (Rp)</label>
                             <Input
-                                type="number"
-                                placeholder={`Minimal ${minBid + 1}`}
+                                type="text"
+                                placeholder={`Minimal Rp ${new Intl.NumberFormat("id-ID").format(minBid + 1)}`}
                                 value={bidAmount}
-                                onChange={(e) => setBidAmount(e.target.value)}
+                                onChange={(e) => {
+                                    const val = e.target.value.replace(/\D/g, "");
+                                    if (val === "") {
+                                        setBidAmount("");
+                                        return;
+                                    }
+                                    const formatted = new Intl.NumberFormat("id-ID").format(parseInt(val));
+                                    setBidAmount(formatted);
+                                }}
                                 required
                             />
                         </div>

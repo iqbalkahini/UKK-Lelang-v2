@@ -132,3 +132,101 @@ export async function getWalletData(page: number = 1, limit: number = 7) {
         return null; // Handle error gracefully or rethrow depending on needs
     }
 }
+
+export async function syncTopupStatus(orderId: string) {
+    try {
+        const supabase = await createClient();
+        
+        // 1. Initialize API
+        const core = new midtransClient.CoreApi({
+            isProduction: false,
+            serverKey: process.env.MIDTRANS_SERVER_KEY || "",
+            clientKey: process.env.MIDTRANS_CLIENT_KEY || ""
+        });
+
+        // 2. Fetch Status from Midtrans
+        const midtransStatus = await (core as any).transaction.status(orderId);
+        const transactionStatus = midtransStatus.transaction_status;
+        const fraudStatus = midtransStatus.fraud_status;
+
+        // 3. Determine new status
+        let newStatus = 'pending';
+        if (transactionStatus == 'capture') {
+            if (fraudStatus == 'challenge') {
+                newStatus = 'challenge';
+            } else if (fraudStatus == 'accept') {
+                newStatus = 'settlement';
+            }
+        } else if (transactionStatus == 'settlement') {
+            newStatus = 'settlement';
+        } else if (transactionStatus == 'cancel' || transactionStatus == 'deny' || transactionStatus == 'expire') {
+            newStatus = 'failure';
+        } else if (transactionStatus == 'pending') {
+            newStatus = 'pending';
+        }
+
+        // 4. Update Database
+        const { data: topupData } = await supabase
+            .from('tb_topup')
+            .update({ status: newStatus })
+            .eq('id', orderId)
+            .select()
+            .single();
+
+        if (topupData && newStatus === 'settlement') {
+            if (topupData.lelang_id) {
+                // Ensure no duplicate deposit
+                const { data: existing } = await supabase
+                    .from('tb_lelang_deposit')
+                    .select('id')
+                    .eq('id_lelang', topupData.lelang_id)
+                    .eq('id_user', topupData.id_user)
+                    .single();
+                
+                if (!existing) {
+                    await supabase
+                        .from('tb_lelang_deposit')
+                        .insert({
+                            id_lelang: topupData.lelang_id,
+                            id_user: topupData.id_user,
+                            jumlah_jaminan: topupData.amount,
+                            status: 'active'
+                        });
+                }
+            } else {
+                // Regular Topup update balance logic
+                const { data: userData } = await supabase
+                    .from('tb_masyarakat')
+                    .select('saldo')
+                    .eq('id', topupData.id_user)
+                    .single();
+
+                if (userData) {
+                    const { data: checkProcessed } = await supabase
+                        .from('tb_topup')
+                        .select('processed_at')
+                        .eq('id', orderId)
+                        .single();
+                    
+                    if (!checkProcessed?.processed_at) {
+                        const newBalance = (userData.saldo || 0) + topupData.amount;
+                        await supabase
+                            .from('tb_masyarakat')
+                            .update({ saldo: newBalance })
+                            .eq('id', topupData.id_user);
+                        
+                        await supabase
+                            .from('tb_topup')
+                            .update({ processed_at: new Date().toISOString() })
+                            .eq('id', orderId);
+                    }
+                }
+            }
+        }
+
+        return { status: newStatus };
+    } catch (error) {
+        console.error("Error syncing topup status:", error);
+        throw error;
+    }
+}
