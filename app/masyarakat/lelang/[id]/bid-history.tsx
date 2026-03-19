@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Gavel, GripVertical, X } from "lucide-react";
+import { Gavel, GripVertical, X, Minus, ChevronUp, Maximize2, Minimize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Bid {
@@ -18,6 +18,8 @@ interface Bid {
 export function BidHistory({ lelangId }: { lelangId: number }) {
     const [bids, setBids] = useState<Bid[]>([]);
     const [isVisible, setIsVisible] = useState(true);
+    const [isMinimized, setIsMinimized] = useState(false);
+    const [isMaximized, setIsMaximized] = useState(false);
     const [position, setPosition] = useState({ x: 20, y: 100 });
     const [isDragging, setIsDragging] = useState(false);
     const dragOffset = useRef({ x: 0, y: 0 });
@@ -56,7 +58,6 @@ export function BidHistory({ lelangId }: { lelangId: number }) {
                     filter: `lelang_id=eq.${lelangId}`
                 },
                 (payload: any) => {
-                    // Refetch to get the joined data (masyarakat name)
                     fetchBids();
                 }
             )
@@ -68,7 +69,7 @@ export function BidHistory({ lelangId }: { lelangId: number }) {
     }, [lelangId]);
 
     const handleMouseDown = (e: React.MouseEvent) => {
-        if (windowRef.current) {
+        if (windowRef.current && !isMaximized) {
             setIsDragging(true);
             dragOffset.current = {
                 x: e.clientX - position.x,
@@ -117,18 +118,34 @@ export function BidHistory({ lelangId }: { lelangId: number }) {
     return (
         <div 
             ref={windowRef}
-            style={{ 
+            style={isMaximized ? {
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                zIndex: 1000,
+            } : { 
                 left: `${position.x}px`, 
                 top: `${position.y}px`,
                 zIndex: 100,
-                resize: 'both',
+                resize: isMinimized ? 'none' : 'both',
                 overflow: 'hidden'
             }}
-            className="fixed w-80 min-h-[160px] min-w-[200px] h-[300px] flex flex-col pointer-events-auto"
+            className={cn(
+                "fixed flex flex-col pointer-events-auto transition-all duration-300", 
+                isDragging && "transition-none",
+                isMaximized ? "w-screen h-screen" :
+                isMinimized ? "w-80 h-auto" : 
+                "w-80 h-[300px] min-h-[160px] min-w-[200px]"
+            )}
         >
             <Card className="shadow-2xl border-primary/20 bg-background/95 backdrop-blur-sm flex flex-col h-full overflow-hidden">
                 <CardHeader 
-                    className="p-3 bg-primary text-primary-foreground flex flex-row items-center justify-between cursor-grab active:cursor-grabbing select-none shrink-0"
+                    className={cn(
+                        "p-3 bg-primary text-primary-foreground flex flex-row items-center justify-between select-none shrink-0",
+                        !isMaximized && "cursor-grab active:cursor-grabbing"
+                    )}
                     onMouseDown={handleMouseDown}
                 >
                     <div className="flex items-center gap-2 pointer-events-none">
@@ -138,51 +155,75 @@ export function BidHistory({ lelangId }: { lelangId: number }) {
                             Daftar Penawar
                         </CardTitle>
                     </div>
-                    <button onClick={() => setIsVisible(false)} className="hover:bg-primary-foreground/20 p-1 rounded transition-colors">
-                        <X className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                        <button 
+                            onClick={() => { setIsMaximized(!isMaximized); setIsMinimized(false); }} 
+                            className="hover:bg-primary-foreground/20 p-1 rounded transition-colors"
+                            title={isMaximized ? "Restore" : "Maximize"}
+                        >
+                            {isMaximized ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                        </button>
+                        <button 
+                            onClick={() => setIsMinimized(!isMinimized)} 
+                            className="hover:bg-primary-foreground/20 p-1 rounded transition-colors"
+                            title={isMinimized ? "Maximize" : "Minimize"}
+                            disabled={isMaximized}
+                        >
+                            {isMinimized ? <ChevronUp className="h-4 w-4" /> : <Minus className="h-4 w-4" />}
+                        </button>
+                        <button 
+                            onClick={() => setIsVisible(false)} 
+                            className="hover:bg-primary-foreground/20 p-1 rounded transition-colors"
+                            title="Close"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    </div>
                 </CardHeader>
-                <CardContent className="p-0 overflow-y-auto flex-1">
-                    {bids.length === 0 ? (
-                        <div className="p-8 text-center text-muted-foreground text-sm italic">
-                            Belum ada penawaran.
-                        </div>
-                    ) : (
-                        <div className="divide-y divide-muted">
-                            {bids.map((bid, idx) => (
-                                <div 
-                                    key={bid.id} 
-                                    className={cn(
-                                        "p-3 flex justify-between items-center transition-colors",
-                                        idx === 0 ? "bg-primary/5 font-semibold" : "hover:bg-muted/50"
-                                    )}
-                                >
-                                    <div className="flex flex-col">
-                                        <span className="text-xs text-muted-foreground line-clamp-1">
-                                            {bid.masyarakat?.nama_lengkap}
-                                        </span>
-                                        <span className={cn(
-                                            "text-sm",
-                                            idx === 0 ? "text-primary font-bold" : "text-foreground"
-                                        )}>
-                                            {new Intl.NumberFormat("id-ID", {
-                                                style: "currency",
-                                                currency: "IDR",
-                                                minimumFractionDigits: 0
-                                            }).format(bid.penawaran_harga)}
-                                        </span>
+                
+                {!isMinimized && (
+                    <CardContent className="p-0 overflow-y-auto flex-1">
+                        {bids.length === 0 ? (
+                            <div className="p-8 text-center text-muted-foreground text-sm italic">
+                                Belum ada penawaran.
+                            </div>
+                        ) : (
+                            <div className="divide-y divide-muted">
+                                {bids.map((bid, idx) => (
+                                    <div 
+                                        key={bid.id} 
+                                        className={cn(
+                                            "p-3 flex justify-between items-center transition-colors",
+                                            idx === 0 ? "bg-primary/5 font-semibold" : "hover:bg-muted/50"
+                                        )}
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className="text-xs text-muted-foreground line-clamp-1">
+                                                {bid.masyarakat?.nama_lengkap}
+                                            </span>
+                                            <span className={cn(
+                                                "text-sm",
+                                                idx === 0 ? "text-primary font-bold" : "text-foreground"
+                                            )}>
+                                                {new Intl.NumberFormat("id-ID", {
+                                                    style: "currency",
+                                                    currency: "IDR",
+                                                    minimumFractionDigits: 0
+                                                }).format(bid.penawaran_harga)}
+                                            </span>
+                                        </div>
+                                        <div className="text-[10px] text-muted-foreground text-right whitespace-nowrap ml-2">
+                                            {new Date(bid.created_at).toLocaleTimeString('id-ID', {
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </div>
                                     </div>
-                                    <div className="text-[10px] text-muted-foreground text-right whitespace-nowrap ml-2">
-                                        {new Date(bid.created_at).toLocaleTimeString('id-ID', {
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </CardContent>
+                                ))}
+                            </div>
+                        )}
+                    </CardContent>
+                )}
             </Card>
         </div>
     );
