@@ -6,6 +6,7 @@ import { Calendar, Clock, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AuctionAction } from "./auction-action";
+import { BidHistory } from "./bid-history";
 
 export default async function DetailLelangPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -154,6 +155,10 @@ export default async function DetailLelangPage({ params }: { params: Promise<{ i
                     </div>
                 </div>
             </div>
+            
+            {lelang.status === 'dibuka' && (
+                <BidHistory lelangId={lelang.id} />
+            )}
         </>
     );
 }

@@ -54,26 +54,37 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: "Error updating record" }, { status: 500 });
         }
 
-        // 3. If Settlement (Success), Update User Balance
+        // 3. If Settlement (Success), Update User Balance or Create Deposit
         if (newStatus === 'settlement') {
-            // Need to fetch current balance first or use atomic increment if possible via RPC
-            // Since we don't have RPC for increment, we fetch then update. 
-            // NOTE: In high concurrency this is bad, but for UKK it's likely fine.
-            // Better: Use extensive RPC function `increment_balance`.
-
-            // Let's try to do it safely with what we have
-            const { data: userData, error: userError } = await supabase
-                .from('tb_masyarakat')
-                .select('saldo')
-                .eq('id', topupData.id_user)
-                .single();
-
-            if (userData) {
-                const newBalance = (userData.saldo || 0) + topupData.amount;
-                await supabase
+            if (topupData.lelang_id) {
+                // It's an auction deposit - Create deposit record
+                const { error: depositError } = await supabase
+                    .from('tb_lelang_deposit')
+                    .insert({
+                        id_lelang: topupData.lelang_id,
+                        id_user: topupData.id_user,
+                        jumlah_jaminan: topupData.amount,
+                        status: 'active'
+                    });
+                
+                if (depositError) {
+                    console.error("Error creating deposit record:", depositError);
+                }
+            } else {
+                // It's a regular topup - Update balance
+                const { data: userData, error: userError } = await supabase
                     .from('tb_masyarakat')
-                    .update({ saldo: newBalance })
-                    .eq('id', topupData.id_user);
+                    .select('saldo')
+                    .eq('id', topupData.id_user)
+                    .single();
+
+                if (userData) {
+                    const newBalance = (userData.saldo || 0) + topupData.amount;
+                    await supabase
+                        .from('tb_masyarakat')
+                        .update({ saldo: newBalance })
+                        .eq('id', topupData.id_user);
+                }
             }
         }
 

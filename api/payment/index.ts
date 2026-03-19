@@ -3,7 +3,7 @@
 import midtransClient from "midtrans-client";
 import { createClient } from "@/lib/supabase/server";
 
-export async function createTopupToken(amount: number) {
+export async function createTopupToken(amount: number, lelangId?: number) {
     try {
         const supabase = await createClient();
 
@@ -14,8 +14,8 @@ export async function createTopupToken(amount: number) {
         // Get masyarakat detail
         const { data: masyarakat } = await supabase
             .from('tb_masyarakat')
-            .select('id, nama_lengkap, username') // assuming email is not in tb_masyarakat based on schema, use auth email if needed
-            .eq('user_id', user.id) // Assuming joined by user_id auth
+            .select('id, nama_lengkap, username')
+            .eq('user_id', user.id)
             .single();
 
         if (!masyarakat) throw new Error("Masyarakat data not found");
@@ -28,13 +28,19 @@ export async function createTopupToken(amount: number) {
         });
 
         // 3. Create db record first to get ID
+        const insertData: any = {
+            id_user: masyarakat.id,
+            amount: amount,
+            status: 'pending'
+        };
+
+        if (lelangId) {
+            insertData.lelang_id = lelangId;
+        }
+
         const { data: topupRecord, error } = await supabase
             .from('tb_topup')
-            .insert({
-                id_user: masyarakat.id,
-                amount: amount,
-                status: 'pending'
-            })
+            .insert(insertData)
             .select()
             .single();
 
@@ -43,13 +49,19 @@ export async function createTopupToken(amount: number) {
         // 4. Create Snap Transaction
         const parameter = {
             transaction_details: {
-                order_id: topupRecord.id, // Using the UUID from tb_topup
+                order_id: topupRecord.id,
                 gross_amount: amount
             },
             customer_details: {
                 first_name: masyarakat.nama_lengkap,
-                email: user.email, // Use auth email
-            }
+                email: user.email,
+            },
+            item_details: lelangId ? [{
+                id: `LELANG-${lelangId}`,
+                price: amount,
+                quantity: 1,
+                name: "Uang Jaminan Lelang"
+            }] : undefined
         };
 
         const transaction = await snap.createTransaction(parameter);
