@@ -136,3 +136,34 @@ export async function placeBid(lelangId: number, amount: number) {
     revalidatePath(`/masyarakat/lelang/${lelangId}`);
     return { success: true };
 }
+
+
+export async function closeAuction(lelangId: number) {
+    const supabase = await createClient();
+
+    // 1. Get highest bid
+    const { data: highestBid } = await supabase
+        .from('history_lelang')
+        .select('user_id, penawaran_harga')
+        .eq('lelang_id', lelangId)
+        .order('penawaran_harga', { ascending: false })
+        .limit(1)
+        .single();
+
+    let updateData: any = { status: "ditutup" };
+
+    if (highestBid) {
+        updateData.user_id = highestBid.user_id;
+        updateData.harga_akhir = highestBid.penawaran_harga;
+    }
+
+    const { error } = await supabase
+        .from('tb_lelang')
+        .update(updateData)
+        .eq('id', lelangId);
+
+    if (error) return { error: "Gagal menutup lelang" };
+
+    revalidatePath(`/petugas/lelang/tutup`);
+    return { success: true };
+}

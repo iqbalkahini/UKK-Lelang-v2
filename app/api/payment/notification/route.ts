@@ -41,7 +41,25 @@ export async function POST(req: NextRequest) {
             newStatus = 'pending';
         }
 
-        // 2. Update tb_topup
+        // Check if this is a final payment (PAY-) or topup (integer ID)
+        if (String(orderId).startsWith('PAY-')) {
+            // This is tb_pembayaran
+            const actualPaymentId = parseInt(orderId.split('-')[1]);
+            
+            const { error: updateError } = await supabase
+                .from('tb_pembayaran')
+                .update({ status: newStatus })
+                .eq('id', actualPaymentId);
+
+            if (updateError) {
+                console.error("Error updating pembayaran record:", updateError);
+                return NextResponse.json({ message: "Error updating record" }, { status: 500 });
+            }
+
+            return NextResponse.json({ message: "OK" });
+        }
+
+        // 2. Otherwise Update tb_topup
         const { data: topupData, error: updateError } = await supabase
             .from('tb_topup')
             .update({ status: newStatus })

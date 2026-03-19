@@ -20,6 +20,7 @@ import {
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { updateLelang } from "@/api/lelang";
+import { closeAuction } from "@/lib/actions/auction";
 
 interface InfiniteLelangListProps {
     statusFilter?: string | string[];
@@ -120,9 +121,8 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
         setIsSubmitting(true);
         try {
             if (actionType === "tutup") {
-                await updateLelang(selectedLelang.id, {
-                    status: "ditutup"
-                });
+                const res = await closeAuction(selectedLelang.id);
+                if (res.error) throw new Error(res.error);
                 toast.success("Lelang berhasil ditutup");
             } else {
                 const formatTimeForDB = (timeStr: string) => {
