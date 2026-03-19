@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 interface LelangCardProps {
     lelang: Lelang;
     onOpen?: (id: number) => void;
+    actionText?: string;
 }
 
 export function LelangCardSkeleton() {
@@ -46,7 +47,7 @@ export function LelangCardSkeleton() {
     );
 }
 
-export function LelangCard({ lelang, onOpen }: LelangCardProps) {
+export function LelangCard({ lelang, onOpen, actionText }: LelangCardProps) {
     const formatCurrency = (amount: number | null) => {
         if (amount === null) return "-";
         return new Intl.NumberFormat("id-ID", {
@@ -164,7 +165,7 @@ export function LelangCard({ lelang, onOpen }: LelangCardProps) {
                     variant={lelang.status === 'pending' || lelang.status === 'ditutup' ? 'default' : 'secondary'}
                 >
                     <Hammer className="w-4 h-4" />
-                    Buka Lelang Sekarang
+                    {actionText || "Buka Lelang Sekarang"}
                 </Button>
             </CardFooter>
         </Card>

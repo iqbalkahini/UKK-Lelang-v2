@@ -23,9 +23,10 @@ import { updateLelang } from "@/api/lelang";
 
 interface InfiniteLelangListProps {
     statusFilter?: string | string[];
+    actionType?: "buka" | "tutup";
 }
 
-export function InfiniteLelangList({ statusFilter = "all" }: InfiniteLelangListProps) {
+export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }: InfiniteLelangListProps) {
     const [lelangs, setLelangs] = useState<Lelang[]>([]);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -118,27 +119,34 @@ export function InfiniteLelangList({ statusFilter = "all" }: InfiniteLelangListP
 
         setIsSubmitting(true);
         try {
-            const formatTimeForDB = (timeStr: string) => {
-                if (timeStr.length === 5) return `${timeStr}:00`;
-                return timeStr;
-            };
+            if (actionType === "tutup") {
+                await updateLelang(selectedLelang.id, {
+                    status: "ditutup"
+                });
+                toast.success("Lelang berhasil ditutup");
+            } else {
+                const formatTimeForDB = (timeStr: string) => {
+                    if (timeStr.length === 5) return `${timeStr}:00`;
+                    return timeStr;
+                };
 
-            await updateLelang(selectedLelang.id, {
-                status: "dibuka",
-                is_manual: true,
-                tgl_lelang: timeSetting.tgl_lelang,
-                waktu_mulai: formatTimeForDB(timeSetting.waktu_mulai),
-                waktu_selesai: formatTimeForDB(timeSetting.waktu_selesai)
-            });
+                await updateLelang(selectedLelang.id, {
+                    status: "dibuka",
+                    is_manual: true,
+                    tgl_lelang: timeSetting.tgl_lelang,
+                    waktu_mulai: formatTimeForDB(timeSetting.waktu_mulai),
+                    waktu_selesai: formatTimeForDB(timeSetting.waktu_selesai)
+                });
+                toast.success("Lelang berhasil dibuka");
+            }
 
-            toast.success("Lelang berhasil dibuka");
             setIsModalOpen(false);
             // Refresh data
             setPage(1);
             fetchData(1, activeSearch, true);
         } catch (error) {
-            console.error("Error opening lelang:", error);
-            toast.error("Gagal membuka lelang");
+            console.error(`Error ${actionType === "tutup" ? "closing" : "opening"} lelang:`, error);
+            toast.error(`Gagal ${actionType === "tutup" ? "menutup" : "membuka"} lelang`);
         } finally {
             setIsSubmitting(false);
         }
@@ -168,7 +176,12 @@ export function InfiniteLelangList({ statusFilter = "all" }: InfiniteLelangListP
             ) : lelangs.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {lelangs.map((lelang) => (
-                        <LelangCard key={lelang.id} lelang={lelang} onOpen={() => handleOpenModal(lelang)} />
+                        <LelangCard 
+                            key={lelang.id} 
+                            lelang={lelang} 
+                            onOpen={() => handleOpenModal(lelang)} 
+                            actionText={actionType === "tutup" ? "Tutup Lelang Sekarang" : "Buka Lelang Sekarang"}
+                        />
                     ))}
                 </div>
             ) : (
@@ -196,65 +209,74 @@ export function InfiniteLelangList({ statusFilter = "all" }: InfiniteLelangListP
                 {isLoadingMore && <Loader2 className="w-6 h-6 animate-spin text-primary" />}
             </div>
 
-            {/* Buka Lelang Modal */}
+            {/* Action Modal */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
-                        <DialogTitle>Buka Lelang</DialogTitle>
+                        <DialogTitle>{actionType === "tutup" ? "Tutup Lelang" : "Buka Lelang"}</DialogTitle>
                         <DialogDescription>
-                            Konfirmasi pengaturan waktu untuk barang <strong>{selectedLelang?.barang?.nama}</strong>.
+                            {actionType === "tutup" ? (
+                                <>Apakah Anda yakin ingin menutup lelang untuk barang <strong>{selectedLelang?.barang?.nama}</strong>? Lemenang lelang akan ditentukan dari penawaran tertinggi.</>
+                            ) : (
+                                <>Konfirmasi pengaturan waktu untuk barang <strong>{selectedLelang?.barang?.nama}</strong>.</>
+                            )}
                         </DialogDescription>
                     </DialogHeader>
                     
-                    <div className="grid gap-4 py-4">
-
-                        {timeSetting.is_manual && (
-                            <>
-                                <div className="space-y-2">
-                                    <Label htmlFor="tgl_lelang">Tanggal Lelang</Label>
-                                    <Input 
-                                        id="tgl_lelang" 
-                                        type="date" 
-                                        value={timeSetting.tgl_lelang}
-                                        onChange={(e) => setTimeSetting(prev => ({ ...prev, tgl_lelang: e.target.value }))}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
+                    {actionType === "buka" && (
+                        <div className="grid gap-4 py-4">
+                            {timeSetting.is_manual && (
+                                <>
                                     <div className="space-y-2">
-                                        <Label htmlFor="waktu_mulai">Waktu Mulai</Label>
+                                        <Label htmlFor="tgl_lelang">Tanggal Lelang</Label>
                                         <Input 
-                                            id="waktu_mulai" 
-                                            type="time" 
-                                            value={timeSetting.waktu_mulai}
-                                            onChange={(e) => setTimeSetting(prev => ({ ...prev, waktu_mulai: e.target.value }))}
+                                            id="tgl_lelang" 
+                                            type="date" 
+                                            value={timeSetting.tgl_lelang}
+                                            onChange={(e) => setTimeSetting(prev => ({ ...prev, tgl_lelang: e.target.value }))}
                                         />
                                     </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="waktu_selesai">Waktu Selesai</Label>
-                                        <Input 
-                                            id="waktu_selesai" 
-                                            type="time" 
-                                            value={timeSetting.waktu_selesai}
-                                            onChange={(e) => setTimeSetting(prev => ({ ...prev, waktu_selesai: e.target.value }))}
-                                        />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="waktu_mulai">Waktu Mulai</Label>
+                                            <Input 
+                                                id="waktu_mulai" 
+                                                type="time" 
+                                                value={timeSetting.waktu_mulai}
+                                                onChange={(e) => setTimeSetting(prev => ({ ...prev, waktu_mulai: e.target.value }))}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="waktu_selesai">Waktu Selesai</Label>
+                                            <Input 
+                                                id="waktu_selesai" 
+                                                type="time" 
+                                                value={timeSetting.waktu_selesai}
+                                                onChange={(e) => setTimeSetting(prev => ({ ...prev, waktu_selesai: e.target.value }))}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
 
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>
                             Batal
                         </Button>
-                        <Button onClick={handleOpenLelang} disabled={isSubmitting}>
+                        <Button 
+                            onClick={handleOpenLelang} 
+                            disabled={isSubmitting}
+                            variant={actionType === "tutup" ? "destructive" : "default"}
+                        >
                             {isSubmitting ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Membuka...
+                                    {actionType === "tutup" ? "Menutup..." : "Membuka..."}
                                 </>
                             ) : (
-                                "Buka Lelang"
+                                actionType === "tutup" ? "Tutup Lelang" : "Buka Lelang"
                             )}
                         </Button>
                     </DialogFooter>

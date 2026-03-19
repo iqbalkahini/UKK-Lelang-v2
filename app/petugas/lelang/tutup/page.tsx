@@ -16,7 +16,7 @@ export default function TutupLelangPage() {
                 </div>
             </div>
             
-            <InfiniteLelangList statusFilter="dibuka" />
+            <InfiniteLelangList statusFilter="dibuka" actionType="tutup" />
         </div>
     );
 }
