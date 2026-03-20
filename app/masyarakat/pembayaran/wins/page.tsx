@@ -29,7 +29,7 @@ export default async function WinsPage() {
             waktu_selesai,
             harga_akhir,
             status,
-            barang:tb_barang(nama, deskripsi, harga_awal, image_urls)
+            barang:tb_barang(nama, deskripsi_barang, harga_awal, image_urls)
         `)
         .eq('status', 'ditutup')
         .eq('user_id', masyarakat.id)

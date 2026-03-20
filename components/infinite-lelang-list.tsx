@@ -9,13 +9,13 @@ import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { Skeleton } from "./ui/skeleton";
 
-import { 
-    Dialog, 
-    DialogContent, 
-    DialogHeader, 
-    DialogTitle, 
-    DialogFooter, 
-    DialogDescription 
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogDescription
 } from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
@@ -35,12 +35,12 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [activeSearch, setActiveSearch] = useState("");
-    
+
     // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedLelang, setSelectedLelang] = useState<Lelang | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    
+
     // Form state
     const [timeSetting, setTimeSetting] = useState({
         is_manual: true,
@@ -58,7 +58,7 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
 
         try {
             const response = await getLelang(pageNum, limit, search, statusFilter);
-            
+
             if (isInitial) {
                 setLelangs(response.data);
             } else {
@@ -157,8 +157,8 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
             <form onSubmit={handleSearch} className="flex items-center gap-2 max-w-md">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                        placeholder="Cari nama barang..." 
+                    <Input
+                        placeholder="Cari nama barang..."
                         className="pl-9 bg-background/50"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -176,10 +176,10 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
             ) : lelangs.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {lelangs.map((lelang) => (
-                        <LelangCard 
-                            key={lelang.id} 
-                            lelang={lelang} 
-                            onOpen={() => handleOpenModal(lelang)} 
+                        <LelangCard
+                            key={lelang.id}
+                            lelang={lelang}
+                            onOpen={() => handleOpenModal(lelang)}
                             actionText={actionType === "tutup" ? "Tutup Lelang Sekarang" : "Buka Lelang Sekarang"}
                         />
                     ))}
@@ -192,8 +192,8 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
                     <div>
                         <h3 className="text-xl font-semibold">Tidak Ada Lelang</h3>
                         <p className="text-muted-foreground">
-                            {activeSearch 
-                                ? `Pencarian "${activeSearch}" tidak ditemukan.` 
+                            {activeSearch
+                                ? `Pencarian "${activeSearch}" tidak ditemukan.`
                                 : "Belum ada lelang yang tersedia untuk dibuka."}
                         </p>
                     </div>
@@ -222,16 +222,16 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
                             )}
                         </DialogDescription>
                     </DialogHeader>
-                    
+
                     {actionType === "buka" && (
                         <div className="grid gap-4 py-4">
                             {timeSetting.is_manual && (
                                 <>
                                     <div className="space-y-2">
                                         <Label htmlFor="tgl_lelang">Tanggal Lelang</Label>
-                                        <Input 
-                                            id="tgl_lelang" 
-                                            type="date" 
+                                        <Input
+                                            id="tgl_lelang"
+                                            type="date"
                                             value={timeSetting.tgl_lelang}
                                             onChange={(e) => setTimeSetting(prev => ({ ...prev, tgl_lelang: e.target.value }))}
                                         />
@@ -239,18 +239,18 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="waktu_mulai">Waktu Mulai</Label>
-                                            <Input 
-                                                id="waktu_mulai" 
-                                                type="time" 
+                                            <Input
+                                                id="waktu_mulai"
+                                                type="time"
                                                 value={timeSetting.waktu_mulai}
                                                 onChange={(e) => setTimeSetting(prev => ({ ...prev, waktu_mulai: e.target.value }))}
                                             />
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="waktu_selesai">Waktu Selesai</Label>
-                                            <Input 
-                                                id="waktu_selesai" 
-                                                type="time" 
+                                            <Input
+                                                id="waktu_selesai"
+                                                type="time"
                                                 value={timeSetting.waktu_selesai}
                                                 onChange={(e) => setTimeSetting(prev => ({ ...prev, waktu_selesai: e.target.value }))}
                                             />
@@ -265,8 +265,8 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
                         <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={isSubmitting}>
                             Batal
                         </Button>
-                        <Button 
-                            onClick={handleOpenLelang} 
+                        <Button
+                            onClick={handleOpenLelang}
                             disabled={isSubmitting}
                             variant={actionType === "tutup" ? "destructive" : "default"}
                         >

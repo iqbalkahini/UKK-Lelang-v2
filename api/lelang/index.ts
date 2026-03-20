@@ -283,10 +283,10 @@ export const getHighestBid = async (
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from("tb_penawaran")
-      .select("harga_penawaran")
+      .from("history_lelang")
+      .select("penawaran_harga")
       .eq("id_lelang", id_lelang)
-      .order("harga_penawaran", { ascending: false })
+      .order("penawaran_harga", { ascending: false })
       .limit(1)
       .single();
 
@@ -296,7 +296,7 @@ export const getHighestBid = async (
       throw error;
     }
 
-    return data?.harga_penawaran ?? null;
+    return data?.penawaran_harga ?? null;
   } catch (error) {
     console.error("Error getting highest bid:", error);
     return null;
