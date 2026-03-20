@@ -55,6 +55,7 @@ export default async function DetailLelangPage({ params }: { params: Promise<{ i
                 .select('id')
                 .eq('id_lelang', id)
                 .eq('id_user', masyarakat.id)
+                .eq('status', 'active')
                 .single();
 
             if (deposit) hasDeposited = true;

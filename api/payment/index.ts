@@ -3,8 +3,10 @@
 import midtransClient from "midtrans-client";
 import { createClient } from "@/lib/supabase/server";
 
-export async function createTopupToken(amount: number, lelangId?: number) {
+export async function createDeposit(amount: number, lelangId?: number) {
     try {
+        if (!lelangId) throw new Error("ID Lelang diperlukan untuk membayar jaminan.");
+
         const supabase = await createClient();
 
         // 1. Get current user
@@ -20,123 +22,103 @@ export async function createTopupToken(amount: number, lelangId?: number) {
 
         if (!masyarakat) throw new Error("Masyarakat data not found");
 
-        // 2. Initialize Snap
+        // 2. Validate Amount
+        const { data: lelang } = await supabase
+            .from('tb_lelang')
+            .select('barang:tb_barang(harga_awal)')
+            .eq('id', lelangId)
+            .single();
+
+        if (!lelang || !lelang.barang) throw new Error("Data lelang tidak ditemukan");
+
+        const hargaAwal = (lelang.barang as any).harga_awal || 0;
+        const expectedDeposit = Math.ceil(hargaAwal * 0.05);
+
+        if (amount !== expectedDeposit) {
+            throw new Error(`Nominal jaminan tidak sesuai. Uang jaminan yang harus dibayar adalah Rp${new Intl.NumberFormat('id-ID').format(expectedDeposit)}`);
+        }
+
+        // 3. Initialize Snap
         const snap = new midtransClient.Snap({
             isProduction: false,
             serverKey: process.env.MIDTRANS_SERVER_KEY || "",
             clientKey: process.env.MIDTRANS_CLIENT_KEY || ""
         });
 
-        // 3. Create db record first to get ID
-        const insertData: any = {
-            id_user: masyarakat.id,
-            amount: amount,
-            status: 'pending'
-        };
-
-        if (lelangId) {
-            insertData.lelang_id = lelangId;
-        }
-
-        const { data: topupRecord, error } = await supabase
-            .from('tb_topup')
-            .insert(insertData)
-            .select()
+        // 4. Create or Get db record
+        let depositRecord;
+        const { data: existingDeposit } = await supabase
+            .from('tb_lelang_deposit')
+            .select('*')
+            .eq('id_lelang', lelangId)
+            .eq('id_user', masyarakat.id)
             .single();
 
-        if (error || !topupRecord) throw new Error("Failed to create topup record");
+        if (existingDeposit) {
+            if (existingDeposit.status === 'active') {
+                throw new Error("Anda sudah membayar jaminan untuk lelang ini.");
+            }
+            depositRecord = existingDeposit;
+            
+            if (depositRecord.jumlah_jaminan !== amount) {
+                const { data: updated } = await supabase
+                    .from('tb_lelang_deposit')
+                    .update({ jumlah_jaminan: amount })
+                    .eq('id', depositRecord.id)
+                    .select()
+                    .single();
+                depositRecord = updated;
+            }
+        } else {
+            const { data: newDeposit, error: insertError } = await supabase
+                .from('tb_lelang_deposit')
+                .insert({
+                    id_lelang: lelangId,
+                    id_user: masyarakat.id,
+                    jumlah_jaminan: amount,
+                    status: 'inactive'
+                })
+                .select()
+                .single();
 
-        // 4. Create Snap Transaction
+            if (insertError || !newDeposit) throw new Error("Gagal membuat data jaminan lelang");
+            depositRecord = newDeposit;
+        }
+
+        // 5. Create Snap Transaction
+        const orderIdString = `DEP-${depositRecord.id}-${Date.now()}`;
         const parameter = {
             transaction_details: {
-                order_id: topupRecord.id,
+                order_id: orderIdString,
                 gross_amount: amount
             },
             customer_details: {
                 first_name: masyarakat.nama_lengkap,
                 email: user.email,
             },
-            item_details: lelangId ? [{
+            item_details: [{
                 id: `LELANG-${lelangId}`,
                 price: amount,
                 quantity: 1,
                 name: "Uang Jaminan Lelang"
-            }] : undefined
+            }]
         };
 
         const transaction = await snap.createTransaction(parameter);
         const token = transaction.token;
 
-        // Update token to db
-        await supabase
-            .from('tb_topup')
-            .update({ snap_token: token })
-            .eq('id', topupRecord.id);
+        return { token, orderId: orderIdString };
 
-        return { token, orderId: topupRecord.id };
-
-    } catch (error) {
-        console.error("Error creating topup token:", error);
-        throw error;
+    } catch (error: any) {
+        console.error("Error creating deposit token:", error);
+        throw new Error(error.message || "Gagal memproses pembayaran jaminan.");
     }
 }
 
-export async function cancelTopup(orderId: string) {
+export async function syncDepositStatus(orderId: string) {
     try {
         const supabase = await createClient();
-        await supabase
-            .from('tb_topup')
-            .update({ status: 'cancel' })
-            .eq('id', orderId);
-        return { success: true };
-    } catch (error) {
-        console.error("Error cancelling topup:", error);
-        return { success: false };
-    }
-}
 
-export async function getWalletData(page: number = 1, limit: number = 7) {
-    try {
-        const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return null;
-
-        // Fetch Saldo
-        const { data: masyarakatData } = await supabase
-            .from('tb_masyarakat')
-            .select('id, saldo')
-            .eq('user_id', user.id)
-            .single();
-
-        if (masyarakatData) {
-            // Calculate range
-            const from = (page - 1) * limit;
-            const to = from + limit - 1;
-
-            // Fetch Transactions
-            const { data: transactionData } = await supabase
-                .from('tb_topup')
-                .select('*')
-                .eq('id_user', masyarakatData.id)
-                .order('created_at', { ascending: false })
-                .range(from, to);
-
-            return {
-                saldo: masyarakatData.saldo,
-                transactions: transactionData || []
-            };
-        }
-        return null;
-    } catch (error) {
-        console.error("Error fetching wallet data:", error);
-        return null; // Handle error gracefully or rethrow depending on needs
-    }
-}
-
-export async function syncTopupStatus(orderId: string) {
-    try {
-        const supabase = await createClient();
-        
         // 1. Initialize API
         const core = new midtransClient.CoreApi({
             isProduction: false,
@@ -165,68 +147,17 @@ export async function syncTopupStatus(orderId: string) {
             newStatus = 'pending';
         }
 
-        // 4. Update Database
-        const { data: topupData } = await supabase
-            .from('tb_topup')
-            .update({ status: newStatus })
-            .eq('id', orderId)
-            .select()
-            .single();
-
-        if (topupData && newStatus === 'settlement') {
-            if (topupData.lelang_id) {
-                // Ensure no duplicate deposit
-                const { data: existing } = await supabase
-                    .from('tb_lelang_deposit')
-                    .select('id')
-                    .eq('id_lelang', topupData.lelang_id)
-                    .eq('id_user', topupData.id_user)
-                    .single();
-                
-                if (!existing) {
-                    await supabase
-                        .from('tb_lelang_deposit')
-                        .insert({
-                            id_lelang: topupData.lelang_id,
-                            id_user: topupData.id_user,
-                            jumlah_jaminan: topupData.amount,
-                            status: 'active'
-                        });
-                }
-            } else {
-                // Regular Topup update balance logic
-                const { data: userData } = await supabase
-                    .from('tb_masyarakat')
-                    .select('saldo')
-                    .eq('id', topupData.id_user)
-                    .single();
-
-                if (userData) {
-                    const { data: checkProcessed } = await supabase
-                        .from('tb_topup')
-                        .select('processed_at')
-                        .eq('id', orderId)
-                        .single();
-                    
-                    if (!checkProcessed?.processed_at) {
-                        const newBalance = (userData.saldo || 0) + topupData.amount;
-                        await supabase
-                            .from('tb_masyarakat')
-                            .update({ saldo: newBalance })
-                            .eq('id', topupData.id_user);
-                        
-                        await supabase
-                            .from('tb_topup')
-                            .update({ processed_at: new Date().toISOString() })
-                            .eq('id', orderId);
-                    }
-                }
-            }
+        if (String(orderId).startsWith('DEP-')) {
+            const actualDepositId = parseInt(orderId.split('-')[1]);
+            await supabase
+                .from('tb_lelang_deposit')
+                .update({ status: newStatus === 'settlement' ? 'active' : 'inactive' })
+                .eq('id', actualDepositId);
         }
 
         return { status: newStatus };
     } catch (error) {
-        console.error("Error syncing topup status:", error);
+        console.error("Error syncing deposit status:", error);
         throw error;
     }
 }
@@ -269,9 +200,9 @@ export async function createPaymentToken(lelangId: number, barangId: number, amo
             .select()
             .single();
 
-        if (error || !payRecord) throw new Error("Failed to create payment record");
+        if (error || !payRecord) throw new Error(error?.message || "Failed to create payment record");
 
-        // 4. Create Snap Transaction
+        // 4. Create Snap Transaction       
         const parameter = {
             transaction_details: {
                 order_id: `PAY-${payRecord.id}-${Date.now()}`,

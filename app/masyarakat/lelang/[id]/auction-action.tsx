@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { placeBid } from "@/lib/actions/auction";
-import { createTopupToken, cancelTopup, syncTopupStatus } from "@/api/payment";
+import { createDeposit, syncDepositStatus } from "@/api/payment";
 import { Loader2, Gavel } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Script from "next/script";
@@ -61,33 +61,32 @@ export function AuctionAction({ lelangId, hargaAwal, highestBid, hasDeposited }:
     const handleJoin = async () => {
         setIsLoading(true);
         try {
-            const { token, orderId } = await createTopupToken(depositAmount, lelangId);
+            const { token, orderId } = await createDeposit(depositAmount, lelangId);
 
             if (window.snap) {
                 window.snap.pay(token, {
                     onSuccess: async function (result: any) {
-                        toast.success("Pembayaran berhasil! Mengonfirmasi...");
-                        await syncTopupStatus(orderId);
+                        toast.success("Deposit diproses, tunggu konfirmasi sistem...");
+                        await syncDepositStatus(orderId);
                         router.refresh();
                     },
                     onPending: async function (result: any) {
                         toast.info("Menunggu pembayaran...");
-                        await syncTopupStatus(orderId);
+                        await syncDepositStatus(orderId);
                         router.refresh();
                     },
                     onError: async function (result: any) {
                         toast.error("Pembayaran gagal!");
-                        await syncTopupStatus(orderId);
+                        await syncDepositStatus(orderId);
                         router.refresh();
                     },
                     onClose: async function () {
                         toast.dismiss();
                         toast.warning("Pembayaran dibatalkan");
                         try {
-                            await cancelTopup(orderId);
-                        } catch (e) {
-                            console.error("Failed to cancel deposit payment", e);
-                        }
+                            // Cek status terakhir apabila user tiba-tiba menutup popup (jaga-jaga jika sebenarnya sudah sukses)
+                            await syncDepositStatus(orderId);
+                        } catch(e) {}
                         router.refresh();
                     }
                 });
