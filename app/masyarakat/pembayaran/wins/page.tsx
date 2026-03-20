@@ -53,7 +53,7 @@ export default async function WinsPage() {
                         Lelang yang berhasil Anda menangkan dan menunggu pembayaran barang.
                     </p>
                 </div>
-                
+
                 {(!wins || wins.length === 0) ? (
                     <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-12 text-center">
                         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-muted mb-4">
@@ -80,10 +80,10 @@ export default async function WinsPage() {
                                 <Card key={lelang.id} className="overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
                                     <div className="relative aspect-video bg-muted overflow-hidden">
                                         {imageUrl ? (
-                                            <Image 
-                                                src={imageUrl} 
-                                                alt={barangItem?.nama || "Barang Lelang"} 
-                                                fill 
+                                            <Image
+                                                src={imageUrl}
+                                                alt={barangItem?.nama || "Barang Lelang"}
+                                                fill
                                                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                                             />
                                         ) : (
@@ -110,7 +110,7 @@ export default async function WinsPage() {
                                                     </p>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="space-y-1.5 pt-1">
                                                 <div className="flex justify-between items-center text-sm">
                                                     <span className="text-muted-foreground">Sudah Dibayar (Jaminan):</span>
@@ -124,11 +124,11 @@ export default async function WinsPage() {
                                         </div>
                                     </CardContent>
                                     <CardFooter className="p-4 bg-muted/30 border-t">
-                                        <PaymentButton 
-                                            lelangId={lelang.id} 
+                                        <PaymentButton
+                                            lelangId={lelang.id}
                                             // @ts-ignore
-                                            barangId={lelang.barang_id || (barangItem as any)?.id || 0} 
-                                            amount={finalPayment} 
+                                            barangId={lelang.barang_id || (barangItem as any)?.id || 0}
+                                            amount={finalPayment}
                                         />
                                     </CardFooter>
                                 </Card>
