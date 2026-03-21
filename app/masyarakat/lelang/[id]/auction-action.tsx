@@ -41,14 +41,16 @@ export function AuctionAction({ lelangId, hargaAwal, highestBid, hasDeposited }:
             .on(
                 'postgres_changes',
                 {
-                    event: 'INSERT',
+                    event: 'UPDATE',
                     schema: 'public',
                     table: 'tb_lelang_deposit',
                     filter: `id_lelang=eq.${lelangId}`
                 },
                 (payload: any) => {
-                    toast.success("Deposit berhasil dikonfirmasi! Anda sekarang bisa menawar.");
-                    router.refresh();
+                    if (payload.new?.status === 'active') {
+                        toast.success("Pembayaran jaminan dikonfirmasi! Anda sekarang bisa menawar.");
+                        router.refresh();
+                    }
                 }
             )
             .subscribe();

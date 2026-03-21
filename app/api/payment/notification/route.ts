@@ -59,12 +59,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: "OK" });
         }
 
-        console.log('ini adalah notifikasi')
-
         if (String(orderId).startsWith('DEP-')) {
             const actualDepositId = parseInt(orderId.split('-')[1]);
-            console.log('Actual deposit id : ', actualDepositId)
-            console.log('new status : ', newStatus)
             const { error: updateError } = await supabase
                 .from('tb_lelang_deposit')
                 .update({ status: newStatus === 'settlement' ? 'active' : 'inactive' })
