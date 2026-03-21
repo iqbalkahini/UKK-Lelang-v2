@@ -195,7 +195,7 @@ export async function createPaymentToken(lelangId: number, barangId: number, amo
                 user_id: masyarakat.id,
                 tgl_pembayaran: new Date().toISOString().split('T')[0],
                 jumlah_pembayaran: amount,
-                status: 'pending'
+                status: 'Belum Dibayar'
             })
             .select()
             .single();

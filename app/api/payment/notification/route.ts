@@ -29,16 +29,16 @@ export async function POST(req: NextRequest) {
             if (fraudStatus == 'challenge') {
                 newStatus = 'challenge';
             } else if (fraudStatus == 'accept') {
-                newStatus = 'settlement';
+                newStatus = 'Sudah Dibayar';
             }
         } else if (transactionStatus == 'settlement') {
-            newStatus = 'settlement';
+            newStatus = 'Sudah Dibayar';
         } else if (transactionStatus == 'cancel' ||
             transactionStatus == 'deny' ||
             transactionStatus == 'expire') {
-            newStatus = 'failure';
+            newStatus = 'Belum Dibayar';
         } else if (transactionStatus == 'pending') {
-            newStatus = 'pending';
+            newStatus = 'Belum Dibayar';
         }
 
         // Check if this is a final payment (PAY-) or topup (integer ID)
