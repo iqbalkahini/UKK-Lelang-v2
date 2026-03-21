@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
 
         if (String(orderId).startsWith('DEP-')) {
             const actualDepositId = parseInt(orderId.split('-')[1]);
+            console.log('Actual deposit id : ', actualDepositId)
             console.log('new status : ', newStatus)
             const { error: updateError } = await supabase
                 .from('tb_lelang_deposit')

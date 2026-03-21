@@ -59,7 +59,7 @@ export async function createDeposit(amount: number, lelangId?: number) {
                 throw new Error("Anda sudah membayar jaminan untuk lelang ini.");
             }
             depositRecord = existingDeposit;
-            
+
             if (depositRecord.jumlah_jaminan !== amount) {
                 const { data: updated } = await supabase
                     .from('tb_lelang_deposit')
