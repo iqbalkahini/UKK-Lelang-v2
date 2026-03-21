@@ -186,7 +186,40 @@ export async function createPaymentToken(lelangId: number, barangId: number, amo
             clientKey: process.env.MIDTRANS_CLIENT_KEY || ""
         });
 
-        // 3. Create db record first
+        // 3. Check for existing payment record (anti-duplicate)
+        const { data: existingPayment } = await supabase
+            .from('tb_pembayaran')
+            .select('*')
+            .eq('lelang_id', lelangId)
+            .eq('user_id', masyarakat.id)
+            .single();
+
+        if (existingPayment) {
+            if (existingPayment.status === 'Sudah Dibayar') {
+                throw new Error("Pembayaran untuk lelang ini sudah diselesaikan.");
+            }
+            // Reuse existing record, just create a new Snap token
+            const parameter = {
+                transaction_details: {
+                    order_id: `PAY-${existingPayment.id}-${Date.now()}`,
+                    gross_amount: amount
+                },
+                customer_details: {
+                    first_name: masyarakat.nama_lengkap,
+                    email: user.email,
+                },
+                item_details: [{
+                    id: `WIN-${lelangId}`,
+                    price: amount,
+                    quantity: 1,
+                    name: "Pembayaran Barang Lelang"
+                }]
+            };
+            const transaction = await snap.createTransaction(parameter);
+            return { token: transaction.token, orderId: existingPayment.id };
+        }
+
+        // 4. No existing record — create new one
         const { data: payRecord, error } = await supabase
             .from('tb_pembayaran')
             .insert({
