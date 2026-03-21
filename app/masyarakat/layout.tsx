@@ -1,5 +1,6 @@
 import { MasyarakatSidebar } from "@/components/masyarakat-sidebar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { Suspense } from "react"
 
 export default function MasyarakatLayout({
     children,
@@ -10,7 +11,9 @@ export default function MasyarakatLayout({
         <SidebarProvider>
             <MasyarakatSidebar />
             <SidebarInset>
-                {children}
+                <Suspense>
+                    {children}
+                </Suspense>
             </SidebarInset>
         </SidebarProvider>
     )
