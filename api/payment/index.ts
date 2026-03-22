@@ -187,58 +187,19 @@ export async function createPaymentToken(lelangId: number, barangId: number, amo
         });
 
         // 3. Check for existing payment record (anti-duplicate)
-        const { data: existingPayment } = await supabase
+        const { data: pembayaran, error } = await supabase
             .from('tb_pembayaran')
             .select('*')
             .eq('lelang_id', lelangId)
             .eq('user_id', masyarakat.id)
             .single();
 
-        if (existingPayment) {
-            if (existingPayment.status === 'Sudah Dibayar') {
-                throw new Error("Pembayaran untuk lelang ini sudah diselesaikan.");
-            }
-            // Reuse existing record, just create a new Snap token
-            const parameter = {
-                transaction_details: {
-                    order_id: `PAY-${existingPayment.id}-${Date.now()}`,
-                    gross_amount: amount
-                },
-                customer_details: {
-                    first_name: masyarakat.nama_lengkap,
-                    email: user.email,
-                },
-                item_details: [{
-                    id: `WIN-${lelangId}`,
-                    price: amount,
-                    quantity: 1,
-                    name: "Pembayaran Barang Lelang"
-                }]
-            };
-            const transaction = await snap.createTransaction(parameter);
-            return { token: transaction.token, orderId: existingPayment.id };
-        }
-
-        // 4. No existing record — create new one
-        const { data: payRecord, error } = await supabase
-            .from('tb_pembayaran')
-            .insert({
-                lelang_id: lelangId,
-                barang_id: barangId,
-                user_id: masyarakat.id,
-                tgl_pembayaran: new Date().toISOString().split('T')[0],
-                jumlah_pembayaran: amount,
-                status: 'Belum Dibayar'
-            })
-            .select()
-            .single();
-
-        if (error || !payRecord) throw new Error(error?.message || "Failed to create payment record");
+        if (error || !pembayaran) throw new Error(error?.message || "Gagal membuat data pembayaran");
 
         // 4. Create Snap Transaction       
         const parameter = {
             transaction_details: {
-                order_id: `PAY-${payRecord.id}-${Date.now()}`,
+                order_id: `PAY-${pembayaran.id}-${Date.now()}`,
                 gross_amount: amount
             },
             customer_details: {
@@ -256,7 +217,7 @@ export async function createPaymentToken(lelangId: number, barangId: number, amo
         const transaction = await snap.createTransaction(parameter);
         const token = transaction.token;
 
-        return { token, orderId: payRecord.id };
+        return { token, orderId: pembayaran.id };
 
     } catch (error) {
         console.error("Error creating payment token:", error);

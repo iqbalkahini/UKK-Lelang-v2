@@ -144,7 +144,7 @@ export async function closeAuction(lelangId: number) {
     // 1. Get highest bid
     const { data: highestBid } = await supabase
         .from('history_lelang')
-        .select('user_id, penawaran_harga')
+        .select('user_id, penawaran_harga, barang_id')
         .eq('lelang_id', lelangId)
         .order('penawaran_harga', { ascending: false })
         .limit(1)
@@ -157,13 +157,51 @@ export async function closeAuction(lelangId: number) {
         updateData.harga_akhir = highestBid.penawaran_harga;
     }
 
-    const { error } = await supabase
+    // 2. Update tb_lelang status → ditutup
+    const { data: lelangUpdated, error } = await supabase
         .from('tb_lelang')
         .update(updateData)
-        .eq('id', lelangId);
+        .eq('id', lelangId)
+        .select('barang_id')
+        .single();
 
     if (error) return { error: "Gagal menutup lelang" };
 
+    // 3. Buat record pembayaran di tb_pembayaran jika ada pemenang
+    if (highestBid) {
+        const barangId = lelangUpdated?.barang_id ?? highestBid.barang_id;
+
+        // Hitung sisa pembayaran (harga akhir - deposit 5% harga awal)
+        const { data: barang } = await supabase
+            .from('tb_barang')
+            .select('harga_awal')
+            .eq('id', barangId)
+            .single();
+
+        const deposit = Math.ceil((barang?.harga_awal ?? 0) * 0.05);
+        const sisaPembayaran = Math.max(0, highestBid.penawaran_harga - deposit);
+
+        // Cek apakah sudah ada record (hindari duplikat jika dipanggil ulang)
+        const { data: existing } = await supabase
+            .from('tb_pembayaran')
+            .select('id')
+            .eq('lelang_id', lelangId)
+            .eq('user_id', highestBid.user_id)
+            .maybeSingle();
+
+        if (!existing) {
+            await supabase.from('tb_pembayaran').insert({
+                lelang_id: lelangId,
+                barang_id: barangId,
+                user_id: highestBid.user_id,
+                tgl_pembayaran: new Date().toISOString().split('T')[0],
+                jumlah_pembayaran: sisaPembayaran,
+                status: 'Belum Dibayar',
+            });
+        }
+    }
+
     revalidatePath(`/petugas/lelang/tutup`);
+    revalidatePath(`/masyarakat/pembayaran/wins`);
     return { success: true };
 }

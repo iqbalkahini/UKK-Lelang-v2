@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import { redirect } from "next/navigation"
 import { PaymentButton } from "./payment-button"
+import { CheckCircle2, Clock } from "lucide-react"
 
 export default async function WinsPage() {
     const supabase = await createClient()
@@ -20,20 +21,32 @@ export default async function WinsPage() {
 
     if (!masyarakat) redirect('/')
 
-    const { data: wins } = await supabase
-        .from('tb_lelang')
+    // Query dari tb_pembayaran join tb_lelang dan tb_barang
+    const { data: pembayaranList } = await supabase
+        .from('tb_pembayaran')
         .select(`
             id,
-            tgl_lelang,
-            waktu_mulai,
-            waktu_selesai,
-            harga_akhir,
+            tgl_pembayaran,
+            jumlah_pembayaran,
             status,
-            barang_id,
-            barang:tb_barang(nama, deskripsi_barang, harga_awal, image_urls)
+            lelang:lelang_id(
+                id,
+                tgl_lelang,
+                waktu_mulai,
+                waktu_selesai,
+                harga_akhir,
+                barang_id
+            ),
+            barang:barang_id(
+                id,
+                nama,
+                deskripsi_barang,
+                harga_awal,
+                image_urls
+            )
         `)
-        .eq('status', 'ditutup')
         .eq('user_id', masyarakat.id)
+        .order('tgl_pembayaran', { ascending: false })
 
     const formatCurrency = (amount: number | null) => {
         if (!amount) return "-";
@@ -41,7 +54,7 @@ export default async function WinsPage() {
             style: "currency",
             currency: "IDR",
             minimumFractionDigits: 0,
-        }).format(amount);
+        }).format(amount)
     }
 
     return (
@@ -51,11 +64,11 @@ export default async function WinsPage() {
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Menang Lelang</h1>
                     <p className="text-muted-foreground mt-2 text-lg">
-                        Lelang yang berhasil Anda menangkan dan menunggu pembayaran barang.
+                        Daftar lelang yang berhasil Anda menangkan beserta status pembayarannya.
                     </p>
                 </div>
 
-                {(!wins || wins.length === 0) ? (
+                {(!pembayaranList || pembayaranList.length === 0) ? (
                     <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-12 text-center">
                         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-muted mb-4">
                             <span className="text-3xl">🏆</span>
@@ -67,23 +80,19 @@ export default async function WinsPage() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {wins.map((lelang) => {
-                            // Extract barang correctly whether it's an array or object
-                            const barangItem = Array.isArray(lelang.barang) ? lelang.barang[0] : lelang.barang;
-                            const imageUrl = barangItem?.image_urls?.[0];
-                            // The amount to pay is (harga akhir) - (5% jaminan of harga awal)
-                            // But for simplicity, we can let them pay the full price remaining.
-                            // The deposit was 5% of harga awal. 
-                            const deposit = Math.ceil((barangItem?.harga_awal || 0) * 0.05);
-                            const finalPayment = Math.max(0, lelang.harga_akhir - deposit);
+                        {pembayaranList.map((item) => {
+                            const barang = Array.isArray(item.barang) ? item.barang[0] : item.barang
+                            const lelang = Array.isArray(item.lelang) ? item.lelang[0] : item.lelang
+                            const imageUrl = (barang as any)?.image_urls?.[0]
+                            const isSudahDibayar = item.status === 'Sudah Dibayar'
 
                             return (
-                                <Card key={lelang.id} className="overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
+                                <Card key={item.id} className="overflow-hidden flex flex-col group hover:shadow-md transition-shadow">
                                     <div className="relative aspect-video bg-muted overflow-hidden">
                                         {imageUrl ? (
                                             <Image
                                                 src={imageUrl}
-                                                alt={barangItem?.nama || "Barang Lelang"}
+                                                alt={(barang as any)?.nama || "Barang Lelang"}
                                                 fill
                                                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                                             />
@@ -99,38 +108,55 @@ export default async function WinsPage() {
                                         </div>
                                     </div>
                                     <CardHeader className="p-4 pb-2">
-                                        <CardTitle className="line-clamp-1">{barangItem?.nama}</CardTitle>
+                                        <CardTitle className="line-clamp-1">{(barang as any)?.nama}</CardTitle>
                                     </CardHeader>
                                     <CardContent className="p-4 pt-0 flex-grow">
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-end border-b pb-3 border-border/50">
                                                 <div className="space-y-1">
-                                                    <span className="text-xs text-muted-foreground uppercase font-semibold">Harga Akhir Anda</span>
+                                                    <span className="text-xs text-muted-foreground uppercase font-semibold">Harga Akhir</span>
                                                     <p className="text-xl font-bold text-primary">
-                                                        {formatCurrency(lelang.harga_akhir)}
+                                                        {formatCurrency((lelang as any)?.harga_akhir)}
                                                     </p>
                                                 </div>
                                             </div>
 
                                             <div className="space-y-1.5 pt-1">
                                                 <div className="flex justify-between items-center text-sm">
-                                                    <span className="text-muted-foreground">Sudah Dibayar (Jaminan):</span>
-                                                    <span className="font-medium text-emerald-600">-{formatCurrency(deposit)}</span>
+                                                    <span className="text-muted-foreground">Sisa Pembayaran:</span>
+                                                    <span className="font-semibold">{formatCurrency(item.jumlah_pembayaran)}</span>
                                                 </div>
-                                                <div className="flex justify-between items-center text-sm font-semibold border-t pt-1.5 mt-1 border-dashed">
-                                                    <span className="text-foreground">Sisa Pembayaran:</span>
-                                                    <span className="text-foreground">{formatCurrency(finalPayment)}</span>
+                                                <div className="flex justify-between items-center text-sm">
+                                                    <span className="text-muted-foreground">Status:</span>
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className={
+                                                            isSudahDibayar
+                                                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400 border-0 gap-1"
+                                                                : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border-0 gap-1"
+                                                        }
+                                                    >
+                                                        {isSudahDibayar
+                                                            ? <><CheckCircle2 className="h-3 w-3" /> Sudah Dibayar</>
+                                                            : <><Clock className="h-3 w-3" /> Belum Dibayar</>
+                                                        }
+                                                    </Badge>
                                                 </div>
                                             </div>
                                         </div>
                                     </CardContent>
                                     <CardFooter className="p-4 bg-muted/30 border-t">
-                                        <PaymentButton
-                                            lelangId={lelang.id}
-                                            // @ts-ignore
-                                            barangId={lelang.barang_id || (barangItem as any)?.id || 0}
-                                            amount={finalPayment}
-                                        />
+                                        {isSudahDibayar ? (
+                                            <div className="w-full text-center text-sm text-muted-foreground py-1">
+                                                ✅ Pembayaran selesai
+                                            </div>
+                                        ) : (
+                                            <PaymentButton
+                                                lelangId={(lelang as any)?.id}
+                                                barangId={(barang as any)?.id ?? 0}
+                                                amount={item.jumlah_pembayaran}
+                                            />
+                                        )}
                                     </CardFooter>
                                 </Card>
                             )
