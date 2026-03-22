@@ -11,7 +11,7 @@ export default function PembayaranPage() {
                     <p className="text-muted-foreground">Kelola pembayaran lelang Anda</p>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2">
-                    <Link href="/masyarakat/pembayaran/wins">
+                    <Link href="/masyarakat/pembayaran/menang">
                         <div className="rounded-lg border p-6 hover:bg-accent cursor-pointer transition-colors">
                             <h3 className="font-semibold mb-2">Menang Lelang</h3>
                             <p className="text-sm text-muted-foreground">Lelang yang Anda menangkan</p>

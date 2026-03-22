@@ -202,6 +202,6 @@ export async function closeAuction(lelangId: number) {
     }
 
     revalidatePath(`/petugas/lelang/tutup`);
-    revalidatePath(`/masyarakat/pembayaran/wins`);
+    revalidatePath(`/masyarakat/pembayaran/menang`);
     return { success: true };
 }

@@ -46,7 +46,7 @@ const navMain = [
         items: [
             {
                 title: "Menang Lelang",
-                url: "/masyarakat/pembayaran/wins",
+                url: "/masyarakat/pembayaran/menang",
             },
             {
                 title: "Riwayat Pembayaran",
