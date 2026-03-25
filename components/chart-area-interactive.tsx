@@ -29,100 +29,7 @@ import {
   ToggleGroupItem,
 } from "@/components/ui/toggle-group"
 
-// Dummy Data for Valuation (Option 1)
-const chartData = [
-  { date: "2024-04-01", harga_akhir: 2500000, harga_awal: 1500000 },
-  { date: "2024-04-02", harga_akhir: 3100000, harga_awal: 2000000 },
-  { date: "2024-04-03", harga_akhir: 1800000, harga_awal: 1200000 },
-  { date: "2024-04-04", harga_akhir: 4200000, harga_awal: 2800000 },
-  { date: "2024-04-05", harga_akhir: 5500000, harga_awal: 3500000 },
-  { date: "2024-04-06", harga_akhir: 6200000, harga_awal: 4000000 },
-  { date: "2024-04-07", harga_akhir: 3500000, harga_awal: 2200000 },
-  { date: "2024-04-08", harga_akhir: 7800000, harga_awal: 5000000 },
-  { date: "2024-04-09", harga_akhir: 1200000, harga_awal: 900000 },
-  { date: "2024-04-10", harga_akhir: 4500000, harga_awal: 3000000 },
-  { date: "2024-04-11", harga_akhir: 5200000, harga_awal: 3800000 },
-  { date: "2024-04-12", harga_akhir: 4800000, harga_awal: 3200000 },
-  { date: "2024-04-13", harga_akhir: 6000000, harga_awal: 4500000 },
-  { date: "2024-04-14", harga_akhir: 2800000, harga_awal: 1800000 },
-  { date: "2024-04-15", harga_akhir: 2500000, harga_awal: 1500000 },
-  { date: "2024-04-16", harga_akhir: 3000000, harga_awal: 2000000 },
-  { date: "2024-04-17", harga_akhir: 8500000, harga_awal: 5500000 },
-  { date: "2024-04-18", harga_akhir: 6800000, harga_awal: 4200000 },
-  { date: "2024-04-19", harga_akhir: 4200000, harga_awal: 2800000 },
-  { date: "2024-04-20", harga_akhir: 1500000, harga_awal: 1000000 },
-  { date: "2024-04-21", harga_akhir: 2800000, harga_awal: 1900000 },
-  { date: "2024-04-22", harga_akhir: 4100000, harga_awal: 2700000 },
-  { date: "2024-04-23", harga_akhir: 3200000, harga_awal: 2100000 },
-  { date: "2024-04-24", harga_akhir: 7500000, harga_awal: 4800000 },
-  { date: "2024-04-25", harga_akhir: 4300000, harga_awal: 2900000 },
-  { date: "2024-04-26", harga_akhir: 1800000, harga_awal: 1100000 },
-  { date: "2024-04-27", harga_akhir: 6900000, harga_awal: 4700000 },
-  { date: "2024-04-28", harga_akhir: 2900000, harga_awal: 1700000 },
-  { date: "2024-04-29", harga_akhir: 5800000, harga_awal: 3600000 },
-  { date: "2024-04-30", harga_akhir: 8200000, harga_awal: 5300000 },
-  { date: "2024-05-01", harga_akhir: 3500000, harga_awal: 2200000 },
-  { date: "2024-05-02", harga_akhir: 5100000, harga_awal: 3400000 },
-  { date: "2024-05-03", harga_akhir: 4600000, harga_awal: 2800000 },
-  { date: "2024-05-04", harga_akhir: 7200000, harga_awal: 4600000 },
-  { date: "2024-05-05", harga_akhir: 8800000, harga_awal: 5700000 },
-  { date: "2024-05-06", harga_akhir: 9500000, harga_awal: 6200000 },
-  { date: "2024-05-07", harga_akhir: 6800000, harga_awal: 4100000 },
-  { date: "2024-05-08", harga_akhir: 3100000, harga_awal: 1900000 },
-  { date: "2024-05-09", harga_akhir: 4500000, harga_awal: 2800000 },
-  { date: "2024-05-10", harga_akhir: 5900000, harga_awal: 3700000 },
-  { date: "2024-05-11", harga_akhir: 6300000, harga_awal: 3900000 },
-  { date: "2024-05-12", harga_akhir: 4200000, harga_awal: 2600000 },
-  { date: "2024-05-13", harga_akhir: 3800000, harga_awal: 2100000 },
-  { date: "2024-05-14", harga_akhir: 8900000, harga_awal: 5500000 },
-  { date: "2024-05-15", harga_akhir: 8500000, harga_awal: 5100000 },
-  { date: "2024-05-16", harga_akhir: 6700000, harga_awal: 4400000 },
-  { date: "2024-05-17", harga_akhir: 9200000, harga_awal: 6000000 },
-  { date: "2024-05-18", harga_akhir: 6400000, harga_awal: 4000000 },
-  { date: "2024-05-19", harga_akhir: 4700000, harga_awal: 2900000 },
-  { date: "2024-05-20", harga_akhir: 3500000, harga_awal: 2300000 },
-  { date: "2024-05-21", harga_akhir: 1900000, harga_awal: 1100000 },
-  { date: "2024-05-22", harga_akhir: 1800000, harga_awal: 1100000 },
-  { date: "2024-05-23", harga_akhir: 5200000, harga_awal: 3300000 },
-  { date: "2024-05-24", harga_akhir: 5800000, harga_awal: 3600000 },
-  { date: "2024-05-25", harga_akhir: 4200000, harga_awal: 2700000 },
-  { date: "2024-05-26", harga_akhir: 4500000, harga_awal: 2800000 },
-  { date: "2024-05-27", harga_akhir: 8400000, harga_awal: 5300000 },
-  { date: "2024-05-28", harga_akhir: 4900000, harga_awal: 3100000 },
-  { date: "2024-05-29", harga_akhir: 1800000, harga_awal: 1100000 },
-  { date: "2024-05-30", harga_akhir: 7100000, harga_awal: 4400000 },
-  { date: "2024-05-31", harga_akhir: 3900000, harga_awal: 2500000 },
-  { date: "2024-06-01", harga_akhir: 3800000, harga_awal: 2300000 },
-  { date: "2024-06-02", harga_akhir: 9400000, harga_awal: 5700000 },
-  { date: "2024-06-03", harga_akhir: 2200000, harga_awal: 1400000 },
-  { date: "2024-06-04", harga_akhir: 8800000, harga_awal: 5200000 },
-  { date: "2024-06-05", harga_akhir: 1900000, harga_awal: 1200000 },
-  { date: "2024-06-06", harga_akhir: 6100000, harga_awal: 3700000 },
-  { date: "2024-06-07", harga_akhir: 6500000, harga_awal: 4100000 },
-  { date: "2024-06-08", harga_akhir: 7700000, harga_awal: 4700000 },
-  { date: "2024-06-09", harga_akhir: 8700000, harga_awal: 5600000 },
-  { date: "2024-06-10", harga_akhir: 3200000, harga_awal: 2100000 },
-  { date: "2024-06-11", harga_akhir: 1900000, harga_awal: 1200000 },
-  { date: "2024-06-12", harga_akhir: 9800000, harga_awal: 5900000 },
-  { date: "2024-06-13", harga_akhir: 1700000, harga_awal: 1100000 },
-  { date: "2024-06-14", harga_akhir: 8500000, harga_awal: 5200000 },
-  { date: "2024-06-15", harga_akhir: 6200000, harga_awal: 3900000 },
-  { date: "2024-06-16", harga_akhir: 7400000, harga_awal: 4500000 },
-  { date: "2024-06-17", harga_akhir: 9500000, harga_awal: 5800000 },
-  { date: "2024-06-18", harga_akhir: 2300000, harga_awal: 1500000 },
-  { date: "2024-06-19", harga_akhir: 7100000, harga_awal: 4300000 },
-  { date: "2024-06-20", harga_akhir: 8200000, harga_awal: 5100000 },
-  { date: "2024-06-21", harga_akhir: 3500000, harga_awal: 2200000 },
-  { date: "2024-06-22", harga_akhir: 6500000, harga_awal: 4000000 },
-  { date: "2024-06-23", harga_akhir: 9600000, harga_awal: 5900000 },
-  { date: "2024-06-24", harga_akhir: 2800000, harga_awal: 1700000 },
-  { date: "2024-06-25", harga_akhir: 3000000, harga_awal: 1900000 },
-  { date: "2024-06-26", harga_akhir: 8700000, harga_awal: 5300000 },
-  { date: "2024-06-27", harga_akhir: 8900000, harga_awal: 5500000 },
-  { date: "2024-06-28", harga_akhir: 3100000, harga_awal: 1900000 },
-  { date: "2024-06-29", harga_akhir: 2200000, harga_awal: 1400000 },
-  { date: "2024-06-30", harga_akhir: 8900000, harga_awal: 5400000 },
-]
+// Updated Chart Area to accept props
 
 const chartConfig = {
   visitors: {
@@ -138,9 +45,9 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ChartAreaInteractive() {
+export function ChartAreaInteractive({ chartData }: { chartData: { date: string, harga_akhir: number, harga_awal: number }[] }) {
   const isMobile = useIsMobile()
-  const [timeRange, setTimeRange] = React.useState("30d")
+  const [timeRange, setTimeRange] = React.useState("90d")
 
   React.useEffect(() => {
     if (isMobile) {
@@ -150,7 +57,7 @@ export function ChartAreaInteractive() {
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date)
-    const referenceDate = new Date("2024-06-30")
+    const referenceDate = new Date() 
     let daysToSubtract = 90
     if (timeRange === "30d") {
       daysToSubtract = 30
