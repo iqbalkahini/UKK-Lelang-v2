@@ -45,7 +45,7 @@ export default async function Page() {
     .from('tb_lelang')
     .select('tgl_lelang, harga_akhir, barang:barang_id(harga_awal)')
     .eq('status', 'ditutup')
-    .eq('user_id', user?.id || '') // Items won by this user
+    .eq('user_id', masyarakat?.id || '') // Items won by this user
     .order('tgl_lelang', { ascending: true })
 
   // Grouping by Date
