@@ -1,5 +1,6 @@
 import { AdminSidebar } from "@/components/admin-sidebar"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
+import { Suspense } from "react"
 
 export default function AdminLayout({
     children,
@@ -10,7 +11,9 @@ export default function AdminLayout({
         <SidebarProvider>
             <AdminSidebar />
             <SidebarInset>
-                {children}
+                <Suspense>
+                    {children}
+                </Suspense>
             </SidebarInset>
         </SidebarProvider>
     )
