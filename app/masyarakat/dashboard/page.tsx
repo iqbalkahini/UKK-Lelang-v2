@@ -11,6 +11,8 @@ export default async function Page() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  const { data: masyarakat } = await supabase.from('tb_masyarakat').select('*').eq('user_id', user?.id || '').single()
+
   // 1. Total Barang (Market-wide)
   const { count: countBarang } = await supabase
     .from('tb_barang')
@@ -27,14 +29,14 @@ export default async function Page() {
     .from('tb_pembayaran')
     .select('*', { count: 'exact', head: true })
     .eq('status', 'Belum Dibayar')
-    .eq('user_id', user?.id || '')
+    .eq('user_id', masyarakat?.id || '')
 
   // 4. Total Pengeluaran (User-specific settlement payments)
   const { data: payments } = await supabase
     .from('tb_pembayaran')
     .select('jumlah_pembayaran')
-    .eq('status', 'settlement')
-    .eq('user_id', user?.id || '')
+    .eq('status', 'Sudah Dibayar')
+    .eq('user_id', masyarakat?.id || '')
 
   const totalPengeluaran = payments?.reduce((acc, curr) => acc + (curr.jumlah_pembayaran || 0), 0) || 0
 
@@ -49,14 +51,14 @@ export default async function Page() {
   // Grouping by Date
   type AreaData = { date: string; harga_akhir: number; harga_awal: number }
   const chartMap = new Map<string, AreaData>()
-  
+
   if (historyData) {
     historyData.forEach((row) => {
       if (!row.tgl_lelang) return;
-      const tgl = row.tgl_lelang.split('T')[0] 
+      const tgl = row.tgl_lelang.split('T')[0]
       const hAwal = (row.barang as any)?.harga_awal || 0;
       const hAkhir = row.harga_akhir || 0;
-      
+
       if (chartMap.has(tgl)) {
         const existing = chartMap.get(tgl)!
         existing.harga_awal += hAwal
@@ -74,7 +76,7 @@ export default async function Page() {
       <div className="flex flex-1 flex-col">
         <div className="@container/main flex flex-1 flex-col gap-2">
           <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-            <SectionCards 
+            <SectionCards
               totalBarang={countBarang || 0}
               lelangAktif={countLelangAktif || 0}
               menungguPembayaran={countMenungguPembayaran || 0}
@@ -84,7 +86,7 @@ export default async function Page() {
               <ChartAreaInteractive chartData={chartDataArray} />
             </div>
             <Suspense>
-              <DataTable data={data} />
+              {/* <DataTable data={data} /> */}
             </Suspense>
           </div>
         </div>
