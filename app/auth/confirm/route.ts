@@ -8,37 +8,23 @@ export async function GET(request: NextRequest) {
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
-
   const supabase = await createClient();
 
-  // Penanganan Flow dengan token_hash (Legacy/Email Templates)
+  // Handler untuk token_hash (recovery/verification)
   if (token_hash && type) {
-    const { error } = await supabase.auth.verifyOtp({
-      type,
-      token_hash,
-    });
-
-    if (!error) {
-      if (type === "recovery") {
-        return redirect("/auth/update-password");
-      }
-      return redirect(next);
-    } else {
-      return redirect(`/auth/error?error=${encodeURIComponent(error.message)}`);
-    }
+    const { error } = await supabase.auth.verifyOtp({ type, token_hash });
+    const redirectPath = !error && type === "recovery"
+      ? "/auth/update-password"
+      : !error ? "/" : `/auth/error?error=${encodeURIComponent(error.message)}`;
+    return redirect(redirectPath);
   }
 
-  // Penanganan Flow dengan code (PKCE)
+  // Handler untuk code (PKCE)
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      return redirect(next);
-    } else {
-      return redirect(`/auth/error?error=${encodeURIComponent(error.message)}`);
-    }
+    return redirect(error ? `/auth/error?error=${encodeURIComponent(error.message)}` : "/");
   }
 
-  // Jika tidak ada token_hash atau code
-  return redirect(`/auth/error?error=No token hash or code provided`);
+  // Default error
+  return redirect("/auth/error?error=No token hash or code provided");
 }
