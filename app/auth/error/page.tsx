@@ -1,32 +1,42 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Suspense } from "react";
+import { AuthErrorMessage } from "@/components/auth-error-message";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 async function ErrorContent({
   searchParams,
 }: {
-  searchParams: Promise<{ error: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const params = await searchParams;
 
   return (
-    <>
-      {params?.error ? (
-        <p className="text-sm text-muted-foreground">
-          Code error: {params.error}
-        </p>
-      ) : (
-        <p className="text-sm text-muted-foreground">
-          An unspecified error occurred.
-        </p>
+    <div className="space-y-4">
+      <AuthErrorMessage />
+
+      {params?.error && (
+        <div className="rounded-md bg-muted p-3">
+          <p className="text-xs font-medium uppercase text-muted-foreground">
+            System Message
+          </p>
+          <p className="text-sm text-foreground">{params.error}</p>
+        </div>
       )}
-    </>
+    </div>
   );
 }
 
 export default function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ error: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -43,6 +53,11 @@ export default function Page({
                 <ErrorContent searchParams={searchParams} />
               </Suspense>
             </CardContent>
+            <CardFooter>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/">Back to Home</Link>
+              </Button>
+            </CardFooter>
           </Card>
         </div>
       </div>

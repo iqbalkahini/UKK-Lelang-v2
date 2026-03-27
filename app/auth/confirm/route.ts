@@ -7,11 +7,12 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
+  const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
 
-  if (token_hash && type) {
-    const supabase = await createClient();
+  const supabase = await createClient();
 
+  if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({
       type,
       token_hash,
@@ -19,16 +20,23 @@ export async function GET(request: NextRequest) {
     if (!error) {
       // Jika type adalah recovery (reset password), selalu arahkan ke update-password
       if (type === "recovery") {
-        redirect("/auth/update-password");
+        return redirect("/auth/update-password");
       }
-      // Untuk type lain, redirect ke next atau root
-      redirect(next);
+      return redirect(next);
     } else {
-      // redirect the user to an error page with some instructions
-      redirect(`/auth/error?error=${error?.message}`);
+      return redirect(`/auth/error?error=${encodeURIComponent(error.message)}`);
     }
   }
 
-  // redirect the user to an error page with some instructions
-  redirect(`/auth/error?error=No token hash or type`);
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
+      return redirect(next);
+    } else {
+      return redirect(`/auth/error?error=${encodeURIComponent(error.message)}`);
+    }
+  }
+
+  // If no token_hash or code is present, redirect to error
+  return redirect(`/auth/error?error=No token hash or code provided`);
 }
