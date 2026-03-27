@@ -1,7 +1,6 @@
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { SectionCards } from "@/components/section-cards"
 import { SiteHeader } from "@/components/site-header"
-import { Suspense } from "react"
 import { createClient } from "@/lib/supabase/server"
 
 export default async function Page() {
