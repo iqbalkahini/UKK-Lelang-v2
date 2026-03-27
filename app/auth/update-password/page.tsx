@@ -17,14 +17,6 @@ export default function Page() {
 }
 
 async function UpdatePasswordContent() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return redirect("/auth/login");
-  }
 
   return <UpdatePasswordForm />;
 }
