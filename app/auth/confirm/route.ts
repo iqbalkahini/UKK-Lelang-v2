@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
   // Handler untuk token_hash (recovery/verification)
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ type, token_hash });
+    console.log(error)
     const redirectPath = !error && type === "recovery"
       ? "/auth/update-password"
       : !error ? "/" : `/auth/error?error=${encodeURIComponent(error.message)}`;
