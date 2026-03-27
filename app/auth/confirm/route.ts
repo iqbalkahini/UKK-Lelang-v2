@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { type EmailOtpType } from "@supabase/supabase-js";
-import { NextRequest, NextResponse } from "next/server";
+import { redirect } from "next/navigation";
+import { type NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -8,12 +9,6 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type") as EmailOtpType | null;
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/";
-
-  // URL untuk redirect utama
-  const redirectTo = request.nextUrl.clone();
-  redirectTo.searchParams.delete("token_hash");
-  redirectTo.searchParams.delete("type");
-  redirectTo.searchParams.delete("code");
 
   const supabase = await createClient();
 
@@ -25,17 +20,12 @@ export async function GET(request: NextRequest) {
     });
 
     if (!error) {
-      // Jika tipe adalah recovery, arahkan ke update-password
       if (type === "recovery") {
-        redirectTo.pathname = "/auth/update-password";
-        return NextResponse.redirect(redirectTo);
+        return redirect("/auth/update-password");
       }
-      redirectTo.pathname = next;
-      return NextResponse.redirect(redirectTo);
+      return redirect(next);
     } else {
-      redirectTo.pathname = "/auth/error";
-      redirectTo.searchParams.set("error", error.message);
-      return NextResponse.redirect(redirectTo);
+      return redirect(`/auth/error?error=${encodeURIComponent(error.message)}`);
     }
   }
 
@@ -43,18 +33,12 @@ export async function GET(request: NextRequest) {
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      // Periksa apakah 'next' diarahkan ke update-password oleh forgot-password-form
-      redirectTo.pathname = next;
-      return NextResponse.redirect(redirectTo);
+      return redirect(next);
     } else {
-      redirectTo.pathname = "/auth/error";
-      redirectTo.searchParams.set("error", error.message);
-      return NextResponse.redirect(redirectTo);
+      return redirect(`/auth/error?error=${encodeURIComponent(error.message)}`);
     }
   }
 
   // Jika tidak ada token_hash atau code
-  redirectTo.pathname = "/auth/error";
-  redirectTo.searchParams.set("error", "No token hash or code provided");
-  return NextResponse.redirect(redirectTo);
+  return redirect(`/auth/error?error=No token hash or code provided`);
 }
