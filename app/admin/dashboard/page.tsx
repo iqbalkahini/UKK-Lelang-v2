@@ -5,8 +5,6 @@ import { SiteHeader } from "@/components/site-header"
 import { Suspense } from "react"
 import { createClient } from "@/lib/supabase/server"
 
-import data from "./data.json"
-
 export default async function Page() {
     const supabase = await createClient()
 
@@ -45,14 +43,14 @@ export default async function Page() {
     // Grouping by Date
     type AreaData = { date: string; harga_akhir: number; harga_awal: number }
     const chartMap = new Map<string, AreaData>()
-    
+
     if (historyData) {
         historyData.forEach((row) => {
             if (!row.tgl_lelang) return;
-            const tgl = row.tgl_lelang.split('T')[0] 
+            const tgl = row.tgl_lelang.split('T')[0]
             const hAwal = (row.barang as any)?.harga_awal || 0;
             const hAkhir = row.harga_akhir || 0;
-            
+
             if (chartMap.has(tgl)) {
                 const existing = chartMap.get(tgl)!
                 existing.harga_awal += hAwal
@@ -70,7 +68,7 @@ export default async function Page() {
             <div className="flex flex-1 flex-col">
                 <div className="@container/main flex flex-1 flex-col gap-2">
                     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-                        <SectionCards 
+                        <SectionCards
                             totalBarang={countBarang || 0}
                             lelangAktif={countLelangAktif || 0}
                             menungguPembayaran={countMenungguPembayaran || 0}
@@ -79,9 +77,6 @@ export default async function Page() {
                         <div className="px-4 lg:px-6">
                             <ChartAreaInteractive chartData={chartDataArray} />
                         </div>
-                        <Suspense>
-                            <DataTable data={data} />
-                        </Suspense>
                     </div>
                 </div>
             </div>
