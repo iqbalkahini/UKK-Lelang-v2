@@ -98,15 +98,15 @@ export function NavUser({
               <AlertDialogTrigger asChild>
                 <Button variant="outline" className="w-full">
                   <LogOutIcon />
-                  Logout
+                  Keluar
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogTitle>Apakah Anda benar-benar yakin?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    your account from our servers.
+                    Tindakan ini tidak dapat dibatalkan. Akun Anda akan dihapus
+                    secara permanen dari server kami.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
