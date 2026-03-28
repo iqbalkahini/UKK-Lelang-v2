@@ -18,20 +18,27 @@ function buildErrorUrl(request: NextRequest, message: string, errorCode?: string
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const tokenHash = searchParams.get("token_hash");
+  const code = searchParams.get("code");
   const type = searchParams.get("type") as EmailOtpType | null;
   const next = searchParams.get("next");
 
-  if (!tokenHash || !type) {
+  const supabase = await createClient();
+  let error: { message: string; code?: string } | null = null;
+
+  if (tokenHash && type) {
+    const result = await supabase.auth.verifyOtp({
+      type,
+      token_hash: tokenHash,
+    });
+    error = result.error;
+  } else if (code) {
+    const result = await supabase.auth.exchangeCodeForSession(code);
+    error = result.error;
+  } else {
     return NextResponse.redirect(
       buildErrorUrl(request, "Link autentikasi tidak valid atau tidak lengkap."),
     );
   }
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({
-    type,
-    token_hash: tokenHash,
-  });
 
   if (error) {
     return NextResponse.redirect(
