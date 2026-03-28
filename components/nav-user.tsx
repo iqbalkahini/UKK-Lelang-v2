@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   BellIcon,
@@ -6,13 +6,9 @@ import {
   LogOutIcon,
   MoreVerticalIcon,
   UserCircleIcon,
-} from "lucide-react"
+} from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,13 +17,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 import {
   AlertDialog,
@@ -39,21 +35,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from "./ui/button"
-import { useLogout } from "@/lib/auth/logout"
+} from "@/components/ui/alert-dialog";
+import { Button } from "./ui/button";
+import { useLogout } from "@/lib/auth/logout";
 
 export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }) {
-  const { isMobile } = useSidebar()
-  const logout = useLogout()
+  const { isMobile } = useSidebar();
+  const logout = useLogout();
 
   return (
     <SidebarMenu>
@@ -98,47 +94,36 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserCircleIcon />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <BellIcon />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" className="w-full">
-                  <LogOutIcon />Logout
+                  <LogOutIcon />
+                  Logout
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your account
-                    from our servers.
+                    This action cannot be undone. This will permanently delete
+                    your account from our servers.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => {
-                    logout()
-                  }}>Continue</AlertDialogAction>
+                  <AlertDialogAction
+                    onClick={() => {
+                      logout();
+                    }}
+                  >
+                    Continue
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
-
     </SidebarMenu>
-  )
+  );
 }
