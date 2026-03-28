@@ -82,3 +82,192 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(12px, -18px, 0) scale(1.04);
+  }
+}
+
+@keyframes float-card {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+@keyframes beam-move {
+  0% {
+    transform: translate3d(-8%, 0, 0) rotate(18deg);
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.42;
+  }
+  100% {
+    transform: translate3d(8%, 0, 0) rotate(18deg);
+    opacity: 0.2;
+  }
+}
+
+@keyframes progress-glow {
+  0%,
+  100% {
+    filter: saturate(1);
+    transform: translateX(-2%);
+  }
+  50% {
+    filter: saturate(1.15);
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-up {
+  opacity: 0;
+  animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animation-delay-1 {
+  animation-delay: 0.12s;
+}
+
+.animation-delay-2 {
+  animation-delay: 0.24s;
+}
+
+.animation-delay-3 {
+  animation-delay: 0.36s;
+}
+
+.animation-delay-4 {
+  animation-delay: 0.48s;
+}
+
+.landing-grid {
+  background-image:
+    linear-gradient(to right, hsl(var(--foreground) / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--foreground) / 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at center, black, transparent 78%);
+}
+
+.landing-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  animation: drift 16s ease-in-out infinite;
+}
+
+.landing-orb-1 {
+  right: -8rem;
+  top: 3rem;
+  height: 24rem;
+  width: 24rem;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.22), transparent 68%);
+}
+
+.landing-orb-2 {
+  left: -6rem;
+  top: 24rem;
+  height: 22rem;
+  width: 22rem;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.18), transparent 70%);
+  animation-delay: -5s;
+}
+
+.landing-orb-3 {
+  bottom: 10rem;
+  right: 18%;
+  height: 18rem;
+  width: 18rem;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.14), transparent 68%);
+  animation-delay: -9s;
+}
+
+.landing-beam {
+  position: absolute;
+  top: -12rem;
+  height: 42rem;
+  width: 14rem;
+  background: linear-gradient(to bottom, transparent, hsl(var(--primary) / 0.14), transparent);
+  filter: blur(8px);
+  animation: beam-move 14s ease-in-out infinite;
+}
+
+.landing-beam-1 {
+  left: 12%;
+}
+
+.landing-beam-2 {
+  right: 10%;
+  animation-delay: -7s;
+}
+
+.landing-panel {
+  box-shadow:
+    0 0 0 1px hsl(var(--foreground) / 0.04),
+    0 32px 110px -55px hsl(var(--foreground) / 0.8);
+}
+
+.landing-progress {
+  animation: progress-glow 4s ease-in-out infinite;
+}
+
+.landing-float-card {
+  position: absolute;
+  animation: float-card 7s ease-in-out infinite;
+}
+
+.landing-float-card-1 {
+  bottom: 2rem;
+  left: -2rem;
+}
+
+.landing-float-card-2 {
+  right: -1.5rem;
+  top: 2.5rem;
+  max-width: 16rem;
+  animation-delay: -3s;
+}
+
+@media (max-width: 1024px) {
+  .landing-beam {
+    display: none;
+  }
+
+  .landing-orb-1,
+  .landing-orb-2,
+  .landing-orb-3 {
+    filter: blur(70px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .landing-orb,
+  .landing-beam,
+  .landing-progress,
+  .landing-float-card {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
