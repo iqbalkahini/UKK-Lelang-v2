@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { getURL } from "@/lib/supabase/get-url";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -31,9 +32,8 @@ export function ForgotPasswordForm({
     setError(null);
 
     try {
-      // The url which will be included in the email. This URL needs to be configured in your redirect URLs in the Supabase dashboard at https://supabase.com/dashboard/project/_/auth/url-configuration
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `https://ukk-lelang.vercel.app/auth/confirm`,
+        redirectTo: getURL("/auth/confirm"),
       });
       if (error) throw error;
       setSuccess(true);

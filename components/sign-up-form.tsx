@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { getURL } from "@/lib/supabase/get-url";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -60,7 +61,7 @@ export function SignUpForm({
             username: dataSignUp.username,
             telp: dataSignUp.telp,
           },
-          emailRedirectTo: `${window.location.origin}/protected`,
+          emailRedirectTo: getURL("/auth/confirm"),
         },
       });
       if (error) throw error;

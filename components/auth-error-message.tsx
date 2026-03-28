@@ -13,14 +13,14 @@ export function AuthErrorMessage() {
   } | null>(null);
 
   useEffect(() => {
-    // Supabase redirects errors to the hash fragment (#)
-    // Example: #error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid+or+has+expired
     const hash = window.location.hash.substring(1);
-    if (!hash) return;
-
-    const params = new URLSearchParams(hash);
-    const errorCode = params.get("error_code");
-    const errorDescription = params.get("error_description");
+    const hashParams = new URLSearchParams(hash);
+    const queryParams = new URLSearchParams(window.location.search);
+    const errorCode =
+      hashParams.get("error_code") || queryParams.get("error_code");
+    const errorDescription =
+      hashParams.get("error_description") ||
+      queryParams.get("error_description");
 
     if (errorCode || errorDescription) {
       let title = "Authentication Error";
