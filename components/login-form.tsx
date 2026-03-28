@@ -58,18 +58,25 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Masuk</CardTitle>
-          <CardDescription>
-            Masuk ke akun Anda
+      <Card className="overflow-hidden rounded-[1.5rem] border-border/70 bg-transparent shadow-none">
+        <CardHeader className="space-y-3 px-6 pb-6 pt-7 md:px-8">
+          <div className="inline-flex w-fit items-center rounded-full border border-border/70 bg-muted/60 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Login
+          </div>
+          <CardTitle className="text-3xl font-semibold tracking-tight">
+            Masuk
+          </CardTitle>
+          <CardDescription className="max-w-sm text-sm leading-6">
+            Masukkan email dan password Anda untuk mengakses sistem lelang.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 pb-7 md:px-8">
           <form onSubmit={handleLogin}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+            <div className="flex flex-col gap-5">
+              <div className="grid gap-2.5">
+                <Label htmlFor="email" className="text-sm font-medium">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -77,14 +84,17 @@ export function LoginForm({
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="h-11 rounded-xl border-border/70 bg-background/80 px-4 shadow-none transition-all focus-visible:ring-2"
                 />
               </div>
-              <div className="grid gap-2">
+              <div className="grid gap-2.5">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-sm font-medium">
+                    Password
+                  </Label>
                   <Link
                     href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    className="ml-auto inline-block text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
                   >
                     Lupa Password?
                   </Link>
@@ -95,18 +105,27 @@ export function LoginForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="h-11 rounded-xl border-border/70 bg-background/80 px-4 shadow-none transition-all focus-visible:ring-2"
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              {error && (
+                <p className="rounded-xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {error}
+                </p>
+              )}
+              <Button
+                type="submit"
+                className="mt-1 h-11 w-full rounded-xl text-sm font-medium shadow-sm transition-all hover:shadow-md"
+                disabled={isLoading}
+              >
                 {isLoading ? "Logging in..." : "Login"}
               </Button>
             </div>
-            <div className="mt-4 text-center text-sm">
+            <div className="mt-6 text-center text-sm text-muted-foreground">
               Belum Punya Akun?{" "}
               <Link
                 href="/auth/sign-up"
-                className="underline underline-offset-4"
+                className="font-medium text-foreground underline underline-offset-4"
               >
                 Daftar
               </Link>

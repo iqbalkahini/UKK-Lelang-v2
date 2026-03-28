@@ -76,90 +76,122 @@ export function SignUpForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Daftar</CardTitle>
-          <CardDescription>Buat Akun Baru</CardDescription>
+      <Card className="overflow-hidden rounded-[1.5rem] border-border/70 bg-transparent shadow-none">
+        <CardHeader className="space-y-3 px-6 pb-6 pt-7 md:px-8">
+          <div className="inline-flex w-fit items-center rounded-full border border-border/70 bg-muted/60 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+            Registrasi
+          </div>
+          <CardTitle className="text-3xl font-semibold tracking-tight">
+            Daftar
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6 pb-7 md:px-8">
           <form onSubmit={handleSignUp}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="nama">Nama</Label>
-                <Input
-                  id="nama"
-                  type="text"
-                  placeholder="John Doe"
-                  required
-                  value={dataSignUp.nama}
-                  onChange={(e) => setDataSignUp({ ...dataSignUp, nama: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="username">Nama Pengguna</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="johndoe"
-                  required
-                  value={dataSignUp.username}
-                  onChange={(e) => setDataSignUp({ ...dataSignUp, username: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="john@example.com"
-                  required
-                  value={dataSignUp.email}
-                  onChange={(e) => setDataSignUp({ ...dataSignUp, email: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="telp">Nomor Telepon</Label>
-                <Input
-                  id="telp"
-                  type="text"
-                  placeholder="08123456789"
-                  required
-                  value={dataSignUp.telp}
-                  onChange={(e) => setDataSignUp({ ...dataSignUp, telp: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Kata Sandi</Label>
+            <div className="flex flex-col gap-5">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-2.5 sm:col-span-2">
+                  <Label htmlFor="nama" className="text-sm font-medium">
+                    Nama
+                  </Label>
+                  <Input
+                    id="nama"
+                    type="text"
+                    placeholder="John Doe"
+                    required
+                    value={dataSignUp.nama}
+                    onChange={(e) => setDataSignUp({ ...dataSignUp, nama: e.target.value })}
+                    className="h-11 rounded-xl border-border/70 bg-background/80 px-4 shadow-none transition-all focus-visible:ring-2"
+                  />
                 </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={dataSignUp.password}
-                  onChange={(e) => setDataSignUp({ ...dataSignUp, password: e.target.value })}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="repeat-password">Konfirmasi Kata Sandi</Label>
+                <div className="grid gap-2.5">
+                  <Label htmlFor="username" className="text-sm font-medium">
+                    Nama Pengguna
+                  </Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="johndoe"
+                    required
+                    value={dataSignUp.username}
+                    onChange={(e) => setDataSignUp({ ...dataSignUp, username: e.target.value })}
+                    className="h-11 rounded-xl border-border/70 bg-background/80 px-4 shadow-none transition-all focus-visible:ring-2"
+                  />
                 </div>
-                <Input
-                  id="repeat-password"
-                  type="password"
-                  required
-                  value={dataSignUp.repeatPassword}
-                  onChange={(e) => setDataSignUp({ ...dataSignUp, repeatPassword: e.target.value })}
-                />
+                <div className="grid gap-2.5">
+                  <Label htmlFor="telp" className="text-sm font-medium">
+                    Nomor Telepon
+                  </Label>
+                  <Input
+                    id="telp"
+                    type="text"
+                    placeholder="08123456789"
+                    required
+                    value={dataSignUp.telp}
+                    onChange={(e) => setDataSignUp({ ...dataSignUp, telp: e.target.value })}
+                    className="h-11 rounded-xl border-border/70 bg-background/80 px-4 shadow-none transition-all focus-visible:ring-2"
+                  />
+                </div>
+                <div className="grid gap-2.5 sm:col-span-2">
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="john@example.com"
+                    required
+                    value={dataSignUp.email}
+                    onChange={(e) => setDataSignUp({ ...dataSignUp, email: e.target.value })}
+                    className="h-11 rounded-xl border-border/70 bg-background/80 px-4 shadow-none transition-all focus-visible:ring-2"
+                  />
+                </div>
+                <div className="grid gap-2.5">
+                  <div className="flex items-center">
+                    <Label htmlFor="password" className="text-sm font-medium">
+                      Kata Sandi
+                    </Label>
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    required
+                    value={dataSignUp.password}
+                    onChange={(e) => setDataSignUp({ ...dataSignUp, password: e.target.value })}
+                    className="h-11 rounded-xl border-border/70 bg-background/80 px-4 shadow-none transition-all focus-visible:ring-2"
+                  />
+                </div>
+                <div className="grid gap-2.5">
+                  <div className="flex items-center">
+                    <Label htmlFor="repeat-password" className="text-sm font-medium">
+                      Konfirmasi Kata Sandi
+                    </Label>
+                  </div>
+                  <Input
+                    id="repeat-password"
+                    type="password"
+                    required
+                    value={dataSignUp.repeatPassword}
+                    onChange={(e) => setDataSignUp({ ...dataSignUp, repeatPassword: e.target.value })}
+                    className="h-11 rounded-xl border-border/70 bg-background/80 px-4 shadow-none transition-all focus-visible:ring-2"
+                  />
+                </div>
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              {error && (
+                <p className="rounded-xl border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {error}
+                </p>
+              )}
+              <Button
+                type="submit"
+                className="mt-1 h-11 w-full rounded-xl text-sm font-medium shadow-sm transition-all hover:shadow-md"
+                disabled={isLoading}
+              >
                 {isLoading ? "Buat Akun..." : "Buat Akun"}
               </Button>
             </div>
-            <div className="mt-4 text-center text-sm">
+            <div className="mt-6 text-center text-sm text-muted-foreground">
               Sudah Punya Akun?{" "}
-              <Link href="/auth/login" className="underline underline-offset-4">
+              <Link href="/auth/login" className="font-medium text-foreground underline underline-offset-4">
                 Login
               </Link>
             </div>
