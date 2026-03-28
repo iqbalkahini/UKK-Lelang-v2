@@ -103,20 +103,22 @@ export function NavUser({
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Apakah Anda benar-benar yakin?</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    Apakah Anda benar-benar yakin?
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
                     Tindakan ini tidak dapat dibatalkan. Akun Anda akan dihapus
                     secara permanen dari server kami.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>Batal</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => {
                       logout();
                     }}
                   >
-                    Continue
+                    Lanjutkan
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
