@@ -43,18 +43,16 @@ export default function Home() {
 
               <div className="space-y-4 lg:space-y-5">
                 <h1 className="animate-fade-up animation-delay-1 max-w-4xl text-4xl font-black leading-[0.92] tracking-[-0.04em] text-foreground sm:text-5xl lg:text-6xl xl:text-[4.5rem]">
-                  Pengalaman lelang
+                  Sistem lelang online
                   <span className="block bg-gradient-to-r from-primary via-foreground to-primary/60 bg-clip-text text-transparent">
-                    yang lebih hidup,
+                    yang simpel,
                   </span>
-                  lebih elegan, dan terasa real-time.
+                  cepat, dan real-time.
                 </h1>
 
                 <p className="animate-fade-up animation-delay-2 max-w-2xl text-base leading-7 text-muted-foreground sm:text-[1.05rem]">
-                  UKK Lelang menghadirkan ruang tawar modern untuk barang-barang
-                  pilihan. Pantau pergerakan harga, temukan item unik, dan
-                  ikuti ritme penawaran dengan antarmuka yang jernih dan
-                  berkelas.
+                  Pantau harga, kelola penawaran, dan ikuti proses lelang
+                  dalam satu tampilan yang jelas dan mudah digunakan.
                 </p>
               </div>
 
