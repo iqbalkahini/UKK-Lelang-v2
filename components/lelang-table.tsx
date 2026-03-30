@@ -4,9 +4,6 @@ import { useState, useEffect } from "react";
 import {
     getLelang,
     deleteLelang,
-    updateStatusLelang,
-    getHighestBid,
-    type Lelang,
     type GetLelangResponse,
 } from "@/api/lelang";
 import {
@@ -31,8 +28,6 @@ import {
     ArrowBigDown,
     MoreHorizontalIcon,
     Eye,
-    PlayCircle,
-    StopCircle,
 } from "lucide-react";
 import {
     Select,
@@ -164,7 +159,7 @@ export function LelangTable({
                 minute: "2-digit",
                 timeZoneName: "short"
             });
-        } catch (e) {
+        } catch {
             return timeString;
         }
     };
@@ -207,6 +202,8 @@ export function LelangTable({
                 return <Badge className="bg-red-500 hover:bg-red-600">Ditutup</Badge>;
             case "pending":
                 return <Badge className="bg-yellow-500 hover:bg-yellow-600">Pending</Badge>;
+            case "dibayar":
+                return <Badge className="bg-blue-500 hover:bg-blue-600">Dibayar</Badge>;
             default:
                 return <Badge>{status}</Badge>;
         }
@@ -302,21 +299,37 @@ export function LelangTable({
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end" className="w-48">
                                                         <DropdownMenuGroup>
-                                                            <DropdownMenuItem asChild>
-                                                                <a href={`/petugas/lelang/${lelang.id}`}>
-                                                                    <Eye /> Detail
-                                                                </a>
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem asChild>
-                                                                <a href={`/petugas/lelang/${lelang.id}/edit`}>
-                                                                    <PencilIcon /> Edit
-                                                                </a>
-                                                            </DropdownMenuItem>
                                                             <DropdownMenuItem
-                                                                onClick={() => handleDeleteClick(lelang.id)}
+                                                                onClick={() => router.push(`/petugas/lelang/${lelang.id}`)}
                                                             >
-                                                                <TrashIcon /> Hapus
+                                                                <Eye /> Detail
                                                             </DropdownMenuItem>
+                                                            {lelang.status === "dibayar" ? (
+                                                                <>
+                                                                    <DropdownMenuItem disabled>
+                                                                        Sudah dibayar
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem disabled>
+                                                                        <PencilIcon /> Edit
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem disabled>
+                                                                        <TrashIcon /> Hapus
+                                                                    </DropdownMenuItem>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => router.push(`/petugas/lelang/${lelang.id}/edit`)}
+                                                                    >
+                                                                        <PencilIcon /> Edit
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuItem
+                                                                        onClick={() => handleDeleteClick(lelang.id)}
+                                                                    >
+                                                                        <TrashIcon /> Hapus
+                                                                    </DropdownMenuItem>
+                                                                </>
+                                                            )}
                                                         </DropdownMenuGroup>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>

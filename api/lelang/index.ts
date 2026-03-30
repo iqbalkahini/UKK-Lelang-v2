@@ -9,7 +9,7 @@ export type Lelang = {
   waktu_mulai: string;
   waktu_selesai: string;
   harga_akhir: number | null;
-  status: "dibuka" | "ditutup" | "pending";
+  status: "dibuka" | "ditutup" | "pending" | "dibayar";
   user_id: string;
   created_at?: string;
   is_manual: boolean;
@@ -37,7 +37,7 @@ export type CreateLelangInput = {
   waktu_selesai: string;
   harga_akhir: number;
   petugas_id: string; // The UUID from tb_petugas
-  status: "dibuka" | "ditutup" | "pending";
+  status: "dibuka" | "ditutup" | "pending" | "dibayar";
   is_manual: boolean;
 };
 
@@ -46,9 +46,26 @@ export type UpdateLelangInput = {
   tgl_lelang?: string;
   waktu_mulai?: string;
   waktu_selesai?: string;
-  status?: "dibuka" | "ditutup" | "pending";
+  status?: "dibuka" | "ditutup" | "pending" | "dibayar";
   harga_akhir?: number | null;
   is_manual?: boolean;
+};
+
+const assertLelangNotPaid = async (id: number) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tb_lelang")
+    .select("status")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  if (data?.status === "dibayar") {
+    throw new Error(
+      "Lelang ini sudah dibayar, sehingga tidak bisa diedit, dihapus, atau dibuka kembali.",
+    );
+  }
 };
 
 export const getLelang = async (
@@ -140,7 +157,7 @@ export const getLelang = async (
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data: data as Lelang[],
+      data: (data as Lelang[]) ?? [],
       total,
       totalPages,
       currentPage: page,
@@ -216,6 +233,8 @@ export const updateLelang = async (
   input: UpdateLelangInput,
 ): Promise<Lelang> => {
   try {
+    await assertLelangNotPaid(id);
+
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("tb_lelang")
@@ -234,13 +253,15 @@ export const updateLelang = async (
 
 export const updateStatusLelang = async (
   id: number,
-  status: "dibuka" | "ditutup" | "pending",
+  status: "dibuka" | "ditutup" | "pending" | "dibayar",
   harga_akhir?: number,
 ): Promise<Lelang> => {
   try {
+    await assertLelangNotPaid(id);
+
     const supabase = await createClient();
 
-    const updateData: any = { status };
+    const updateData: UpdateLelangInput = { status };
     if (harga_akhir !== undefined) {
       updateData.harga_akhir = harga_akhir;
     }
@@ -262,6 +283,8 @@ export const updateStatusLelang = async (
 
 export const deleteLelang = async (id: number): Promise<boolean> => {
   try {
+    await assertLelangNotPaid(id);
+
     const supabase = await createClient();
     const { error } = await supabase
       .from("tb_lelang")

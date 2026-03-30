@@ -4,7 +4,7 @@ import { Lelang } from "@/api/lelang";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Hammer, Gavel, Calendar, Clock, Image as ImageIcon } from "lucide-react";
+import { Hammer, Calendar, Clock, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -48,6 +48,8 @@ export function LelangCardSkeleton() {
 }
 
 export function LelangCard({ lelang, onOpen, actionText }: LelangCardProps) {
+    const isPaid = lelang.status === "dibayar";
+
     const formatCurrency = (amount: number | null) => {
         if (amount === null) return "-";
         return new Intl.NumberFormat("id-ID", {
@@ -75,6 +77,7 @@ export function LelangCard({ lelang, onOpen, actionText }: LelangCardProps) {
             case "dibuka": return "default";
             case "pending": return "outline";
             case "ditutup": return "destructive";
+            case "dibayar": return "secondary";
             default: return "secondary";
         }
     };
@@ -84,6 +87,7 @@ export function LelangCard({ lelang, onOpen, actionText }: LelangCardProps) {
             case "dibuka": return "Dibuka";
             case "pending": return "Tertunda";
             case "ditutup": return "Ditutup";
+            case "dibayar": return "Dibayar";
             default: return status;
         }
     };
@@ -162,10 +166,11 @@ export function LelangCard({ lelang, onOpen, actionText }: LelangCardProps) {
                 <Button
                     className="w-full gap-2 shadow-sm font-semibold"
                     onClick={() => onOpen?.(lelang.id)}
+                    disabled={isPaid}
                     variant={lelang.status === 'pending' || lelang.status === 'ditutup' ? 'default' : 'secondary'}
                 >
                     <Hammer className="w-4 h-4" />
-                    {actionText || "Buka Lelang Sekarang"}
+                    {isPaid ? "Sudah Dibayar" : actionText || "Buka Lelang Sekarang"}
                 </Button>
             </CardFooter>
         </Card>

@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 // 2. Hapus kata 'async' di depan function
 export default function EditLelangPage({
@@ -48,9 +49,14 @@ export default function EditLelangPage({
         tgl_lelang: string;
         waktu_mulai: string;
         waktu_selesai: string;
-        status: 'pending' | "dibuka" | "ditutup";
+        status: 'pending' | "dibuka" | "ditutup" | "dibayar";
         is_manual: boolean;
     }) => {
+        if (lelang?.status === "dibayar") {
+            toast.error("Lelang yang sudah dibayar tidak bisa diedit");
+            return;
+        }
+
         try {
             await updateLelang(parseInt(id), data);
             toast.success("Lelang berhasil diupdate");
@@ -83,6 +89,32 @@ export default function EditLelangPage({
         return (
             <div className="px-4 lg:px-6 py-5">
                 <p className="text-center text-muted-foreground">Lelang tidak ditemukan</p>
+            </div>
+        );
+    }
+
+    if (lelang.status === "dibayar") {
+        return (
+            <div className="px-4 lg:px-6 py-5 space-y-6">
+                <div className="mb-6">
+                    <Link href={`/petugas/lelang/${id}`}>
+                        <Button variant="ghost" size="sm" className="mb-4">
+                            <ArrowLeft className="mr-2 h-4 w-4" />
+                            Kembali
+                        </Button>
+                    </Link>
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        Edit Lelang #{lelang.id}
+                    </h1>
+                    <p className="text-muted-foreground">Perbarui informasi lelang</p>
+                </div>
+
+                <Alert>
+                    <AlertTitle>Lelang terkunci</AlertTitle>
+                    <AlertDescription>
+                        Lelang ini sudah dibayar, sehingga data lelang tidak bisa diubah lagi.
+                    </AlertDescription>
+                </Alert>
             </div>
         );
     }

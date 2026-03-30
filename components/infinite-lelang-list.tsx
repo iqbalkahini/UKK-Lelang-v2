@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { getLelang, Lelang, GetLelangResponse } from "@/api/lelang";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { getLelang, Lelang } from "@/api/lelang";
 import { LelangCard, LelangCardSkeleton } from "./lelang-card";
 import { Loader2, Search, PackageSearch } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
-import { Skeleton } from "./ui/skeleton";
 
 import {
     Dialog,
@@ -18,7 +17,6 @@ import {
     DialogDescription
 } from "./ui/dialog";
 import { Label } from "./ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { updateLelang } from "@/api/lelang";
 import { closeAuction } from "@/lib/actions/auction";
 
@@ -52,7 +50,7 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
     const limit = 8;
     const observerTarget = useRef<HTMLDivElement>(null);
 
-    const fetchData = async (pageNum: number, search: string, isInitial: boolean = false) => {
+    const fetchData = useCallback(async (pageNum: number, search: string, isInitial: boolean = false) => {
         if (isInitial) setIsLoading(true);
         else setIsLoadingMore(true);
 
@@ -73,12 +71,12 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
             setIsLoading(false);
             setIsLoadingMore(false);
         }
-    };
+    }, [limit, statusFilter]);
 
     useEffect(() => {
         setPage(1);
         fetchData(1, activeSearch, true);
-    }, [activeSearch, statusFilter]);
+    }, [activeSearch, statusFilter, fetchData]);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -97,7 +95,7 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
         }
 
         return () => observer.disconnect();
-    }, [hasMore, isLoading, isLoadingMore, page, activeSearch]);
+    }, [hasMore, isLoading, isLoadingMore, page, activeSearch, fetchData]);
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -105,6 +103,11 @@ export function InfiniteLelangList({ statusFilter = "all", actionType = "buka" }
     };
 
     const handleOpenModal = (lelang: Lelang) => {
+        if (lelang.status === "dibayar") {
+            toast.error("Lelang yang sudah dibayar tidak bisa dibuka kembali");
+            return;
+        }
+
         setSelectedLelang(lelang);
         setTimeSetting({
             is_manual: lelang.is_manual ?? true,

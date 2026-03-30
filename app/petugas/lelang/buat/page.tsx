@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import { LelangForm } from "@/components/lelang-form";
 import { createLelang } from "@/api/lelang";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +17,7 @@ export default function CreateLelangPage() {
     tgl_lelang: string;
     waktu_mulai: string;
     waktu_selesai: string;
-    status: 'pending' | "dibuka" | "ditutup";
+    status: 'pending' | "dibuka" | "ditutup" | "dibayar";
     is_manual: boolean
   }) => {
     try {
@@ -34,12 +34,13 @@ export default function CreateLelangPage() {
 
       toast.success("Lelang berhasil dibuat");
       router.push("/petugas/lelang");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating lelang:", error);
-      if (error?.code === "23505" || error?.message?.includes("409") || error?.details?.includes("already exists")) {
+      const err = error as { code?: string; message?: string; details?: string };
+      if (err?.code === "23505" || err?.message?.includes("409") || err?.details?.includes("already exists")) {
         toast.error("Barang ini sudah dilelang");
       } else {
-        toast.error(error?.message || "Gagal membuat lelang");
+        toast.error(err?.message || "Gagal membuat lelang");
       }
     }
   };

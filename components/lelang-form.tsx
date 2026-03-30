@@ -21,7 +21,7 @@ type LelangFormProps = {
     tgl_lelang?: string;
     waktu_mulai: string;
     waktu_selesai: string;
-    status: "dibuka" | "ditutup" | "pending";
+    status: "dibuka" | "ditutup" | "pending" | "dibayar";
     is_manual: boolean;
   };
   onSubmit: (data: {
@@ -29,7 +29,7 @@ type LelangFormProps = {
     tgl_lelang: string;
     waktu_mulai: string;
     waktu_selesai: string;
-    status: "dibuka" | "ditutup" | "pending";
+    status: "dibuka" | "ditutup" | "pending" | "dibayar";
     is_manual: boolean;
   }) => Promise<void>;
   onCancel?: () => void;
@@ -51,7 +51,7 @@ export function LelangForm({
     tgl_lelang: string;
     waktu_mulai: string;
     waktu_selesai: string;
-    status: "dibuka" | "ditutup" | "pending";
+    status: "dibuka" | "ditutup" | "pending" | "dibayar";
     is_manual: boolean;
   };
 
@@ -63,7 +63,7 @@ export function LelangForm({
     waktu_mulai: initialData?.waktu_mulai?.slice(0, 5) || "08:00",
     waktu_selesai: initialData?.waktu_selesai?.slice(0, 5) || "16:00",
     status:
-      initialData?.status || ("pending" as "dibuka" | "ditutup" | "pending"),
+      initialData?.status || ("pending" as "dibuka" | "ditutup" | "pending" | "dibayar"),
     is_manual: initialData?.is_manual ?? true,
   });
 
@@ -199,7 +199,7 @@ export function LelangForm({
         <Label htmlFor="status">Status</Label>
         <Select
           value={formData.status}
-          onValueChange={(value: "dibuka" | "ditutup" | "pending") =>
+          onValueChange={(value: "dibuka" | "ditutup" | "pending" | "dibayar") =>
             setFormData({ ...formData, status: value })
           }
         >

@@ -15,7 +15,9 @@ export async function POST(req: NextRequest) {
 
         // 1. Verify notification signature (Optional but recommended, doing simple check via status for now)
         // Midtrans SDK also has helper for verification if needed, but checking status response is standard.
-        const statusResponse = await (core as any).transaction.notification(notificationJson);
+        const statusResponse = await core.transaction.notification(
+            notificationJson as Record<string, string>,
+        );
 
         const orderId = statusResponse.order_id;
         const transactionStatus = statusResponse.transaction_status;
@@ -46,14 +48,28 @@ export async function POST(req: NextRequest) {
             // This is tb_pembayaran
             const actualPaymentId = parseInt(orderId.split('-')[1]);
 
-            const { error: updateError } = await supabase
+            const { data: updatedPayment, error: updateError } = await supabase
                 .from('tb_pembayaran')
                 .update({ status: newStatus })
-                .eq('id', actualPaymentId);
+                .eq('id', actualPaymentId)
+                .select('lelang_id')
+                .single();
 
             if (updateError) {
                 console.error("Error updating pembayaran record:", updateError);
                 return NextResponse.json({ message: "Error updating record" }, { status: 500 });
+            }
+
+            if (newStatus === 'Sudah Dibayar' && updatedPayment?.lelang_id) {
+                const { error: lelangError } = await supabase
+                    .from('tb_lelang')
+                    .update({ status: 'dibayar' })
+                    .eq('id', updatedPayment.lelang_id);
+
+                if (lelangError) {
+                    console.error("Error updating lelang record:", lelangError);
+                    return NextResponse.json({ message: "Error updating lelang record" }, { status: 500 });
+                }
             }
 
             return NextResponse.json({ message: "OK" });

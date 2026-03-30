@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Edit, PlayCircle, StopCircle } from "lucide-react";
 import Link from "next/link";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function LelangDetailPage({
     params,
@@ -20,7 +20,6 @@ export default function LelangDetailPage({
     const [lelang, setLelang] = useState<Lelang | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
-    const router = useRouter();
 
     useEffect(() => {
         const fetchLelang = async () => {
@@ -40,6 +39,10 @@ export default function LelangDetailPage({
 
     const handleToggleStatus = async () => {
         if (!lelang) return;
+        if (lelang.status === "dibayar") {
+            toast.error("Lelang yang sudah dibayar tidak bisa dibuka atau diubah lagi");
+            return;
+        }
 
         setIsUpdatingStatus(true);
         try {
@@ -101,6 +104,8 @@ export default function LelangDetailPage({
                 return <Badge className="bg-red-500 hover:bg-red-600">Ditutup</Badge>;
             case "pending":
                 return <Badge className="bg-yellow-500 hover:bg-yellow-600">Pending</Badge>;
+            case "dibayar":
+                return <Badge className="bg-blue-500 hover:bg-blue-600">Dibayar</Badge>;
             default:
                 return <Badge>{status}</Badge>;
         }
@@ -133,6 +138,8 @@ export default function LelangDetailPage({
         );
     }
 
+    const isLocked = lelang.status === "dibayar";
+
     return (
         <div className="px-4 lg:px-6 py-5">
             <div className="mb-6">
@@ -152,15 +159,23 @@ export default function LelangDetailPage({
                         </p>
                     </div>
                     <div className="flex gap-2">
-                        <Link href={`/petugas/lelang/${lelang.id}/edit`}>
-                            <Button variant="outline">
+                        <Link
+                            href={isLocked ? "#" : `/petugas/lelang/${lelang.id}/edit`}
+                            onClick={(e) => {
+                                if (isLocked) {
+                                    e.preventDefault();
+                                    toast.error("Lelang yang sudah dibayar tidak bisa diedit");
+                                }
+                            }}
+                        >
+                            <Button variant="outline" disabled={isLocked}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
                             </Button>
                         </Link>
                         <Button
                             onClick={handleToggleStatus}
-                            disabled={isUpdatingStatus}
+                            disabled={isUpdatingStatus || isLocked}
                             variant={lelang.status === "dibuka" ? "destructive" : "default"}
                         >
                             {lelang.status === "dibuka" ? (
@@ -180,6 +195,16 @@ export default function LelangDetailPage({
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
+                {isLocked && (
+                    <div className="md:col-span-2">
+                        <Alert>
+                            <AlertTitle>Lelang terkunci</AlertTitle>
+                            <AlertDescription>
+                                Lelang ini sudah dibayar, sehingga tidak bisa diedit, dihapus, atau dibuka kembali.
+                            </AlertDescription>
+                        </Alert>
+                    </div>
+                )}
                 <Card>
                     <CardHeader>
                         <CardTitle>Informasi Lelang</CardTitle>
