@@ -15,8 +15,8 @@ export async function POST(req: NextRequest) {
 
         // 1. Verify notification signature (Optional but recommended, doing simple check via status for now)
         // Midtrans SDK also has helper for verification if needed, but checking status response is standard.
-        const statusResponse = await core.transaction.notification(
-            notificationJson as Record<string, string>,
+        const statusResponse = await (core as any).transaction.notification(
+            notificationJson,
         );
 
         const orderId = statusResponse.order_id;
