@@ -201,7 +201,19 @@ export const createLelang = async (
   try {
     const supabase = await createClient();
 
-    // 2. Prepare payload
+    // 2. Look up petugas profile to get the bigint ID
+    const { data: petugas, error: petugasError } = await supabase
+      .from("tb_petugas")
+      .select("id")
+      .eq("user_id", input.petugas_id)
+      .single();
+
+    if (petugasError || !petugas) {
+      console.error("Petugas profile not found for UUID:", input.petugas_id);
+      throw new Error("Profil petugas tidak ditemukan");
+    }
+
+    // 3. Prepare payload
     const payload = {
       barang_id: input.barang_id,
       tgl_lelang: input.tgl_lelang,
@@ -209,7 +221,7 @@ export const createLelang = async (
       waktu_selesai: input.waktu_selesai,
       harga_akhir: input.harga_akhir,
       status: input.status,
-      petugas_id: input.petugas_id,
+      petugas_id: petugas.id, // Use the bigint ID from tb_petugas
       is_manual: input.is_manual,
       user_id: null,
     };
