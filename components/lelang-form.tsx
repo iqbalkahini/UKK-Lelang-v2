@@ -98,7 +98,7 @@ export function LelangForm({
     tgl_lelang: initialData?.tgl_lelang
       ? new Date(initialData.tgl_lelang).toISOString().slice(0, 10)
       : new Date().toISOString().slice(0, 10),
-    waktu_mulai: initialData?.waktu_mulai?.slice(0, 5) || "08:00",
+    waktu_mulai: initialData?.waktu_mulai?.slice(0, 5) || new Date().toTimeString().slice(0, 5),
     waktu_selesai: initialData?.waktu_selesai?.slice(0, 5) || "16:00",
     status:
       initialData?.status || ("pending" as "dibuka" | "ditutup" | "pending" | "dibayar"),
