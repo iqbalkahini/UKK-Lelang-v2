@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { getAvailableBarang, type Barang } from "@/api/barang";
 import { getLelangBarangIds } from "@/api/lelang";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,8 +29,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { Loader2, Check, ChevronsUpDown, Search } from "lucide-react";
+import { Loader2, Check, ChevronsUpDown, Search, Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
 
 type LelangFormProps = {
   initialData?: {
@@ -298,17 +301,41 @@ export function LelangForm({
 
       {/* Tanggal Lelang */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="space-y-2">
+        <div className="space-y-2 flex flex-col">
           <Label htmlFor="tgl_lelang">Tanggal Lelang</Label>
-          <Input
-            id="tgl_lelang"
-            type="date"
-            value={formData.tgl_lelang}
-            onChange={(e) =>
-              setFormData({ ...formData, tgl_lelang: e.target.value })
-            }
-            required
-          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                id="tgl_lelang"
+                variant={"outline"}
+                className={cn(
+                  "w-full justify-start text-left font-normal",
+                  !formData.tgl_lelang && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {formData.tgl_lelang ? (
+                  format(new Date(formData.tgl_lelang), "PPP", { locale: idLocale })
+                ) : (
+                  <span>Pilih tanggal</span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={formData.tgl_lelang ? new Date(formData.tgl_lelang) : undefined}
+                onSelect={(date) =>
+                  setFormData({
+                    ...formData,
+                    tgl_lelang: date ? format(date, "yyyy-MM-dd") : "",
+                  })
+                }
+                disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className="space-y-2">

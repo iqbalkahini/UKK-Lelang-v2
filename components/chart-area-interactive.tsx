@@ -4,6 +4,7 @@ import * as React from "react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 
 import { useIsMobile } from "@/hooks/use-mobile"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Card,
   CardContent,
@@ -218,6 +219,25 @@ export function ChartAreaInteractive({ chartData }: { chartData: { date: string,
             />
           </AreaChart>
         </ChartContainer>
+      </CardContent>
+    </Card>
+  )
+}
+
+export function ChartAreaInteractiveSkeleton() {
+  return (
+    <Card className="@container/card">
+      <CardHeader className="relative">
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-4 w-1/2" />
+        </div>
+        <div className="absolute right-4 top-4">
+          <Skeleton className="h-8 w-48" />
+        </div>
+      </CardHeader>
+      <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+        <Skeleton className="h-[250px] w-full rounded-xl" />
       </CardContent>
     </Card>
   )
