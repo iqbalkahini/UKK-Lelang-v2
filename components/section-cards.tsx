@@ -1,4 +1,5 @@
 import { PackageIcon, GavelIcon, ClockIcon, DollarSignIcon } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 
 import {
   Card,
@@ -90,6 +91,27 @@ export function SectionCards({
           </div>
         </CardFooter>
       </Card>
+    </div>
+  )
+}
+
+export function SectionCardsSkeleton() {
+  return (
+    <div className="sm:grid-cols-2 lg:grid-cols-4 grid grid-cols-1 gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i} className="@container/card bg-gradient-to-t from-primary/5 to-card dark:bg-card">
+          <CardHeader className="relative">
+            <Skeleton className="h-4 w-24 mb-2" />
+            <Skeleton className="h-8 w-20" />
+            <div className="absolute right-4 top-4">
+              <Skeleton className="size-4 rounded-full" />
+            </div>
+          </CardHeader>
+          <CardFooter className="flex-col items-start gap-1">
+            <Skeleton className="h-3 w-32" />
+          </CardFooter>
+        </Card>
+      ))}
     </div>
   )
 }
