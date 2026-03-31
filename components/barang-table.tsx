@@ -177,6 +177,24 @@ export function BarangTable({ basePath = "/petugas/barang" }: BarangTableProps) 
         localStorage.setItem('filter_tabel', JSON.stringify(newFilter));
     }
 
+    const getStatusBadge = (barang: Barang) => {
+        const lelang = barang.lelang?.[0];
+        if (!lelang) return <Badge variant="outline" className="bg-slate-100 text-slate-500 border-slate-200 font-medium">Belum di Lelang</Badge>;
+
+        switch (lelang.status) {
+            case "dibuka":
+                return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 border-emerald-200 font-medium text-[10px] sm:text-xs">Dibuka</Badge>;
+            case "ditutup":
+                return <Badge className="bg-orange-100 text-orange-700 hover:bg-orange-100 border-orange-200 font-medium text-[10px] sm:text-xs">Ditutup</Badge>;
+            case "pending":
+                return <Badge className="bg-sky-100 text-sky-700 hover:bg-sky-100 border-sky-200 font-medium text-[10px] sm:text-xs">Pending</Badge>;
+            case "dibayar":
+                return <Badge className="bg-violet-100 text-violet-700 hover:bg-violet-100 border-violet-200 font-medium text-[10px] sm:text-xs">Dibayar</Badge>;
+            default:
+                return <Badge variant="outline">{lelang.status}</Badge>;
+        }
+    };
+
     return (
         <div className="flex flex-col gap-4">
             {/* Search Filter */}
@@ -232,10 +250,13 @@ export function BarangTable({ basePath = "/petugas/barang" }: BarangTableProps) 
                                         <CardTitle className="text-lg font-bold truncate max-w-[200px]">
                                             {barang.nama}
                                         </CardTitle>
-                                        <CardDescription className="flex items-center gap-1 text-xs">
-                                            <PackageIcon className="h-3 w-3" />
-                                            ID: {barang.id}
-                                        </CardDescription>
+                                        <div className="flex gap-2 items-center">
+                                            <CardDescription className="flex items-center gap-1 text-xs">
+                                                <PackageIcon className="h-3 w-3" />
+                                                ID: {barang.id}
+                                            </CardDescription>
+                                            {getStatusBadge(barang)}
+                                        </div>
                                     </div>
                                     <Badge variant="secondary" className="font-semibold px-2 py-1">
                                         {formatCurrency(barang.harga_awal)}
@@ -296,8 +317,9 @@ export function BarangTable({ basePath = "/petugas/barang" }: BarangTableProps) 
                             <TableHead>Nama Barang</TableHead>
                             <TableHead className="flex items-center justify-evenly cursor-pointer" onClick={handleFilter}>Tanggal  {filter.date == 'ascending' ? <ArrowBigUp /> : <ArrowBigDown />}</TableHead>
                             <TableHead className="text-right">Harga Awal</TableHead>
-                            <TableHead className="hidden md:table-cell">Deskripsi</TableHead>
-                            <TableHead className="text-center w-[150px]">Aksi</TableHead>
+                            <TableHead className="hidden lg:table-cell">Deskripsi</TableHead>
+                            <TableHead className="text-center">Status</TableHead>
+                            <TableHead className="text-center w-[100px]">Aksi</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -361,8 +383,11 @@ export function BarangTable({ basePath = "/petugas/barang" }: BarangTableProps) 
                                     <TableCell className="text-right">
                                         {formatCurrency(barang.harga_awal)}
                                     </TableCell>
-                                    <TableCell className="hidden md:table-cell max-w-md truncate">
+                                    <TableCell className="hidden lg:table-cell max-w-md truncate">
                                         {barang.deskripsi_barang}
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        {getStatusBadge(barang)}
                                     </TableCell>
                                     <TableCell className="text-center">
                                         <div className="flex items-center justify-center gap-2">
@@ -396,7 +421,7 @@ export function BarangTable({ basePath = "/petugas/barang" }: BarangTableProps) 
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center">
+                                <TableCell colSpan={7} className="h-24 text-center">
                                     {activeSearch ? "Tidak ada data yang cocok dengan pencarian." : "Tidak ada data."}
                                 </TableCell>
                             </TableRow>

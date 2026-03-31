@@ -9,6 +9,9 @@ export type Barang = {
   harga_awal: number;
   deskripsi_barang: string;
   image_urls: string[];
+  lelang?: {
+    status: "dibuka" | "ditutup" | "pending" | "dibayar";
+  }[];
 };
 
 export type GetBarangResponse = {
@@ -37,7 +40,7 @@ export const getBarang = async (
       .select("*", { count: "exact", head: true });
     let dataQuery = supabase
       .from("tb_barang")
-      .select("*")
+      .select("*, lelang:tb_lelang(status)")
       .order("tanggal", { ascending: date == "ascending" });
 
     // Apply search filter if search query exists
