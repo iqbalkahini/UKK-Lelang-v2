@@ -205,12 +205,6 @@ export default function DetailBarangPage() {
                             </div>
                         </div>
                     </div>
-
-                    <div className="flex gap-3 pt-4">
-                        <Button className="w-full h-12 text-lg" disabled>
-                            Buka Lelang
-                        </Button>
-                    </div>
                 </div>
             </div>
         </div>
