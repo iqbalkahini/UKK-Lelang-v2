@@ -57,6 +57,8 @@ import {
     DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Badge } from "./ui/badge";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card";
+import { CalendarIcon, ClockIcon } from "lucide-react";
 
 type LelangTableProps = {
     statusFilter?: "all" | "dibuka" | "ditutup" | "pending";
@@ -234,7 +236,8 @@ export function LelangTable({
             </div>
 
             {/* Table */}
-            <div className="overflow-hidden rounded-lg border">
+            {/* Table View (Desktop) */}
+            <div className="hidden md:block overflow-hidden rounded-lg border">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -259,7 +262,7 @@ export function LelangTable({
                     <TableBody>
                         {isLoading ? (
                             <TableRow>
-                                <TableCell colSpan={showActions ? 7 : 6}>
+                                <TableCell colSpan={showActions ? 8 : 7}>
                                     <div className="flex flex-col gap-2">
                                         <Skeleton className="h-4 w-full" />
                                         <Skeleton className="h-4 w-full" />
@@ -351,16 +354,106 @@ export function LelangTable({
                 </Table>
             </div>
 
+            {/* Card View (Mobile) */}
+            <div className="md:hidden flex flex-col gap-4">
+                {isLoading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                        <Card key={i}>
+                            <CardHeader className="pb-2">
+                                <Skeleton className="h-5 w-3/4" />
+                            </CardHeader>
+                            <CardContent className="pb-2 space-y-2">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-5/6" />
+                            </CardContent>
+                            <CardFooter>
+                                <Skeleton className="h-8 w-full" />
+                            </CardFooter>
+                        </Card>
+                    ))
+                ) : data?.data.length ? (
+                    data.data.map((lelang) => (
+                        <Card key={lelang.id}>
+                            <CardHeader className="pb-2">
+                                <div className="flex justify-between items-start">
+                                    <div className="space-y-1">
+                                        <CardTitle className="text-lg">{lelang.barang?.nama || "-"}</CardTitle>
+                                        <p className="text-xs text-muted-foreground">ID: #{lelang.id}</p>
+                                    </div>
+                                    {getStatusBadge(lelang.status)}
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pb-4 text-sm space-y-3">
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                                        <CalendarIcon className="h-3.5 w-3.5" />
+                                        <span>{formatDate(lelang.tgl_lelang)}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                                        <ClockIcon className="h-3.5 w-3.5" />
+                                        <span>{formatTime(lelang.waktu_mulai)}</span>
+                                    </div>
+                                </div>
+                                <div className="flex justify-between border-t pt-2">
+                                    <div>
+                                        <p className="text-xs text-muted-foreground uppercase tracking-wider">Harga Awal</p>
+                                        <p className="font-semibold">{formatCurrency(lelang.barang?.harga_awal ?? 0)}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-xs text-muted-foreground uppercase tracking-wider">Harga Akhir</p>
+                                        <p className="font-semibold text-primary">{formatCurrency(lelang.harga_akhir)}</p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                            {showActions && (
+                                <CardFooter className="pt-0 border-t flex gap-2 p-2">
+                                    <Button 
+                                        variant="outline" 
+                                        className="flex-1 h-9" 
+                                        onClick={() => router.push(`/petugas/lelang/${lelang.id}`)}
+                                    >
+                                        <Eye className="mr-2 h-4 w-4" /> Detail
+                                    </Button>
+                                    {lelang.status !== "dibayar" && (
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="outline" size="icon" className="h-9 w-9">
+                                                    <MoreHorizontalIcon className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => router.push(`/petugas/lelang/${lelang.id}/edit`)}>
+                                                    <PencilIcon className="mr-2 h-4 w-4" /> Edit
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem className="text-destructive" onClick={() => handleDeleteClick(lelang.id)}>
+                                                    <TrashIcon className="mr-2 h-4 w-4" /> Hapus
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    )}
+                                </CardFooter>
+                            )}
+                        </Card>
+                    ))
+                ) : (
+                    <div className="py-12 text-center border rounded-lg bg-muted/20">
+                        <p className="text-muted-foreground">
+                            {activeSearch ? "Tidak ada data yang cocok." : "Tidak ada data lelang."}
+                        </p>
+                    </div>
+                )}
+            </div>
+
             {/* Pagination Controls */}
             {data && (
-                <div className="flex items-center justify-between px-2">
-                    <div className="flex-1 text-sm text-muted-foreground">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-2 pb-4">
+                    <div className="flex-1 text-sm text-muted-foreground text-center sm:text-left">
                         Menampilkan {(currentPage - 1) * pageSize + 1} hingga{" "}
                         {Math.min(currentPage * pageSize, data.total)} dari {data.total} data
                     </div>
-                    <div className="flex items-center gap-6">
+                    <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">Baris per halaman</span>
+                            <span className="text-sm font-medium whitespace-nowrap">Baris per halaman</span>
                             <Select
                                 value={`${pageSize}`}
                                 onValueChange={(value) => {
@@ -381,7 +474,7 @@ export function LelangTable({
                             </Select>
                         </div>
 
-                        <div className="flex items-center justify-center text-sm font-medium">
+                        <div className="flex items-center justify-center text-sm font-medium whitespace-nowrap">
                             Halaman {currentPage} dari {data.totalPages}
                         </div>
 

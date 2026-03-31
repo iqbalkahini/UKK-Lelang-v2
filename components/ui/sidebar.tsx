@@ -709,6 +709,22 @@ const SidebarMenuSub = React.forwardRef<
 ))
 SidebarMenuSub.displayName = "SidebarMenuSub"
 
+const SidebarMenuSubHeader = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<"div">
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    data-sidebar="menu-sub-header"
+    className={cn(
+      "flex h-7 items-center px-2 text-xs font-semibold text-sidebar-foreground/50",
+      className
+    )}
+    {...props}
+  />
+))
+SidebarMenuSubHeader.displayName = "SidebarMenuSubHeader"
+
 const SidebarMenuSubItem = React.forwardRef<
   HTMLLIElement,
   React.ComponentProps<"li">
@@ -764,6 +780,7 @@ export {
   SidebarMenuSkeleton,
   SidebarMenuSub,
   SidebarMenuSubButton,
+  SidebarMenuSubHeader,
   SidebarMenuSubItem,
   SidebarProvider,
   SidebarRail,

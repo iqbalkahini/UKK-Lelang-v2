@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/hooks/useUser";
+import { SiteHeader } from "@/components/site-header";
 
 export default function CreateLelangPage() {
   const router = useRouter();
@@ -46,7 +47,9 @@ export default function CreateLelangPage() {
   };
 
   return (
-    <div className="px-4 lg:px-6 py-5">
+    <div className="flex flex-col min-h-screen">
+      <SiteHeader title="Tambah Lelang" />
+      <div className="flex-1 px-4 lg:px-6 py-5">
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">Tambah Lelang</h1>
         <p className="text-muted-foreground">Buat lelang baru untuk barang</p>
@@ -66,6 +69,7 @@ export default function CreateLelangPage() {
           </Suspense>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

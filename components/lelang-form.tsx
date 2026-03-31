@@ -61,7 +61,7 @@ export function LelangForm({
   const [isLoadingBarang, setIsLoadingBarang] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [open, setOpen] = useState(false);
-  
+
   // Infinite Scroll & Search States
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -69,18 +69,18 @@ export function LelangForm({
   const [search, setSearch] = useState("");
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [lelangIds, setLelangIds] = useState<number[]>([]);
-  
+
   const observer = useRef<IntersectionObserver | null>(null);
   const lastElementRef = useCallback((node: HTMLDivElement | null) => {
     if (isLoadingBarang || isFetchingMore) return;
     if (observer.current) observer.current.disconnect();
-    
+
     observer.current = new IntersectionObserver(entries => {
       if (entries[0].isIntersecting && hasMore) {
         setPage(prevPage => prevPage + 1);
       }
     });
-    
+
     if (node) observer.current.observe(node);
   }, [isLoadingBarang, isFetchingMore, hasMore]);
 
@@ -110,7 +110,7 @@ export function LelangForm({
       try {
         const ids = await getLelangBarangIds();
         setLelangIds(ids);
-        
+
         const result = await getAvailableBarang(1, 7, search, ids);
         setBarangList(result.data);
         setHasMore(result.currentPage < result.totalPages);
@@ -205,8 +205,8 @@ export function LelangForm({
               >
                 {formData.id_barang
                   ? barangList.find(
-                      (barang) => barang.id.toString() === formData.id_barang
-                    )?.nama || "Pilih barang"
+                    (barang) => barang.id.toString() === formData.id_barang
+                  )?.nama || "Pilih barang"
                   : "Pilih barang"}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
@@ -214,8 +214,8 @@ export function LelangForm({
             <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
               <Command shouldFilter={false}>
                 <div className="relative border-b">
-                  <CommandInput 
-                    placeholder="Cari barang..." 
+                  <CommandInput
+                    placeholder="Cari barang..."
                     value={inputValue}
                     onValueChange={setInputValue}
                     onKeyDown={(e) => {
@@ -225,9 +225,9 @@ export function LelangForm({
                     }}
                     className="pr-16 border-none focus:ring-0 w-full"
                   />
-                  <Button 
-                    variant="secondary" 
-                    size="sm" 
+                  <Button
+                    variant="secondary"
+                    size="sm"
                     className="absolute right-2 top-1/2 -translate-y-1/2 h-7 px-3 text-xs"
                     onClick={() => setSearch(inputValue)}
                     disabled={isLoadingBarang || isFetchingMore}
@@ -277,10 +277,10 @@ export function LelangForm({
                             </div>
                           </CommandItem>
                         ))}
-                        
+
                         {/* Intersection Trigger */}
                         <div ref={lastElementRef} className="h-1" />
-                        
+
                         {isFetchingMore && (
                           <div className="py-2 flex justify-center">
                             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />

@@ -47,6 +47,9 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "./ui/skeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+import { Badge } from "./ui/badge";
+import { TagIcon, CalendarIcon, PackageIcon } from "lucide-react";
 
 
 type BarangTableProps = {
@@ -202,8 +205,90 @@ export function BarangTable({ basePath = "/petugas/barang" }: BarangTableProps) 
                 )}
             </div>
 
-            {/* Table */}
-            <div className="overflow-hidden rounded-lg border">
+            {/* Mobile Cards View */}
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+                {isLoading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                        <Card key={i} className="overflow-hidden">
+                            <CardHeader className="pb-4">
+                                <Skeleton className="h-6 w-3/4 mb-2" />
+                                <Skeleton className="h-4 w-1/2" />
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <Skeleton className="h-16 w-full" />
+                                <div className="flex justify-between items-center">
+                                    <Skeleton className="h-4 w-24" />
+                                    <Skeleton className="h-8 w-8" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))
+                ) : data?.data.length ? (
+                    data.data.map((barang) => (
+                        <Card key={barang.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                            <CardHeader className="p-4 pb-2 space-y-1">
+                                <div className="flex items-start justify-between">
+                                    <div className="space-y-1">
+                                        <CardTitle className="text-lg font-bold truncate max-w-[200px]">
+                                            {barang.nama}
+                                        </CardTitle>
+                                        <CardDescription className="flex items-center gap-1 text-xs">
+                                            <PackageIcon className="h-3 w-3" />
+                                            ID: {barang.id}
+                                        </CardDescription>
+                                    </div>
+                                    <Badge variant="secondary" className="font-semibold px-2 py-1">
+                                        {formatCurrency(barang.harga_awal)}
+                                    </Badge>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-4 pt-2 space-y-3">
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground border-l-2 border-primary/50 pl-2">
+                                    <CalendarIcon className="h-3 w-3" />
+                                    <span>{formatDate(barang.tanggal)}</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground line-clamp-2 bg-muted/30 p-2 rounded border border-border/50">
+                                    {barang.deskripsi_barang}
+                                </p>
+                                <div className="flex justify-end">
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                                                <MoreHorizontalIcon className="h-4 w-4" />
+                                                <span className="sr-only">Menu aksi</span>
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end" className="w-40">
+                                            <DropdownMenuGroup>
+                                                <DropdownMenuItem asChild>
+                                                    <a href={`${basePath}/${barang.id}`}>
+                                                        <Eye className="mr-2 h-4 w-4" /> Detail
+                                                    </a>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem asChild>
+                                                    <a href={`${basePath}/${barang.id}/edit`}>
+                                                        <PencilIcon className="mr-2 h-4 w-4" /> Edit
+                                                    </a>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleDeleteClick(barang.id)}>
+                                                    <TrashIcon className="mr-2 h-4 w-4" /> Hapus
+                                                </DropdownMenuItem>
+                                            </DropdownMenuGroup>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))
+                ) : (
+                    <div className="py-10 text-center text-muted-foreground bg-muted/10 rounded-lg border border-dashed">
+                        {activeSearch ? "Tidak ada data yang cocok dengan pencarian." : "Tidak ada data."}
+                    </div>
+                )}
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:block overflow-hidden rounded-lg border">
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -322,16 +407,17 @@ export function BarangTable({ basePath = "/petugas/barang" }: BarangTableProps) 
 
             {/* Pagination Controls */}
             {data && (
-                <div className="flex items-center justify-between px-2">
-                    <div className="flex-1 text-sm text-muted-foreground">
-                        Menampilkan {((currentPage - 1) * pageSize) + 1} hingga{" "}
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-2">
+                    <div className="text-sm text-muted-foreground text-center sm:text-left">
+                        <span className="hidden sm:inline">Menampilkan </span>
+                        {((currentPage - 1) * pageSize) + 1} <span className="hidden sm:inline">hingga</span><span className="sm:hidden">-</span>{" "}
                         {Math.min(currentPage * pageSize, data.total)} dari {data.total}{" "}
-                        data
+                        <span className="hidden sm:inline">data</span>
                     </div>
-                    <div className="flex items-center gap-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                         {/* Page size selector */}
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">Baris per halaman</span>
+                            <span className="text-sm font-medium whitespace-nowrap">Baris per halaman</span>
                             <Select
                                 value={`${pageSize}`}
                                 onValueChange={(value) => {
@@ -339,7 +425,7 @@ export function BarangTable({ basePath = "/petugas/barang" }: BarangTableProps) 
                                     setCurrentPage(1); // Reset to first page when changing page size
                                 }}
                             >
-                                <SelectTrigger className="w-20">
+                                <SelectTrigger className="w-[70px]">
                                     <SelectValue placeholder={pageSize} />
                                 </SelectTrigger>
                                 <SelectContent side="top">
@@ -352,55 +438,56 @@ export function BarangTable({ basePath = "/petugas/barang" }: BarangTableProps) 
                             </Select>
                         </div>
 
-                        {/* Page info */}
-                        <div className="flex items-center justify-center text-sm font-medium">
-                            Halaman {currentPage} dari {data.totalPages}
-                        </div>
+                        {/* Page info and buttons */}
+                        <div className="flex items-center gap-4">
+                            <div className="flex w-[100px] items-center justify-center text-sm font-medium">
+                                Hal {currentPage} <span className="hidden sm:inline mx-1">dari</span><span className="sm:hidden">/</span> {data.totalPages}
+                            </div>
 
-                        {/* Pagination buttons */}
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="outline"
-                                className="hidden h-8 w-8 p-0 lg:flex"
-                                size="icon"
-                                onClick={() => setCurrentPage(1)}
-                                disabled={currentPage === 1}
-                            >
-                                <span className="sr-only">Halaman pertama</span>
-                                <ChevronsLeftIcon className="h-4 w-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="h-8 w-8 p-0"
-                                size="icon"
-                                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                                disabled={currentPage === 1}
-                            >
-                                <span className="sr-only">Halaman sebelumnya</span>
-                                <ChevronLeftIcon className="h-4 w-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="h-8 w-8 p-0"
-                                size="icon"
-                                onClick={() =>
-                                    setCurrentPage((prev) => Math.min(data.totalPages, prev + 1))
-                                }
-                                disabled={currentPage === data.totalPages}
-                            >
-                                <span className="sr-only">Halaman berikutnya</span>
-                                <ChevronRightIcon className="h-4 w-4" />
-                            </Button>
-                            <Button
-                                variant="outline"
-                                className="hidden h-8 w-8 p-0 lg:flex"
-                                size="icon"
-                                onClick={() => setCurrentPage(data.totalPages)}
-                                disabled={currentPage === data.totalPages}
-                            >
-                                <span className="sr-only">Halaman terakhir</span>
-                                <ChevronsRightIcon className="h-4 w-4" />
-                            </Button>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    className="hidden h-8 w-8 p-0 lg:flex"
+                                    size="icon"
+                                    onClick={() => setCurrentPage(1)}
+                                    disabled={currentPage === 1}
+                                >
+                                    <span className="sr-only">Halaman pertama</span>
+                                    <ChevronsLeftIcon className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="h-8 w-8 p-0"
+                                    size="icon"
+                                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    <span className="sr-only">Halaman sebelumnya</span>
+                                    <ChevronLeftIcon className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="h-8 w-8 p-0"
+                                    size="icon"
+                                    onClick={() =>
+                                        setCurrentPage((prev) => Math.min(data.totalPages, prev + 1))
+                                    }
+                                    disabled={currentPage === data.totalPages}
+                                >
+                                    <span className="sr-only">Halaman berikutnya</span>
+                                    <ChevronRightIcon className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="hidden h-8 w-8 p-0 lg:flex"
+                                    size="icon"
+                                    onClick={() => setCurrentPage(data.totalPages)}
+                                    disabled={currentPage === data.totalPages}
+                                >
+                                    <span className="sr-only">Halaman terakhir</span>
+                                    <ChevronsRightIcon className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
