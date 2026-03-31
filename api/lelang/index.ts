@@ -358,3 +358,19 @@ export const getActiveAuctions = async (): Promise<Lelang[]> => {
     return [];
   }
 };
+
+// Get IDs of items already in tb_lelang
+export const getLelangBarangIds = async (): Promise<number[]> => {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("tb_lelang")
+      .select("barang_id");
+
+    if (error) throw error;
+    return data.map((item) => item.barang_id);
+  } catch (error) {
+    console.error("Error fetching lelang barang ids:", error);
+    return [];
+  }
+};

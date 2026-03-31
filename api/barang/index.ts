@@ -168,3 +168,55 @@ export const getBarangForSelect = async (
     throw error;
   }
 };
+
+export const getAvailableBarang = async (
+  page: number = 1,
+  limit: number = 7,
+  search: string = "",
+  excludeIds: number[] = []
+): Promise<GetBarangResponse> => {
+  try {
+    const supabase = await createClient();
+    const offset = (page - 1) * limit;
+
+    let countQuery = supabase
+      .from("tb_barang")
+      .select("*", { count: "exact", head: true });
+
+    let dataQuery = supabase
+      .from("tb_barang")
+      .select("*")
+      .order("tanggal", { ascending: false });
+
+    if (search && search.trim() !== "") {
+      const searchTerm = `%${search.trim()}%`;
+      countQuery = countQuery.or(`nama.ilike.${searchTerm},deskripsi_barang.ilike.${searchTerm}`);
+      dataQuery = dataQuery.or(`nama.ilike.${searchTerm},deskripsi_barang.ilike.${searchTerm}`);
+    }
+
+    if (excludeIds.length > 0) {
+      countQuery = countQuery.not("id", "in", `(${excludeIds.join(",")})`);
+      dataQuery = dataQuery.not("id", "in", `(${excludeIds.join(",")})`);
+    }
+
+    const { count, error: countError } = await countQuery;
+    if (countError) throw countError;
+
+    const { data, error } = await dataQuery.range(offset, offset + limit - 1);
+    if (error) throw error;
+
+    const total = count ?? 0;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: data as Barang[],
+      total,
+      totalPages,
+      currentPage: page,
+      limit,
+    };
+  } catch (error) {
+    console.error("Error fetching available barang:", error);
+    throw error;
+  }
+};

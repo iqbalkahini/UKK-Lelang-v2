@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { getBarang, type Barang } from "@/api/barang";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { getAvailableBarang, type Barang } from "@/api/barang";
+import { getLelangBarangIds } from "@/api/lelang";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,8 +13,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check, ChevronsUpDown, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type LelangFormProps = {
   initialData?: {
@@ -45,6 +60,29 @@ export function LelangForm({
   const [barangList, setBarangList] = useState<Barang[]>([]);
   const [isLoadingBarang, setIsLoadingBarang] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [open, setOpen] = useState(false);
+  
+  // Infinite Scroll & Search States
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [inputValue, setInputValue] = useState("");
+  const [search, setSearch] = useState("");
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [lelangIds, setLelangIds] = useState<number[]>([]);
+  
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastElementRef = useCallback((node: HTMLDivElement | null) => {
+    if (isLoadingBarang || isFetchingMore) return;
+    if (observer.current) observer.current.disconnect();
+    
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setPage(prevPage => prevPage + 1);
+      }
+    });
+    
+    if (node) observer.current.observe(node);
+  }, [isLoadingBarang, isFetchingMore, hasMore]);
 
   type LelangFormData = {
     id_barang: string;
@@ -68,20 +106,44 @@ export function LelangForm({
   });
 
   useEffect(() => {
-    const fetchBarang = async () => {
+    const fetchInitialData = async () => {
       try {
-        const result = await getBarang(1, 1000); // Get all barang
+        const ids = await getLelangBarangIds();
+        setLelangIds(ids);
+        
+        const result = await getAvailableBarang(1, 7, search, ids);
         setBarangList(result.data);
+        setHasMore(result.currentPage < result.totalPages);
+        setPage(1);
       } catch (error) {
-        console.error("Error fetching barang:", error);
+        console.error("Error fetching initial barang:", error);
         toast.error("Gagal mengambil data barang");
       } finally {
         setIsLoadingBarang(false);
       }
     };
 
-    fetchBarang();
-  }, []);
+    fetchInitialData();
+  }, [search]); // Refetch on search
+
+  useEffect(() => {
+    if (page === 1) return; // Already handled by initial fetch
+
+    const fetchMoreBarang = async () => {
+      try {
+        setIsFetchingMore(true);
+        const result = await getAvailableBarang(page, 7, search, lelangIds);
+        setBarangList(prev => [...prev, ...result.data]);
+        setHasMore(result.currentPage < result.totalPages);
+      } catch (error) {
+        console.error("Error fetching more barang:", error);
+      } finally {
+        setIsFetchingMore(false);
+      }
+    };
+
+    fetchMoreBarang();
+  }, [page, lelangIds]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,28 +189,110 @@ export function LelangForm({
       <div className="space-y-2">
         <Label htmlFor="id_barang">Barang</Label>
         {isLoadingBarang ? (
-          <div className="flex items-center text-sm text-muted-foreground">
+          <div className="flex items-center text-sm text-muted-foreground h-10 border rounded-md px-3">
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Memuat data barang...
           </div>
         ) : (
-          <Select
-            value={formData.id_barang}
-            onValueChange={(value) =>
-              setFormData({ ...formData, id_barang: value })
-            }
-          >
-            <SelectTrigger id="id_barang">
-              <SelectValue placeholder="Pilih barang" />
-            </SelectTrigger>
-            <SelectContent>
-              {barangList.map((barang) => (
-                <SelectItem key={barang.id} value={barang.id.toString()}>
-                  {barang.nama} - Rp {barang.harga_awal.toLocaleString("id-ID")}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="w-full justify-between font-normal"
+                disabled={isSubmitting}
+              >
+                {formData.id_barang
+                  ? barangList.find(
+                      (barang) => barang.id.toString() === formData.id_barang
+                    )?.nama || "Pilih barang"
+                  : "Pilih barang"}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+              <Command shouldFilter={false}>
+                <div className="relative border-b">
+                  <CommandInput 
+                    placeholder="Cari barang..." 
+                    value={inputValue}
+                    onValueChange={setInputValue}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        setSearch(inputValue);
+                      }
+                    }}
+                    className="pr-16 border-none focus:ring-0 w-full"
+                  />
+                  <Button 
+                    variant="secondary" 
+                    size="sm" 
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-7 px-3 text-xs"
+                    onClick={() => setSearch(inputValue)}
+                    disabled={isLoadingBarang || isFetchingMore}
+                  >
+                    {isLoadingBarang ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      "Cari"
+                    )}
+                  </Button>
+                </div>
+                <CommandList>
+                  {isLoadingBarang ? (
+                    <div className="py-6 text-center text-sm text-muted-foreground">
+                      <Loader2 className="mx-auto h-4 w-4 animate-spin mb-2" />
+                      Mencari barang...
+                    </div>
+                  ) : (
+                    <>
+                      <CommandEmpty>Barang tidak ditemukan.</CommandEmpty>
+                      <CommandGroup>
+                        {barangList.map((barang) => (
+                          <CommandItem
+                            key={barang.id}
+                            value={barang.id.toString()}
+                            onSelect={() => {
+                              setFormData({
+                                ...formData,
+                                id_barang: barang.id.toString(),
+                              });
+                              setOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                formData.id_barang === barang.id.toString()
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            <div className="flex flex-col">
+                              <span>{barang.nama}</span>
+                              <span className="text-xs text-muted-foreground">
+                                Rp {barang.harga_awal.toLocaleString("id-ID")}
+                              </span>
+                            </div>
+                          </CommandItem>
+                        ))}
+                        
+                        {/* Intersection Trigger */}
+                        <div ref={lastElementRef} className="h-1" />
+                        
+                        {isFetchingMore && (
+                          <div className="py-2 flex justify-center">
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          </div>
+                        )}
+                      </CommandGroup>
+                    </>
+                  )}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         )}
       </div>
 
