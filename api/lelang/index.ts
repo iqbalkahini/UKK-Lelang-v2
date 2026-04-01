@@ -10,8 +10,10 @@ export type Lelang = {
   waktu_selesai: string;
   harga_akhir: number | null;
   status: "dibuka" | "ditutup" | "pending" | "dibayar";
-  user_id: string;
-  created_at?: string;
+  user_id: string | null;
+  petugas_id: number;
+  created_at: string;
+  updated_at: string;
   is_manual: boolean;
   // Joined fields from barang
   barang?: {

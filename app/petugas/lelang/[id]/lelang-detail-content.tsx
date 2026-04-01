@@ -57,7 +57,7 @@ export function LelangDetailContent({ id, lelang }: LelangDetailContentProps) {
                         {getStatusBadge(lelang.status)}
                     </div>
                     <p className="text-muted-foreground mt-1">
-                        Dibuat pada {format(new Date(lelang.created_at), "EEEE, d MMMM yyyy", { locale: idLocale })}
+                        Dibuat pada {lelang.created_at ? format(new Date(lelang.created_at), "EEEE, d MMMM yyyy", { locale: idLocale }) : "-"}
                     </p>
                 </div>
                 
@@ -149,7 +149,7 @@ export function LelangDetailContent({ id, lelang }: LelangDetailContentProps) {
                                             <div>
                                                 <h4 className="font-bold text-foreground">Tanggal Pelaksanaan</h4>
                                                 <p className="text-muted-foreground mt-1">
-                                                    {format(new Date(lelang.tgl_lelang), "d MMMM yyyy", { locale: idLocale })}
+                                                    {lelang.tgl_lelang ? format(new Date(lelang.tgl_lelang), "d MMMM yyyy", { locale: idLocale }) : "-"}
                                                 </p>
                                             </div>
                                         </div>
@@ -233,7 +233,7 @@ export function LelangDetailContent({ id, lelang }: LelangDetailContentProps) {
                             </div>
                             <div className="pt-4 border-t">
                                 <p className="text-xs text-muted-foreground italic text-center">
-                                    Terakhir diperbarui: {format(new Date(lelang.updated_at), "HH:mm", { locale: idLocale })} WIB
+                                    Terakhir diperbarui: {lelang.updated_at ? format(new Date(lelang.updated_at), "HH:mm", { locale: idLocale }) : "-"} WIB
                                 </p>
                             </div>
                         </CardContent>
