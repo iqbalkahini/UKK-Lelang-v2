@@ -148,10 +148,16 @@ export const getLelang = async (
 
 
     const { count, error: countError } = await countQuery;
-    if (countError) throw countError;
+    if (countError) {
+      console.error("Error fetching lelang count:", countError);
+      return { data: [], total: 0, totalPages: 0, currentPage: page, limit };
+    }
 
     const { data, error } = await dataQuery.range(offset, offset + limit - 1);
-    if (error) throw error;
+    if (error) {
+      console.error("Error fetching lelang data:", error);
+      return { data: [], total: 0, totalPages: 0, currentPage: page, limit };
+    }
 
     const total = count ?? 0;
     const totalPages = Math.ceil(total / limit);
@@ -164,8 +170,8 @@ export const getLelang = async (
       limit,
     };
   } catch (error) {
-    console.error("Error fetching lelang:", error);
-    throw error;
+    console.error("Critical error in getLelang:", error);
+    return { data: [], total: 0, totalPages: 0, currentPage: 1, limit: 10 };
   }
 };
 
