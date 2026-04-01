@@ -26,9 +26,9 @@ export default function LelangDetailPage({
             try {
                 const data = await getLelangById(parseInt(id));
                 setLelang(data);
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Error fetching lelang:", error);
-                toast.error("Gagal mengambil data lelang");
+                toast.error(`Gagal mengambil data lelang: ${error.message || "Unknown error"}`);
             } finally {
                 setIsLoading(false);
             }
