@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, use } from "react"
 import { useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -22,15 +22,14 @@ interface Barang {
 export default function DetailBarangPage({
     params,
 }: {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 }) {
+    const { id } = use(params)
     const router = useRouter()
     const [barang, setBarang] = useState<Barang | null>(null)
     const [loading, setLoading] = useState(true)
     const [selectedImage, setSelectedImage] = useState<string | null>(null)
 
-    // Handle potential array or string (though simpler in prop usually)
-    const id = params.id
 
     useEffect(() => {
         if (!id) return

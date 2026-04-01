@@ -58,7 +58,7 @@ export function ChartAreaInteractive({ chartData }: { chartData: { date: string,
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date)
-    const referenceDate = new Date() 
+    const referenceDate = new Date()
     let daysToSubtract = 90
     if (timeRange === "30d") {
       daysToSubtract = 30

@@ -6,8 +6,8 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table"
 import { Gavel, CheckCircle2, Clock, TrendingUp } from "lucide-react"
-import { MonthFilter } from "../month-filter"
-import { ExportLelangButton, type LelangRow } from "../export-buttons"
+import { MonthFilter } from "@/components/laporan/month-filter"
+import { ExportLelangButton, type LelangRow } from "@/components/laporan/export-buttons"
 import { Suspense } from "react"
 
 export default async function LaporanLelangPage({

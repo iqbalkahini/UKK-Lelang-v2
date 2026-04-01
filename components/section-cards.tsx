@@ -17,10 +17,10 @@ interface SectionCardsProps {
 }
 
 export function SectionCards({
-    totalBarang,
-    lelangAktif,
-    menungguPembayaran,
-    totalPendapatan
+  totalBarang,
+  lelangAktif,
+  menungguPembayaran,
+  totalPendapatan
 }: SectionCardsProps) {
   return (
     <div className="*:data-[slot=card]:shadow-xs sm:grid-cols-2 lg:grid-cols-4 grid grid-cols-1 gap-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card">
@@ -40,7 +40,7 @@ export function SectionCards({
           </div>
         </CardFooter>
       </Card>
-      
+
       <Card className="@container/card">
         <CardHeader className="relative">
           <CardDescription>Lelang Aktif</CardDescription>

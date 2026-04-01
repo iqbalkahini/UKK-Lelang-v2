@@ -80,14 +80,14 @@ export default async function Page() {
     // Grouping by Date
     type AreaData = { date: string; harga_akhir: number; harga_awal: number }
     const chartMap = new Map<string, AreaData>()
-    
+
     if (historyData) {
         historyData.forEach((row) => {
             if (!row.tgl_lelang) return;
-            const tgl = row.tgl_lelang.split('T')[0] 
+            const tgl = row.tgl_lelang.split('T')[0]
             const hAwal = (row.barang as any)?.harga_awal || 0;
             const hAkhir = row.harga_akhir || 0;
-            
+
             if (chartMap.has(tgl)) {
                 const existing = chartMap.get(tgl)!
                 existing.harga_awal += hAwal
@@ -103,10 +103,10 @@ export default async function Page() {
         <>
             <SiteHeader title="Dashboard" />
             <div className="flex flex-1 flex-col p-4 md:p-6 gap-6 max-w-7xl mx-auto w-full">
-                
+
                 {/* 1. Overview Cards */}
                 <div className="mb-2">
-                    <SectionCards 
+                    <SectionCards
                         totalBarang={countBarang || 0}
                         lelangAktif={countLelangAktif || 0}
                         menungguPembayaran={countMenungguPembayaran || 0}
@@ -123,7 +123,7 @@ export default async function Page() {
 
                     {/* Pie Chart (Kanan) */}
                     <div className="lg:col-span-1">
-                        <ChartPieInteractive 
+                        <ChartPieInteractive
                             aktif={countLelangAktif || 0}
                             belumAktif={countLelangPending || 0}
                             ditutup={countLelangDitutup || 0}
@@ -159,7 +159,7 @@ export default async function Page() {
                                     recentLelangs.map((lelang) => {
                                         const barang = Array.isArray(lelang.barang) ? lelang.barang[0] : lelang.barang
                                         const pemenang = Array.isArray(lelang.pemenang) ? lelang.pemenang[0] : lelang.pemenang
-                                        
+
                                         return (
                                             <TableRow key={lelang.id} className="hover:bg-muted/30">
                                                 <TableCell className="pl-6">

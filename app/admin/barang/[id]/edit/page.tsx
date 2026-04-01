@@ -6,9 +6,10 @@ import { notFound } from "next/navigation"
 export default async function EditBarangPage({
     params,
 }: {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 }) {
-    const id = parseInt(params.id)
+    const { id: idParam } = await params
+    const id = parseInt(idParam)
     if (isNaN(id)) notFound()
 
     let barang = null

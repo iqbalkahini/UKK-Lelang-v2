@@ -6,8 +6,8 @@ import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table"
 import { Package, Gavel, CheckCircle2, Clock } from "lucide-react"
-import { MonthFilter } from "../month-filter"
-import { ExportBarangButton, type BarangRow } from "../export-buttons"
+import { MonthFilter } from "@/components/laporan/month-filter"
+import { ExportBarangButton, type BarangRow } from "@/components/laporan/export-buttons"
 import { Suspense } from "react"
 
 export default async function LaporanBarangPage({

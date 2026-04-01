@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
             newStatus = 'Belum Dibayar';
         }
 
-        // Check if this is a final payment (PAY-) or topup (integer ID)
+        // Check if this is a final payment (PAY-) or deposit (DEP-)
         if (String(orderId).startsWith('PAY-')) {
             // This is tb_pembayaran
             const actualPaymentId = parseInt(orderId.split('-')[1]);
