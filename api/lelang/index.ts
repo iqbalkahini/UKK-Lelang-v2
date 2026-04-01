@@ -169,25 +169,36 @@ export const getLelang = async (
   }
 };
 
-export const getLelangById = async (id: number): Promise<Lelang> => {
+export const getLelangById = async (id: number): Promise<Lelang | null> => {
   try {
+    if (isNaN(id)) return null;
+    
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("tb_lelang")
       .select(
         `
         *,
-        barang:tb_barang(*)
+        barang:tb_barang!barang_id (
+          nama,
+          harga_awal,
+          deskripsi_barang,
+          image_urls
+        )
       `,
       )
       .eq("id", id)
-      .single();
+      .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Error fetching lelang by id:", error);
+      return null;
+    }
+    
     return data as Lelang;
   } catch (error) {
-    console.error("Error fetching lelang by id:", error);
-    throw error;
+    console.error("Critical error in getLelangById:", error);
+    return null;
   }
 };
 
